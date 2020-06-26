@@ -3,8 +3,8 @@
 set -e
 
 PRO_DIR="$(pwd)/Chromium"
-BASE_DIR="/root/chromium/src"
-RELEASE_DIR="${BASE_DIR}/out/Release"
+BASE_DIR="/home/chromium/chromium/src"
+RELEASE_DIR="${BASE_DIR}/out/Debug"
 APP_DIR="${PRO_DIR}/app"
 MODULES_DIR="${PRO_DIR}"
 
@@ -40,8 +40,7 @@ sync_components() {
 		${components}/language/android/java/src/* \
 		${components}/location/android/java/src/* \
 		${components}/minidump_uploader/android/java/src/* \
-		${components}/module_installer/android/java/src-common/* \
-		${components}/module_installer/android/java/src-impl/* \
+		${components}/module_installer/android/java/src/* \
 		${components}/navigation_interception/android/java/src/* \
 		${components}/offline_items_collection/core/android/java/src/* \
 		${components}/omnibox/browser/android/java/src/* \
@@ -55,7 +54,6 @@ sync_components() {
 		${components}/variations/android/java/src/* \
 		${components}/version_info/android/java/src/* \
 		${components}/viz/service/java/src/* \
-		${components}/web_restrictions/browser/java/src/* \
 		"${APP_DIR}/src/main/java"
 
 	cp -r ${RELEASE_DIR}/gen/components/version_info/android/java/* \
@@ -126,7 +124,7 @@ sync_download() {
 sync_autofill_assistant() {
 	mkdir -p ${MODULES_DIR}/autofill_assistant/src/main/res
 
-	cp -r ${BASE_DIR}/chrome/android/java/res_autofill_assistant/* \
+	cp -r ${BASE_DIR}/chrome/android/features/autofill_assistant/java/res/* \
 		"${MODULES_DIR}/autofill_assistant/src/main/res"
 }
 
@@ -148,21 +146,12 @@ sync_splash() {
 }
 
 sync_feed() {
-	mkdir -p ${MODULES_DIR}/feed/{shared_res,shared_public_res,basic_res,basic_view_res,piet_res}
+	mkdir -p ${MODULES_DIR}/feed/{basic_res,piet_res}
 
-	cp -r ${BASE_DIR}/third_party/feed/src/src/main/java/com/google/android/libraries/feed/sharedstream/res/* \
-	"${MODULES_DIR}/feed/shared_res"
-
-	cp -r ${BASE_DIR}/third_party/feed/src/src/main/java/com/google/android/libraries/feed/sharedstream/publicapi/menumeasurer/res/* \
-	"${MODULES_DIR}/feed/shared_public_res"
-
-	cp -r ${BASE_DIR}/third_party/feed/src/src/main/java/com/google/android/libraries/feed/basicstream/res/* \
+	cp -r ${BASE_DIR}/chrome/android/feed/core/java/res/* \
 	"${MODULES_DIR}/feed/basic_res"
 
-	cp -r ${BASE_DIR}/third_party/feed/src/src/main/java/com/google/android/libraries/feed/basicstream/internal/viewholders/res/* \
-	"${MODULES_DIR}/feed/basic_view_res"
-
-	cp -r ${BASE_DIR}/third_party/feed/src/src/main/java/com/google/android/libraries/feed/piet/res/* \
+	cp -r ${BASE_DIR}/chrome/android/feed/core/java/src/org/chromium/chrome/browser/feed/library/piet/res/* \
 	"${MODULES_DIR}/feed/piet_res"
 }
 
@@ -192,7 +181,7 @@ sync_chrome() {
 		${BASE_DIR}/chrome/android/webapk/libs/common/src/* \
 		${BASE_DIR}/device/bluetooth/android/java/src/* \
 		${BASE_DIR}/device/gamepad/android/java/src/* \
-		${BASE_DIR}/device/usb/android/java/src/* \
+		${BASE_DIR}/services/device/usb/android/java/src/* \
 		${BASE_DIR}/device/vr/android/java/src/* \
 		${BASE_DIR}/media/base/android/java/src/* \
 		${BASE_DIR}/media/capture/content/android/java/src/* \
@@ -222,12 +211,8 @@ sync_chrome() {
 		${BASE_DIR}/third_party/android_swipe_refresh/java/src/* \
 		${BASE_DIR}/third_party/cct_dynamic_module/src/src/java/* \
 		${BASE_DIR}/third_party/cacheinvalidation/src/java/* \
-		${BASE_DIR}/third_party/feed/src/src/main/java/* \
 		${BASE_DIR}/third_party/gif_player/src/* \
 		${BASE_DIR}/third_party/protobuf/java/core/src/main/java/* \
-		"$src_dir"
-
-	cp -r ${RELEASE_DIR}/gradle/chrome/android/chrome_public_apk/extracted-srcjars/* \
 		"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
@@ -236,7 +221,6 @@ sync_chrome() {
 	mkdir -p ${PRO_DIR}/res_base
 
 	cp -r ${BASE_DIR}/chrome/android/java/res/* \
-		${RELEASE_DIR}/gen/chrome/android/chrome_strings_grd_grit_output/* \
 	       "${PRO_DIR}/res_base"
 
 	cp -r  ${BASE_DIR}/chrome/android/java/res_chromium/* \
@@ -269,9 +253,7 @@ sync_assets() {
 	mkdir -p "${asset_dir}/locales"
 
 	cp ${RELEASE_DIR}/*.dat \
-		${RELEASE_DIR}/natives_blob.bin \
 		${RELEASE_DIR}/gen/chrome/android/chrome_apk_paks/*.pak \
-		${RELEASE_DIR}/gen/chrome/android/chrome_public_apk_unwind_assets/* \
 		"$asset_dir"
 
 	cp ${RELEASE_DIR}/gen/chrome/android/chrome_apk_paks/locales/{en-US,zh-CN,zh-TW}.pak \
@@ -283,7 +265,7 @@ sync_libs() {
 	mkdir -p "${APP_DIR}/libs"
 
 	cp ${BASE_DIR}/third_party/google_android_play_core/*.aar \
-		${RELEASE_DIR}/lib.java/third_party/android_tools/gcm.jar \
+		${RELEASE_DIR}/lib.java/third_party/android_sdk/gcm.jar \
 		"${APP_DIR}/libs"
 }
 
@@ -303,13 +285,6 @@ clean_project() {
 		${APP_DIR}/src/main/java/org/chromium/components/embedder_support/media \
 		${APP_DIR}/src/main/java/org/chromium/chrome/browser/offlinepages/evaluation \
 		${APP_DIR}/src/main/java/{src,test,templates}
-
-	local feed_dir="${APP_DIR}/src/main/java/com/google/android/libraries/feed"
-	find "$feed_dir" -regextype "posix-egrep" -regex ".*/(testing|test_data|res)" -type d -print0 | \
-		xargs -0 rm -rf
-
-	find "$feed_dir" -regextype "posix-egrep" -regex ".*/AndroidManifest.xml" -type f -print0 | \
-		xargs -0 rm -f
 
 	local del_files="README|OWNERS|COPYING|BUILD|.*\.template|R\.java|.*\.stamp|.*stamp\.d|.*\.py|.*\.flags"
 	find "$PRO_DIR" -regextype "posix-egrep" -regex ".*/(${del_files})" -type f -print0 | \
