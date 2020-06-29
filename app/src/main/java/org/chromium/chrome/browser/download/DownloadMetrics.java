@@ -4,13 +4,12 @@
 
 package org.chromium.chrome.browser.download;
 
-import android.support.annotation.IntDef;
+import androidx.annotation.IntDef;
 
-import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;
+import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.metrics.RecordHistogram;
-import org.chromium.chrome.browser.download.ui.DownloadFilter;
-import org.chromium.chrome.browser.init.ChromeBrowserInitializer;
+import org.chromium.content_public.browser.BrowserStartupController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,30 +19,20 @@ import java.util.ArrayList;
  * Records download related metrics on Android.
  */
 public class DownloadMetrics {
-    // Tracks where the users interact with download files on Android. Used in histogram.
-    // See AndroidDownloadOpenSource in enums.xml. The values used by this enum will be persisted
-    // to server logs and should not be deleted, changed or reused.
-    @IntDef({DownloadOpenSource.UNKNOWN, DownloadOpenSource.ANDROID_DOWNLOAD_MANAGER,
-            DownloadOpenSource.DOWNLOAD_HOME, DownloadOpenSource.NOTIFICATION,
-            DownloadOpenSource.NEW_TAP_PAGE, DownloadOpenSource.INFO_BAR,
-            DownloadOpenSource.SNACK_BAR, DownloadOpenSource.AUTO_OPEN,
-            DownloadOpenSource.DOWNLOAD_PROGRESS_INFO_BAR})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DownloadOpenSource {
-        int UNKNOWN = 0;
-        int ANDROID_DOWNLOAD_MANAGER = 1;
-        int DOWNLOAD_HOME = 2;
-        int NOTIFICATION = 3;
-        int NEW_TAP_PAGE = 4;
-        int INFO_BAR = 5;
-        int SNACK_BAR = 6;
-        int AUTO_OPEN = 7;
-        int DOWNLOAD_PROGRESS_INFO_BAR = 8;
-        int NUM_ENTRIES = 9;
-    }
-
     private static final String TAG = "DownloadMetrics";
     private static final int MAX_VIEW_RETENTION_MINUTES = 30 * 24 * 60;
+
+    // Please treat this list as append only and keep it in sync with
+    // Android.DownloadManager.Cancel.CancelFrom in enums.xml.
+    @IntDef({CancelFrom.CANCEL_SHUTDOWN, CancelFrom.CANCEL_NOTIFICATION,
+            CancelFrom.CANCEL_DOWNLOAD_HOME, CancelFrom.NUM_ENTRIES})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CancelFrom {
+        int CANCEL_SHUTDOWN = 0;
+        int CANCEL_NOTIFICATION = 1;
+        int CANCEL_DOWNLOAD_HOME = 2;
+        int NUM_ENTRIES = 3;
+    }
 
     /**
      * Records download open source.
@@ -60,11 +49,23 @@ public class DownloadMetrics {
         int type = DownloadFilter.fromMimeType(mimeType);
         if (type == DownloadFilter.Type.VIDEO) {
             RecordHistogram.recordEnumeratedHistogram("Android.DownloadManager.OpenSource.Video",
-                    source, DownloadOpenSource.NUM_ENTRIES);
+                    source, DownloadOpenSource.MAX_VALUE);
         } else if (type == DownloadFilter.Type.AUDIO) {
             RecordHistogram.recordEnumeratedHistogram("Android.DownloadManager.OpenSource.Audio",
-                    source, DownloadOpenSource.NUM_ENTRIES);
+                    source, DownloadOpenSource.MAX_VALUE);
+        } else {
+            RecordHistogram.recordEnumeratedHistogram("Android.DownloadManager.OpenSource.Other",
+                    source, DownloadOpenSource.MAX_VALUE);
         }
+    }
+
+    public static void recordDownloadPageOpen(@DownloadOpenSource int source) {
+        if (!isNativeLoaded()) {
+            Log.w(TAG, "Native is not loaded, dropping download open metrics.");
+            return;
+        }
+        RecordHistogram.recordEnumeratedHistogram(
+                "Android.DownloadPage.OpenSource", source, DownloadOpenSource.MAX_VALUE);
     }
 
     /**
@@ -95,6 +96,15 @@ public class DownloadMetrics {
     }
 
     /**
+     * Records various call sites from where the download cancellation has been called.
+     * @param cancelFrom Various cancel reasons.
+     */
+    public static void recordDownloadCancel(@CancelFrom int cancelFrom) {
+        RecordHistogram.recordEnumeratedHistogram(
+                "Android.DownloadManager.Cancel", cancelFrom, CancelFrom.NUM_ENTRIES);
+    }
+
+    /**
      * Records download directory type when a download is completed.
      * @param filePath The absolute file path of the download.
      */
@@ -115,7 +125,6 @@ public class DownloadMetrics {
     }
 
     private static boolean isNativeLoaded() {
-        return ChromeBrowserInitializer.getInstance(ContextUtils.getApplicationContext())
-                .hasNativeInitializationCompleted();
+        return BrowserStartupController.get(LibraryProcessType.PROCESS_BROWSER).isNativeStarted();
     }
 }

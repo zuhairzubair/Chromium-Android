@@ -16,13 +16,15 @@ import android.text.style.StyleSpan;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 
+import org.chromium.base.BuildInfo;
 import org.chromium.base.ContextUtils;
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.task.AsyncTask;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.download.DownloadManagerService;
-import org.chromium.chrome.browser.download.DownloadMetrics;
+import org.chromium.chrome.browser.download.DownloadOpenSource;
 import org.chromium.chrome.browser.download.DownloadUtils;
+import org.chromium.components.download.DownloadCollectionBridge;
 
 import java.io.File;
 
@@ -56,7 +58,7 @@ public class DuplicateDownloadInfoBar extends ConfirmInfoBar {
      */
     private DuplicateDownloadInfoBar(Context context, String filePath, boolean isOfflinePage,
             String pageUrl, boolean isIncognito, boolean duplicateRequestExists) {
-        super(R.drawable.infobar_downloading, null, null, null,
+        super(R.drawable.infobar_downloading, R.color.infobar_icon_drawable_color, null, null, null,
                 context.getString(R.string.duplicate_download_infobar_download_button),
                 context.getString(R.string.cancel));
         mFilePath = filePath;
@@ -79,24 +81,33 @@ public class DuplicateDownloadInfoBar extends ConfirmInfoBar {
         return getMessageText(template, filename, new ClickableSpan() {
             @Override
             public void onClick(View view) {
-                new AsyncTask<Boolean>() {
+                new AsyncTask<String>() {
                     @Override
-                    protected Boolean doInBackground() {
-                        return new File(mFilePath).exists();
+                    protected String doInBackground() {
+                        if (BuildInfo.isAtLeastQ()
+                                && DownloadCollectionBridge.getDownloadCollectionBridge()
+                                           .needToPublishDownload(mFilePath)) {
+                            Uri uri = DownloadCollectionBridge.getDownloadCollectionBridge()
+                                              .getDownloadUriForFileName(filename);
+                            return uri == null ? null : uri.toString();
+                        } else {
+                            if (file.exists()) return mFilePath;
+                            return null;
+                        }
                     }
 
                     @Override
-                    protected void onPostExecute(Boolean fileExists) {
-                        if (fileExists) {
-                            DownloadUtils.openFile(file, mimeType, null, mIsIncognito, null, null,
-                                    DownloadMetrics.DownloadOpenSource.INFO_BAR);
+                    protected void onPostExecute(String filePath) {
+                        if (filePath != null) {
+                            DownloadUtils.openFile(filePath, mimeType, null, mIsIncognito, null,
+                                    null, DownloadOpenSource.INFO_BAR);
                         } else {
                             DownloadManagerService.openDownloadsPage(
-                                    ContextUtils.getApplicationContext());
+                                    ContextUtils.getApplicationContext(),
+                                    DownloadOpenSource.INFO_BAR);
                         }
                     }
-                }
-                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         });
     }
@@ -145,7 +156,7 @@ public class DuplicateDownloadInfoBar extends ConfirmInfoBar {
      * @return Possible mime type of the file.
      */
     private static String getMimeTypeFromUri(Uri fileUri) {
-        String extension = MimeTypeMap.getSingleton().getFileExtensionFromUrl(fileUri.toString());
+        String extension = MimeTypeMap.getFileExtensionFromUrl(fileUri.toString());
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
     }
 

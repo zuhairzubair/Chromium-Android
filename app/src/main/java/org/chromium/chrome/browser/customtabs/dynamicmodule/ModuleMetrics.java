@@ -5,22 +5,20 @@
 package org.chromium.chrome.browser.customtabs.dynamicmodule;
 
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
-import android.support.annotation.StringDef;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.StringDef;
 
 import org.chromium.base.Log;
-import org.chromium.base.annotations.JNINamespace;
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.chrome.browser.metrics.UmaSessionStats;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Records metrics related to custom tabs dynamic modules.
  */
-@JNINamespace("customtabs")
 public final class ModuleMetrics {
     private ModuleMetrics() {}
 
@@ -124,32 +122,27 @@ public final class ModuleMetrics {
 
     public static void recordCreateActivityDelegateTime(long startTime) {
         RecordHistogram.recordMediumTimesHistogram(
-                "CustomTabs.DynamicModule.CreateActivityDelegateTime", now() - startTime,
-                TimeUnit.MILLISECONDS);
+                "CustomTabs.DynamicModule.CreateActivityDelegateTime", now() - startTime);
     }
 
     public static void recordCreatePackageContextTime(long startTime) {
         RecordHistogram.recordMediumTimesHistogram(
-                "CustomTabs.DynamicModule.CreatePackageContextTime", now() - startTime,
-                TimeUnit.MILLISECONDS);
+                "CustomTabs.DynamicModule.CreatePackageContextTime", now() - startTime);
     }
 
     public static void recordLoadClassTime(long startTime) {
         RecordHistogram.recordMediumTimesHistogram(
-                "CustomTabs.DynamicModule.EntryPointLoadClassTime", now() - startTime,
-                TimeUnit.MILLISECONDS);
+                "CustomTabs.DynamicModule.EntryPointLoadClassTime", now() - startTime);
     }
 
     public static void recordEntryPointNewInstanceTime(long startTime) {
         RecordHistogram.recordMediumTimesHistogram(
-                "CustomTabs.DynamicModule.EntryPointNewInstanceTime", now() - startTime,
-                TimeUnit.MILLISECONDS);
+                "CustomTabs.DynamicModule.EntryPointNewInstanceTime", now() - startTime);
     }
 
     public static void recordEntryPointInitTime(long startTime) {
         RecordHistogram.recordMediumTimesHistogram(
-                "CustomTabs.DynamicModule.EntryPointInitTime", now() - startTime,
-                TimeUnit.MILLISECONDS);
+                "CustomTabs.DynamicModule.EntryPointInitTime", now() - startTime);
     }
 
     /**
@@ -172,14 +165,4 @@ public final class ModuleMetrics {
     public static void registerLifecycleState(@LifecycleState String state) {
         UmaSessionStats.registerSyntheticFieldTrial(LIFECYCLE_STATE_TRIAL_NAME, state);
     }
-
-    /**
-     * Records the size of the memory occupied by a custom tabs dynamic module's code.
-     * @param packageName package name of the module for which the memory footprint is recorded.
-     */
-    public static void recordCodeMemoryFootprint(String packageName) {
-        nativeRecordCodeMemoryFootprint(packageName);
-    }
-
-    private static native void nativeRecordCodeMemoryFootprint(String packageName);
 }

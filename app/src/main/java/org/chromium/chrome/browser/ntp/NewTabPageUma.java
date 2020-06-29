@@ -5,10 +5,12 @@
 package org.chromium.chrome.browser.ntp;
 
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import androidx.annotation.IntDef;
+
+import org.chromium.base.TimeUtils;
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.base.metrics.RecordUserAction;
 import org.chromium.chrome.browser.ChromeActivity;
@@ -19,12 +21,12 @@ import org.chromium.chrome.browser.rappor.RapporServiceBridge;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tabmodel.EmptyTabModelSelectorObserver;
 import org.chromium.chrome.browser.tabmodel.TabModelSelector;
-import org.chromium.chrome.browser.util.UrlUtilities;
+import org.chromium.chrome.browser.util.UrlUtilitiesJni;
+import org.chromium.net.NetworkChangeNotifier;
 import org.chromium.ui.base.PageTransition;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Records UMA stats for which actions the user takes on the NTP in the
@@ -34,7 +36,8 @@ public final class NewTabPageUma {
     private NewTabPageUma() {}
 
     // Possible actions taken by the user on the NTP. These values are also defined in
-    // histograms.xml. WARNING: these values must stay in sync with histograms.xml.
+    // enums.xml as NewTabPageActionAndroid2.
+    // WARNING: these values must stay in sync with enums.xml.
 
     /** User performed a search using the omnibox. */
     private static final int ACTION_SEARCHED_USING_OMNIBOX = 0;
@@ -69,8 +72,14 @@ public final class NewTabPageUma {
     /** User clicked on the "Refresh" button in the "all dismissed" state. */
     public static final int ACTION_CLICKED_ALL_DISMISSED_REFRESH = 10;
 
+    /** User opened an explore sites tile. */
+    public static final int ACTION_OPENED_EXPLORE_SITES_TILE = 11;
+
+    /** User clicked on the "Manage Interests" item in the snippet card menu. */
+    public static final int ACTION_CLICKED_MANAGE_INTERESTS = 12;
+
     /** The number of possible actions. */
-    private static final int NUM_ACTIONS = 11;
+    private static final int NUM_ACTIONS = 13;
 
     /** User navigated to a page using the omnibox. */
     private static final int RAPPOR_ACTION_NAVIGATED_USING_OMNIBOX = 0;
@@ -93,7 +102,7 @@ public final class NewTabPageUma {
 
     /**
      * Possible results when updating content suggestions list in the UI. Keep in sync with the
-     * ContentSuggestionsUIUpdateResult enum in histograms.xml. Do not remove or change existing
+     * ContentSuggestionsUIUpdateResult2 enum in enums.xml. Do not remove or change existing
      * values other than NUM_UI_UPDATE_RESULTS.
      */
     @IntDef({ContentSuggestionsUIUpdateResult.SUCCESS_APPENDED,
@@ -123,13 +132,12 @@ public final class NewTabPageUma {
         int NUM_ENTRIES = 4;
     }
 
-    @IntDef({ContentSuggestionsDisplayStatus.VISIBLE, ContentSuggestionsDisplayStatus.COLLAPSED,
-            ContentSuggestionsDisplayStatus.DISABLED_BY_POLICY,
-            ContentSuggestionsDisplayStatus.NUM_ENTRIES})
-
     // These values are persisted to logs. Entries should not be renumbered and
     // numeric values should never be reused. This maps directly to
     // the ContentSuggestionsDisplayStatus enum defined in tools/metrics/enums.xml.
+    @IntDef({ContentSuggestionsDisplayStatus.VISIBLE, ContentSuggestionsDisplayStatus.COLLAPSED,
+            ContentSuggestionsDisplayStatus.DISABLED_BY_POLICY})
+    @Retention(RetentionPolicy.SOURCE)
     private @interface ContentSuggestionsDisplayStatus {
         int VISIBLE = 0;
         int COLLAPSED = 1;
@@ -171,7 +179,7 @@ public final class NewTabPageUma {
         if ((transitionType & PageTransition.CORE_MASK) == PageTransition.GENERATED) {
             recordAction(ACTION_SEARCHED_USING_OMNIBOX);
         } else {
-            if (UrlUtilities.nativeIsGoogleHomePageUrl(destinationUrl)) {
+            if (UrlUtilitiesJni.get().isGoogleHomePageUrl(destinationUrl)) {
                 recordAction(ACTION_NAVIGATED_TO_GOOGLE_HOMEPAGE);
             } else {
                 recordAction(ACTION_NAVIGATED_USING_OMNIBOX);
@@ -222,7 +230,8 @@ public final class NewTabPageUma {
     }
 
     /**
-     * Record a NTP impression (even potential ones to make informed product decisions).
+     * Record a NTP impression (even potential ones to make informed product decisions). If the
+     * impression type is {@link NewTabPageUma#NTP_IMPRESSION_REGULAR}, also records a user action.
      * @param impressionType Type of the impression from NewTabPageUma.java
      */
     public static void recordNTPImpression(int impressionType) {
@@ -262,6 +271,23 @@ public final class NewTabPageUma {
     }
 
     /**
+     * Records the network status of the user.
+     */
+    public static void recordIsUserOnline() {
+        RecordHistogram.recordBooleanHistogram(
+                "NewTabPage.MobileIsUserOnline", NetworkChangeNotifier.isOnline());
+    }
+
+    /**
+     * Records the time duration that the NTP was visible.
+     * @param lastShownTimeNs A long as returned by System#nanoTime() - this should have been
+     *                        called at the moment the new tab page is shown.
+     */
+    public static void recordTimeSpentOnNtp(long lastShownTimeNs) {
+        RecordHistogram.recordMediumTimesHistogram("NewTabPage.TimeSpent",
+                (System.nanoTime() - lastShownTimeNs) / TimeUtils.NANOSECONDS_PER_MILLISECOND);
+    }
+    /**
      * Records how much time elapsed from start until the search box became available to the user.
      */
     public static void recordSearchAvailableLoadTime(ChromeActivity activity) {
@@ -274,12 +300,10 @@ public final class NewTabPageUma {
                 - IntentHandler.getTimestampFromIntent(activity.getIntent());
         if (activity.hadWarmStart()) {
             RecordHistogram.recordMediumTimesHistogram(
-                    "NewTabPage.SearchAvailableLoadTime2.WarmStart", timeFromIntent,
-                    TimeUnit.MILLISECONDS);
+                    "NewTabPage.SearchAvailableLoadTime2.WarmStart", timeFromIntent);
         } else {
             RecordHistogram.recordMediumTimesHistogram(
-                    "NewTabPage.SearchAvailableLoadTime2.ColdStart", timeFromIntent,
-                    TimeUnit.MILLISECONDS);
+                    "NewTabPage.SearchAvailableLoadTime2.ColdStart", timeFromIntent);
         }
     }
 
@@ -348,10 +372,10 @@ public final class NewTabPageUma {
         view.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                long timeToFirstDrawMs =
-                        TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - constructedTimeNs);
+                long timeToFirstDrawMs = (System.nanoTime() - constructedTimeNs)
+                        / TimeUtils.NANOSECONDS_PER_MILLISECOND;
                 RecordHistogram.recordTimesHistogram(
-                        "NewTabPage.TimeToFirstDraw2", timeToFirstDrawMs, TimeUnit.MILLISECONDS);
+                        "NewTabPage.TimeToFirstDraw2", timeToFirstDrawMs);
                 view.getViewTreeObserver().removeOnPreDrawListener(this);
                 return true;
             }

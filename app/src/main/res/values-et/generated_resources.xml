@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Jätka"</string>
+<string name="tos_notification_title">"Chrome\'i teenusetingimused muutuvad 31. märtsil"</string>
+<string name="tos_notification_body_text">"Vaadake uued tingimused üle"</string>
+<string name="tos_notification_ack_button_text">"Selge"</string>
+<string name="tos_notification_review_button_text">"Vaata üle"</string>
+<string name="search_or_type_web_address">"Otsige või sisestage veebiaadress"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Kas eemaldada soovitus lõikelaualt?"</string>
+<string name="options_homepage_title">"Avaleht"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"See sait jagab teavet väljaspool inkognito režiimi oleva rakendusega."</string>
+<string name="external_app_leave_incognito_warning_title">"Kas lahkuda inkognito režiimist?"</string>
+<string name="external_app_leave_incognito_stay">"Jää siia"</string>
+<string name="external_app_leave_incognito_leave">"Lahku"</string>
+<string name="external_app_restricted_access_error">"Chrome\'il pole soovitud allikale juurdepääsu."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Läheduses olevaid seadmeid ei leitud."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"Luba"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Blokeeri"</string>
+<string name="blocked_ads_prompt_title">"Reklaamid on blokeeritud"</string>
+<string name="video_call_notification_text_2">"Juurdepääs videosisendile"</string>
+<string name="audio_call_notification_text_2">"Juurdepääs helisisendile"</string>
+<string name="video_audio_call_notification_text_2">"Juurdepääs heli- ja videosisendile"</string>
+<string name="video_call_incognito_notification_text_2">"Saidil on juurdepääs teie videosisendile"</string>
+<string name="audio_call_incognito_notification_text_2">"Saidil on juurdepääs helisisendile"</string>
+<string name="video_audio_call_incognito_notification_text_2">"Saidil on juurdepääs heli- ja videosisendile"</string>
+</resources>

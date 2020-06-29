@@ -4,6 +4,7 @@
 
 package org.chromium.chrome.browser.firstrun;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
@@ -90,18 +91,21 @@ public class ToSAndUMAFirstRunFragment extends Fragment implements FirstRunFragm
 
         mTosAndPrivacy.setMovementMethod(LinkMovementMethod.getInstance());
 
-        NoUnderlineClickableSpan clickableTermsSpan = new NoUnderlineClickableSpan((view1) -> {
-            if (!isAdded()) return;
-            getPageDelegate().showInfoPage(R.string.chrome_terms_of_service_url);
-        });
+        Resources resources = getResources();
+        NoUnderlineClickableSpan clickableTermsSpan =
+                new NoUnderlineClickableSpan(resources, (view1) -> {
+                    if (!isAdded()) return;
+                    getPageDelegate().showInfoPage(R.string.chrome_terms_of_service_url);
+                });
 
-        NoUnderlineClickableSpan clickablePrivacySpan = new NoUnderlineClickableSpan((view1) -> {
-            if (!isAdded()) return;
-            getPageDelegate().showInfoPage(R.string.chrome_privacy_notice_url);
-        });
+        NoUnderlineClickableSpan clickablePrivacySpan =
+                new NoUnderlineClickableSpan(resources, (view1) -> {
+                    if (!isAdded()) return;
+                    getPageDelegate().showInfoPage(R.string.chrome_privacy_notice_url);
+                });
 
         NoUnderlineClickableSpan clickableFamilyLinkPrivacySpan =
-                new NoUnderlineClickableSpan((view1) -> {
+                new NoUnderlineClickableSpan(resources, (view1) -> {
                     if (!isAdded()) return;
                     getPageDelegate().showInfoPage(R.string.family_link_privacy_policy_url);
                 });
@@ -110,7 +114,7 @@ public class ToSAndUMAFirstRunFragment extends Fragment implements FirstRunFragm
         Bundle freProperties = getPageDelegate().getProperties();
         @ChildAccountStatus.Status
         int childAccountStatus = freProperties.getInt(
-                AccountFirstRunFragment.CHILD_ACCOUNT_STATUS, ChildAccountStatus.NOT_CHILD);
+                SigninFirstRunFragment.CHILD_ACCOUNT_STATUS, ChildAccountStatus.NOT_CHILD);
         if (childAccountStatus == ChildAccountStatus.REGULAR_CHILD) {
             tosAndPrivacyText =
                     SpanApplier.applySpans(getString(R.string.fre_tos_and_privacy_child_account),

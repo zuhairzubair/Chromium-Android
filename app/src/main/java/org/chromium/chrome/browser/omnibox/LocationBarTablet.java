@@ -15,13 +15,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.download.DownloadUtils;
 import org.chromium.chrome.browser.ntp.NewTabPage;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.toolbar.top.ToolbarTablet;
-import org.chromium.chrome.browser.widget.animation.CancelAwareAnimatorListener;
+import org.chromium.components.browser_ui.widget.animation.CancelAwareAnimatorListener;
 import org.chromium.ui.base.LocalizationUtils;
 import org.chromium.ui.interpolators.BakedBezierInterpolator;
 
@@ -252,7 +251,7 @@ public class LocationBarTablet extends LocationBarLayout {
         if (showSaveOfflineButton) mSaveOfflineButton.setEnabled(isSaveOfflineButtonEnabled());
 
         if (!mShouldShowButtonsWhenUnfocused) {
-            updateMicButtonVisibility(mUrlFocusChangePercent);
+            updateMicButtonVisibility();
         } else {
             mMicButton.setVisibility(shouldShowMicButton() ? View.VISIBLE : View.GONE);
         }
@@ -424,7 +423,7 @@ public class LocationBarTablet extends LocationBarLayout {
 
         if (shouldShowSaveOfflineButton() && mSaveOfflineButton.getVisibility() == View.VISIBLE) {
             animators.add(createHideButtonAnimator(mSaveOfflineButton));
-        } else if (!(mUrlBar.isFocused() && mDeleteButton.getVisibility() != View.VISIBLE)) {
+        } else if (!(mUrlBar.hasFocus() && mDeleteButton.getVisibility() != View.VISIBLE)) {
             // If the save offline button isn't enabled, the microphone button always shows when
             // buttons are shown in the unfocused location bar. When buttons are hidden in the
             // unfocused location bar, the microphone shows if the location bar is focused and the
@@ -498,7 +497,7 @@ public class LocationBarTablet extends LocationBarLayout {
      * @param deleteOffset The additional offset to use for the delete button.
      */
     private void setChildTranslationsForWidthChangeAnimation(int offset, int deleteOffset) {
-        if (!ApiCompatibilityUtils.isLayoutRtl(this)) {
+        if (getLayoutDirection() != LAYOUT_DIRECTION_RTL) {
             // When the location bar layout direction is LTR, the buttons at the end (left side)
             // of the location bar need to stick to the left edge.
             if (mSaveOfflineButton.getVisibility() == View.VISIBLE) {
@@ -544,13 +543,13 @@ public class LocationBarTablet extends LocationBarLayout {
 
         // There are two actions, bookmark and save offline, and they should be shown if the
         // omnibox isn't focused.
-        return !(mUrlBar.hasFocus() || mUrlFocusChangeInProgress);
+        return !(mUrlBar.hasFocus() || isUrlFocusChangeInProgress());
     }
 
     private boolean shouldShowMicButton() {
         // If the download UI is enabled, the mic button should be only be shown when the url bar
         // is focused.
-        return mVoiceRecognitionHandler != null && mVoiceRecognitionHandler.isVoiceSearchEnabled()
-                && mNativeInitialized && (mUrlBar.hasFocus() || mUrlFocusChangeInProgress);
+        return mVoiceSearchEnabled && mNativeInitialized
+                && (mUrlBar.hasFocus() || isUrlFocusChangeInProgress());
     }
 }

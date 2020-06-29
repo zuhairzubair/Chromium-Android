@@ -7,16 +7,22 @@ package org.chromium.chrome.browser.fullscreen;
 import android.os.Handler;
 import android.os.SystemClock;
 
-import org.chromium.base.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
+
+import org.chromium.base.CommandLine;
+import org.chromium.base.supplier.ObservableSupplier;
+import org.chromium.base.supplier.Supplier;
+import org.chromium.chrome.browser.ChromeSwitches;
 import org.chromium.chrome.browser.tab.BrowserControlsVisibilityDelegate;
+import org.chromium.content_public.common.BrowserControlsState;
+import org.chromium.ui.util.TokenHolder;
 
 /**
  * Determines the desired visibility of the browser controls based on the current state of the
  * running activity.
  */
 public class BrowserStateBrowserControlsVisibilityDelegate
-        implements BrowserControlsVisibilityDelegate {
-
+        extends BrowserControlsVisibilityDelegate {
     /** Minimum duration (in milliseconds) that the controls are shown when requested. */
     @VisibleForTesting
     static final long MINIMUM_SHOW_DURATION_MS = 3000;
@@ -27,20 +33,31 @@ public class BrowserStateBrowserControlsVisibilityDelegate
 
     private final Handler mHandler = new Handler();
 
+    /** Predicate that tells if we're in persistent fullscreen mode. */
+    private final Supplier<Boolean> mPersistentFullscreenMode;
+
     private long mCurrentShowingStartTime;
 
     /**
      * Constructs a BrowserControlsVisibilityDelegate designed to deal with overrides driven by
      * the browser UI (as opposed to the state of the tab).
      *
-     * @param stateChangedCallback The callback to be triggered when the fullscreen state should be
-     *                             updated based on the state of the browser visibility override.
+     * @param persistentFullscreenMode Predicate that tells if we're in persistent fullscreen mode.
      */
-    public BrowserStateBrowserControlsVisibilityDelegate(Runnable stateChangedCallback) {
-        mTokenHolder = new TokenHolder(stateChangedCallback);
+    public BrowserStateBrowserControlsVisibilityDelegate(
+            ObservableSupplier<Boolean> persistentFullscreenMode) {
+        super(BrowserControlsState.BOTH);
+        mTokenHolder = new TokenHolder(this::updateVisibilityConstraints);
+        mPersistentFullscreenMode = persistentFullscreenMode;
+        persistentFullscreenMode.addObserver((persistentMode) -> updateVisibilityConstraints());
+        updateVisibilityConstraints();
     }
 
     private void ensureControlsVisibleForMinDuration() {
+        // Do not lock the controls as visible. Such as in testing.
+        if (CommandLine.getInstance().hasSwitch(ChromeSwitches.DISABLE_MINIMUM_SHOW_DURATION)) {
+            return;
+        }
         if (mHandler.hasMessages(0)) return; // Messages sent via post/postDelayed have what=0
 
         long currentShowingTime = SystemClock.uptimeMillis() - mCurrentShowingStartTime;
@@ -96,14 +113,18 @@ public class BrowserStateBrowserControlsVisibilityDelegate
         mTokenHolder.releaseToken(token);
     }
 
-    @Override
-    public boolean canShowBrowserControls() {
-        return true;
+    @BrowserControlsState
+    private int calculateVisibilityConstraints() {
+        if (mPersistentFullscreenMode.get()) {
+            return BrowserControlsState.HIDDEN;
+        } else if (mTokenHolder.hasTokens() && !sDisableOverridesForTesting) {
+            return BrowserControlsState.SHOWN;
+        }
+        return BrowserControlsState.BOTH;
     }
 
-    @Override
-    public boolean canAutoHideBrowserControls() {
-        return sDisableOverridesForTesting || !mTokenHolder.hasTokens();
+    private void updateVisibilityConstraints() {
+        set(calculateVisibilityConstraints());
     }
 
     /**

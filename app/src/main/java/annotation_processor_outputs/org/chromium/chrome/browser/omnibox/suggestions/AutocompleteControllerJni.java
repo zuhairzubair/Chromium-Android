@@ -1,0 +1,110 @@
+package org.chromium.chrome.browser.omnibox.suggestions;
+
+import J.N;
+import java.lang.Override;
+import java.lang.String;
+import javax.annotation.Generated;
+import org.chromium.base.JniStaticTestMocker;
+import org.chromium.base.NativeLibraryLoadedStatus;
+import org.chromium.base.annotations.CheckDiscard;
+import org.chromium.chrome.browser.profiles.Profile;
+import org.chromium.content_public.browser.WebContents;
+
+@Generated("org.chromium.jni_generator.JniProcessor")
+@CheckDiscard("crbug.com/993421")
+final class AutocompleteControllerJni implements AutocompleteController.Natives {
+  private static AutocompleteController.Natives testInstance;
+
+  public static final JniStaticTestMocker<AutocompleteController.Natives> TEST_HOOKS = new org.chromium.base.JniStaticTestMocker<org.chromium.chrome.browser.omnibox.suggestions.AutocompleteController.Natives>() {
+    @java.lang.Override
+    public void setInstanceForTesting(
+        org.chromium.chrome.browser.omnibox.suggestions.AutocompleteController.Natives instance) {
+      if (!J.N.TESTING_ENABLED) {
+        throw new RuntimeException("Tried to set a JNI mock when mocks aren't enabled!");
+      }
+      testInstance = instance;
+    }
+  };
+
+  @Override
+  public long init(AutocompleteController caller, Profile profile) {
+    return (long)N.MHKRbGMP(caller, profile);
+  }
+
+  @Override
+  public void start(long nativeAutocompleteControllerAndroid, AutocompleteController caller,
+      String text, int cursorPosition, String desiredTld, String currentUrl, int pageClassification,
+      boolean preventInlineAutocomplete, boolean preferKeyword, boolean allowExactKeywordMatch,
+      boolean wantAsynchronousMatches) {
+    N.Mc4QrncX(nativeAutocompleteControllerAndroid, caller, text, cursorPosition, desiredTld, currentUrl, pageClassification, preventInlineAutocomplete, preferKeyword, allowExactKeywordMatch, wantAsynchronousMatches);
+  }
+
+  @Override
+  public OmniboxSuggestion classify(long nativeAutocompleteControllerAndroid,
+      AutocompleteController caller, String text, boolean focusedFromFakebox) {
+    return (OmniboxSuggestion)N.MDxZMia5(nativeAutocompleteControllerAndroid, caller, text, focusedFromFakebox);
+  }
+
+  @Override
+  public void stop(long nativeAutocompleteControllerAndroid, AutocompleteController caller,
+      boolean clearResults) {
+    N.MktNJvjP(nativeAutocompleteControllerAndroid, caller, clearResults);
+  }
+
+  @Override
+  public void resetSession(long nativeAutocompleteControllerAndroid,
+      AutocompleteController caller) {
+    N.MHXditHc(nativeAutocompleteControllerAndroid, caller);
+  }
+
+  @Override
+  public void onSuggestionSelected(long nativeAutocompleteControllerAndroid,
+      AutocompleteController caller, int selectedIndex, int hashCode, String currentPageUrl,
+      int pageClassification, long elapsedTimeSinceModified, int completedLength,
+      WebContents webContents) {
+    N.MqRSHXK7(nativeAutocompleteControllerAndroid, caller, selectedIndex, hashCode, currentPageUrl, pageClassification, elapsedTimeSinceModified, completedLength, webContents);
+  }
+
+  @Override
+  public void onOmniboxFocused(long nativeAutocompleteControllerAndroid,
+      AutocompleteController caller, String omniboxText, String currentUrl, int pageClassification,
+      String currentTitle) {
+    N.MmFptZoy(nativeAutocompleteControllerAndroid, caller, omniboxText, currentUrl, pageClassification, currentTitle);
+  }
+
+  @Override
+  public void deleteSuggestion(long nativeAutocompleteControllerAndroid,
+      AutocompleteController caller, int selectedIndex, int hashCode) {
+    N.MIy8Zrdo(nativeAutocompleteControllerAndroid, caller, selectedIndex, hashCode);
+  }
+
+  @Override
+  public String updateMatchDestinationURLWithQueryFormulationTime(
+      long nativeAutocompleteControllerAndroid, AutocompleteController caller, int selectedIndex,
+      int hashCode, long elapsedTimeSinceInputChange) {
+    return (String)N.M$ADdPWO(nativeAutocompleteControllerAndroid, caller, selectedIndex, hashCode, elapsedTimeSinceInputChange);
+  }
+
+  @Override
+  public String qualifyPartialURLQuery(String query) {
+    return (String)N.MOCmo$He(query);
+  }
+
+  @Override
+  public void prefetchZeroSuggestResults() {
+    N.MjJ0r9e$();
+  }
+
+  public static AutocompleteController.Natives get() {
+    if (N.TESTING_ENABLED) {
+      if (testInstance != null) {
+        return testInstance;
+      }
+      if (N.REQUIRE_MOCK) {
+        throw new UnsupportedOperationException("No mock found for the native implementation for org.chromium.chrome.browser.omnibox.suggestions.AutocompleteController.Natives. The current configuration requires all native implementations to have a mock instance.");
+      }
+    }
+    NativeLibraryLoadedStatus.checkLoaded(false);
+    return new AutocompleteControllerJni();
+  }
+}

@@ -10,11 +10,6 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
-import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -24,35 +19,52 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
-import org.chromium.base.VisibleForTesting;
+import androidx.annotation.ColorRes;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.annotation.VisibleForTesting;
+
+import org.chromium.base.ObserverList;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.appmenu.AppMenuButtonHelper;
+import org.chromium.chrome.browser.ThemeColorProvider;
+import org.chromium.chrome.browser.ThemeColorProvider.ThemeColorObserver;
+import org.chromium.chrome.browser.ThemeColorProvider.TintObserver;
 import org.chromium.chrome.browser.compositor.Invalidator;
 import org.chromium.chrome.browser.compositor.layouts.LayoutUpdateHost;
-import org.chromium.chrome.browser.fullscreen.BrowserStateBrowserControlsVisibilityDelegate;
+import org.chromium.chrome.browser.compositor.layouts.OverviewModeBehavior;
+import org.chromium.chrome.browser.findinpage.FindToolbar;
 import org.chromium.chrome.browser.ntp.NewTabPage;
 import org.chromium.chrome.browser.omnibox.LocationBar;
 import org.chromium.chrome.browser.omnibox.UrlBarData;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tabmodel.TabModelSelector;
+import org.chromium.chrome.browser.toolbar.HomeButton;
 import org.chromium.chrome.browser.toolbar.MenuButton;
 import org.chromium.chrome.browser.toolbar.TabCountProvider;
+import org.chromium.chrome.browser.toolbar.ToolbarColors;
 import org.chromium.chrome.browser.toolbar.ToolbarDataProvider;
+import org.chromium.chrome.browser.toolbar.ToolbarProgressBar;
 import org.chromium.chrome.browser.toolbar.ToolbarTabController;
-import org.chromium.chrome.browser.util.ViewUtils;
-import org.chromium.chrome.browser.widget.ToolbarProgressBar;
+import org.chromium.chrome.browser.toolbar.top.TopToolbarCoordinator.UrlExpansionObserver;
+import org.chromium.chrome.browser.ui.appmenu.AppMenuButtonHelper;
+import org.chromium.chrome.browser.util.AccessibilityUtil;
+import org.chromium.components.browser_ui.widget.textbubble.TextBubble;
 import org.chromium.components.security_state.ConnectionSecurityLevel;
 import org.chromium.ui.UiUtils;
+import org.chromium.ui.base.ViewUtils;
 
 /**
  * Layout class that contains the base shared logic for manipulating the toolbar component. For
  * interaction that are not from Views inside Toolbar hierarchy all interactions should be done
  * through {@link Toolbar} rather than using this class directly.
  */
-public abstract class ToolbarLayout extends FrameLayout {
+public abstract class ToolbarLayout
+        extends FrameLayout implements TintObserver, ThemeColorObserver {
     private Invalidator mInvalidator;
 
+    protected final ObserverList<UrlExpansionObserver> mUrlExpansionObservers =
+            new ObserverList<>();
     private final int[] mTempPosition = new int[2];
 
     /**
@@ -60,11 +72,11 @@ public abstract class ToolbarLayout extends FrameLayout {
      */
     private MenuButton mMenuButtonWrapper;
 
-    protected final ColorStateList mDarkModeTint;
-    protected final ColorStateList mLightModeTint;
+    private final ColorStateList mDefaultTint;
 
     private ToolbarDataProvider mToolbarDataProvider;
     private ToolbarTabController mToolbarTabController;
+
     @Nullable
     protected ToolbarProgressBar mProgressBar;
 
@@ -75,14 +87,14 @@ public abstract class ToolbarLayout extends FrameLayout {
 
     private boolean mFindInPageToolbarShowing;
 
+    private ThemeColorProvider mThemeColorProvider;
+
     /**
      * Basic constructor for {@link ToolbarLayout}.
      */
     public ToolbarLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mDarkModeTint = AppCompatResources.getColorStateList(getContext(), R.color.dark_mode_tint);
-        mLightModeTint =
-                AppCompatResources.getColorStateList(getContext(), R.color.light_mode_tint);
+        mDefaultTint = ToolbarColors.getThemedToolbarIconTint(getContext(), false);
         mProgressBar = createProgressBar();
 
         addOnLayoutChangeListener(new OnLayoutChangeListener() {
@@ -103,19 +115,23 @@ public abstract class ToolbarLayout extends FrameLayout {
      * Initialize the external dependencies required for view interaction.
      * @param toolbarDataProvider The provider for toolbar data.
      * @param tabController       The controller that handles interactions with the tab.
-     * @param appMenuButtonHelper The helper for managing menu button interactions.
      */
-    void initialize(ToolbarDataProvider toolbarDataProvider, ToolbarTabController tabController,
-            AppMenuButtonHelper appMenuButtonHelper) {
+    void initialize(ToolbarDataProvider toolbarDataProvider, ToolbarTabController tabController) {
         mToolbarDataProvider = toolbarDataProvider;
         mToolbarTabController = tabController;
+    }
+
+    /**
+     * @param appMenuButtonHelper The helper for managing menu button interactions.
+     */
+    void setAppMenuButtonHelper(AppMenuButtonHelper appMenuButtonHelper) {
         if (mMenuButtonWrapper != null) {
             mMenuButtonWrapper.setAppMenuButtonHelper(appMenuButtonHelper);
         } else {
             final ImageButton menuButton = getMenuButton();
             if (menuButton != null) {
                 menuButton.setOnTouchListener(appMenuButtonHelper);
-                menuButton.setAccessibilityDelegate(appMenuButtonHelper);
+                menuButton.setAccessibilityDelegate(appMenuButtonHelper.getAccessibilityDelegate());
             }
         }
     }
@@ -123,7 +139,59 @@ public abstract class ToolbarLayout extends FrameLayout {
     /**
      * Cleans up any code as necessary.
      */
-    void destroy() {}
+    void destroy() {
+        if (mThemeColorProvider != null) {
+            mThemeColorProvider.removeTintObserver(this);
+            mThemeColorProvider.removeThemeColorObserver(this);
+            mThemeColorProvider = null;
+        }
+
+        getLocationBar().destroy();
+    }
+
+    /**
+     * @param urlExpansionObserver The observer that observes URL expansion percentage change.
+     */
+    void addUrlExpansionObserver(UrlExpansionObserver urlExpansionObserver) {
+        mUrlExpansionObservers.addObserver(urlExpansionObserver);
+    }
+
+    /**
+     * @param urlExpansionObserver The observer that observes URL expansion percentage change.
+     */
+    void removeUrlExpansionObserver(UrlExpansionObserver urlExpansionObserver) {
+        mUrlExpansionObservers.removeObserver(urlExpansionObserver);
+    }
+
+    /**
+     * @param themeColorProvider The {@link ThemeColorProvider} used for tinting the toolbar
+     *                           buttons.
+     */
+    void setThemeColorProvider(ThemeColorProvider themeColorProvider) {
+        mThemeColorProvider = themeColorProvider;
+        mThemeColorProvider.addTintObserver(this);
+        mThemeColorProvider.addThemeColorObserver(this);
+    }
+
+    /**
+     * @return The tint the toolbar buttons should use.
+     */
+    protected ColorStateList getTint() {
+        return mThemeColorProvider == null ? mDefaultTint : mThemeColorProvider.getTint();
+    }
+
+    /**
+     * @return Whether to use light assets.
+     */
+    protected boolean useLight() {
+        return mThemeColorProvider != null && mThemeColorProvider.useLight();
+    }
+
+    @Override
+    public void onTintChanged(ColorStateList tint, boolean useLight) {}
+
+    @Override
+    public void onThemeColorChanged(int color, boolean shouldAnimate) {}
 
     /**
      * Set the height that the progress bar should be.
@@ -139,6 +207,11 @@ public abstract class ToolbarLayout extends FrameLayout {
     ToolbarProgressBar createProgressBar() {
         return new ToolbarProgressBar(getContext(), getProgressBarHeight(), this, false);
     }
+
+    /**
+     * @param isVisible Whether the bottom toolbar is visible.
+     */
+    void onBottomToolbarVisibilityChanged(boolean isVisible) {}
 
     /**
      * Disable the menu button. This removes the view from the hierarchy and nulls the related
@@ -163,6 +236,16 @@ public abstract class ToolbarLayout extends FrameLayout {
         mToolbarDataProvider = new ToolbarDataProvider() {
             @Override
             public boolean isIncognito() {
+                return false;
+            }
+
+            @Override
+            public boolean isInOverviewAndShowingOmnibox() {
+                return false;
+            }
+
+            @Override
+            public boolean shouldShowLocationBarInOverviewMode() {
                 return false;
             }
 
@@ -234,11 +317,6 @@ public abstract class ToolbarLayout extends FrameLayout {
             @Override
             public @ColorRes int getSecurityIconColorStateList() {
                 return 0;
-            }
-
-            @Override
-            public boolean shouldDisplaySearchTerms() {
-                return false;
             }
         };
 
@@ -374,7 +452,7 @@ public abstract class ToolbarLayout extends FrameLayout {
 
     /**
      * Gives inheriting classes the chance to respond to
-     * {@link org.chromium.chrome.browser.widget.findinpage.FindToolbar} state changes.
+     * {@link FindToolbar} state changes.
      * @param showing Whether or not the {@code FindToolbar} will be showing.
      */
     void handleFindLocationBarStateChange(boolean showing) {
@@ -382,16 +460,18 @@ public abstract class ToolbarLayout extends FrameLayout {
     }
 
     /**
-     * Sets the delegate to handle visibility of browser controls.
-     */
-    void setBrowserControlsVisibilityDelegate(
-            BrowserStateBrowserControlsVisibilityDelegate controlsVisibilityDelegate) {}
-
-    /**
      * Sets the OnClickListener that will be notified when the TabSwitcher button is pressed.
      * @param listener The callback that will be notified when the TabSwitcher button is pressed.
      */
     void setOnTabSwitcherClickHandler(OnClickListener listener) {}
+
+    /**
+     * Sets the OnLongClickListener that will be notified when the TabSwitcher button is long
+     *         pressed.
+     * @param listener The callback that will be notified when the TabSwitcher button is long
+     *         pressed.
+     */
+    void setOnTabSwitcherLongClickHandler(OnLongClickListener listener) {}
 
     /**
      * Sets the OnClickListener that will be notified when the bookmark button is pressed.
@@ -546,6 +626,8 @@ public abstract class ToolbarLayout extends FrameLayout {
     }
 
     void setLayoutUpdateHost(LayoutUpdateHost layoutUpdateHost) {}
+
+    void setOverviewModeBehavior(OverviewModeBehavior overviewModeBehavior) {}
 
     /**
      * @param attached Whether or not the web content is attached to the view heirarchy.
@@ -709,17 +791,14 @@ public abstract class ToolbarLayout extends FrameLayout {
     public abstract LocationBar getLocationBar();
 
     /**
-     * @return Whether or not this toolbar should use light or dark assets based on the theme.
-     */
-    abstract boolean useLightDrawables();
-
-    /**
      * Navigates the current Tab back.
      * @return Whether or not the current Tab did go back.
      */
     boolean back() {
-        if (getLocationBar() != null) getLocationBar().setUrlBarFocus(false);
-        return mToolbarTabController != null ? mToolbarTabController.back() : false;
+        if (getLocationBar() != null) {
+            getLocationBar().setUrlBarFocus(false, null, LocationBar.OmniboxFocusReason.UNFOCUS);
+        }
+        return mToolbarTabController != null && mToolbarTabController.back();
     }
 
     /**
@@ -727,7 +806,9 @@ public abstract class ToolbarLayout extends FrameLayout {
      * @return Whether or not the current Tab did go forward.
      */
     boolean forward() {
-        if (getLocationBar() != null) getLocationBar().setUrlBarFocus(false);
+        if (getLocationBar() != null) {
+            getLocationBar().setUrlBarFocus(false, null, LocationBar.OmniboxFocusReason.UNFOCUS);
+        }
         return mToolbarTabController != null ? mToolbarTabController.forward() : false;
     }
 
@@ -738,7 +819,9 @@ public abstract class ToolbarLayout extends FrameLayout {
      * <p>The buttons of the toolbar will be updated as a result of making this call.
      */
     void stopOrReloadCurrentTab() {
-        if (getLocationBar() != null) getLocationBar().setUrlBarFocus(false);
+        if (getLocationBar() != null) {
+            getLocationBar().setUrlBarFocus(false, null, LocationBar.OmniboxFocusReason.UNFOCUS);
+        }
         if (mToolbarTabController != null) mToolbarTabController.stopOrReloadCurrentTab();
     }
 
@@ -746,7 +829,9 @@ public abstract class ToolbarLayout extends FrameLayout {
      * Opens hompage in the current tab.
      */
     void openHomepage() {
-        if (getLocationBar() != null) getLocationBar().setUrlBarFocus(false);
+        if (getLocationBar() != null) {
+            getLocationBar().setUrlBarFocus(false, null, LocationBar.OmniboxFocusReason.UNFOCUS);
+        }
         if (mToolbarTabController != null) mToolbarTabController.openHomepage();
     }
 
@@ -757,7 +842,12 @@ public abstract class ToolbarLayout extends FrameLayout {
 
     void showAppMenuUpdateBadge(boolean animate) {
         if (mMenuButtonWrapper == null) return;
-        mMenuButtonWrapper.showAppMenuUpdateBadge(animate);
+        mMenuButtonWrapper.showAppMenuUpdateBadgeIfAvailable(animate);
+    }
+
+    void setAppMenuUpdateBadgeSuppressed(boolean suppress) {
+        if (mMenuButtonWrapper == null) return;
+        mMenuButtonWrapper.setAppMenuUpdateBadgeSuppressed(suppress);
     }
 
     boolean isShowingAppMenuUpdateBadge() {
@@ -773,19 +863,16 @@ public abstract class ToolbarLayout extends FrameLayout {
     /**
      * Enable the experimental toolbar button.
      * @param onClickListener The {@link OnClickListener} to be called when the button is clicked.
-     * @param drawableResId The resource id of the drawable to display for the button.
+     * @param image The drawable to display for the button.
      * @param contentDescriptionResId The resource id of the content description for the button.
      */
-    void enableExperimentalButton(OnClickListener onClickListener, @DrawableRes int drawableResId,
+    void enableExperimentalButton(OnClickListener onClickListener, Drawable image,
             @StringRes int contentDescriptionResId) {}
 
     /**
-     * @return The experimental toolbar button if it exists.
+     * Updates image displayed on experimental button.
      */
-    @Nullable
-    View getExperimentalButtonView() {
-        return null;
-    }
+    void updateExperimentalButtonImage(Drawable image) {}
 
     /**
      * Disable the experimental toolbar button.
@@ -793,9 +880,34 @@ public abstract class ToolbarLayout extends FrameLayout {
     void disableExperimentalButton() {}
 
     /**
+     * @return Experimental button view.
+     */
+    View getExperimentalButtonView() {
+        return null;
+    }
+
+    /**
+     * Displays in-product help for experimental button.
+     * @param stringId The id of the string resource for the text that should be shown.
+     * @param accessibilityStringId The id of the string resource of the accessibility text.
+     * @param dismissedCallback The callback that will be called when in-product help is dismissed.
+     */
+    void showIPHOnExperimentalButton(@StringRes int stringId, @StringRes int accessibilityStringId,
+            Runnable dismissedCallback) {
+        View experimentalButton = getExperimentalButtonView();
+        TextBubble textBubble =
+                new TextBubble(getContext(), experimentalButton, stringId, accessibilityStringId,
+                        experimentalButton, AccessibilityUtil.isAccessibilityEnabled());
+        textBubble.setDismissOnTouchInteraction(true);
+        textBubble.addOnDismissListener(() -> {
+            dismissedCallback.run();
+        });
+        textBubble.show();
+    }
+
+    /**
      * Sets the menu button's background depending on whether or not we are highlighting and whether
      * or not we are using light or dark assets.
-     * @param highlighting Whether or not the menu button should be highlighted.
      */
     void setMenuButtonHighlightDrawable() {
         if (mMenuButtonWrapper == null) return;
@@ -807,4 +919,12 @@ public abstract class ToolbarLayout extends FrameLayout {
      * it.
      */
     void setTabModelSelector(TabModelSelector selector) {}
+
+    /**
+     * @return {@link HomeButton} this {@link ToolbarLayout} contains.
+     */
+    @VisibleForTesting
+    public HomeButton getHomeButtonForTesting() {
+        return null;
+    }
 }

@@ -5,23 +5,28 @@
 package org.chromium.chrome.browser.background_task_scheduler;
 
 import android.content.Context;
-import android.support.annotation.IntDef;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.base.ThreadUtils;
-import org.chromium.base.VisibleForTesting;
 import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.library_loader.ProcessInitException;
+import org.chromium.base.task.PostTask;
 import org.chromium.chrome.browser.init.BrowserParts;
 import org.chromium.chrome.browser.init.ChromeBrowserInitializer;
 import org.chromium.chrome.browser.init.EmptyBrowserParts;
+import org.chromium.chrome.browser.metrics.BackgroundTaskMemoryMetricsEmitter;
 import org.chromium.components.background_task_scheduler.BackgroundTask;
 import org.chromium.components.background_task_scheduler.BackgroundTaskSchedulerExternalUma;
 import org.chromium.components.background_task_scheduler.TaskParameters;
 import org.chromium.content_public.browser.BrowserStartupController;
+import org.chromium.content_public.browser.UiThreadTaskTraits;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Random;
 
 /**
  * Base class implementing {@link BackgroundTask} that adds native initialization, ensuring that
@@ -29,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public abstract class NativeBackgroundTask implements BackgroundTask {
     private static final String TAG = "BTS_NativeBkgrdTask";
+    private static final int MAX_MEMORY_MEASUREMENT_DELAY_MS = 60 * 1000;
 
     /** Specifies which action to take following onStartTaskBeforeNativeLoaded. */
     @IntDef({StartBeforeNativeResult.LOAD_NATIVE, StartBeforeNativeResult.RESCHEDULE,
@@ -43,13 +49,31 @@ public abstract class NativeBackgroundTask implements BackgroundTask {
         int DONE = 2;
     }
 
-    protected NativeBackgroundTask() {}
-
     /** Indicates that the task has already been stopped. Should only be accessed on UI Thread. */
     private boolean mTaskStopped;
 
     /** The id of the task from {@link TaskParameters} used for metrics logging. */
     private int mTaskId;
+
+    /**
+     * If true, the task runs in Service Manager Only Mode. If false, the task runs in Full Browser
+     * Mode.
+     */
+    private boolean mRunningInServiceManagerOnlyMode;
+
+    /** Make sure that we do not double record task finished metric */
+    private boolean mFinishMetricRecorded;
+
+    private BackgroundTaskSchedulerExternalUma mExternalUma;
+
+    protected NativeBackgroundTask() {
+        this(BackgroundTaskSchedulerExternalUma.getInstance());
+    }
+
+    @VisibleForTesting
+    NativeBackgroundTask(BackgroundTaskSchedulerExternalUma externalUma) {
+        mExternalUma = externalUma;
+    }
 
     @Override
     public final boolean onStartTask(
@@ -57,19 +81,32 @@ public abstract class NativeBackgroundTask implements BackgroundTask {
         ThreadUtils.assertOnUiThread();
         mTaskId = taskParameters.getTaskId();
 
+        TaskFinishedCallback wrappedCallback = needsReschedule -> {
+            recordTaskFinishedMetric();
+            callback.taskFinished(needsReschedule);
+        };
+
+        // WrappedCallback will only be called when the work is done or in onStopTask. If the task
+        // is short-circuited early (by returning DONE or RESCHEDULE as a StartBeforeNativeResult),
+        // the wrappedCallback is not called. Thus task-finished metrics are only recorded if
+        // task-started metrics are.
         @StartBeforeNativeResult
-        int beforeNativeResult = onStartTaskBeforeNativeLoaded(context, taskParameters, callback);
+        int beforeNativeResult =
+                onStartTaskBeforeNativeLoaded(context, taskParameters, wrappedCallback);
 
         if (beforeNativeResult == StartBeforeNativeResult.DONE) return false;
 
         if (beforeNativeResult == StartBeforeNativeResult.RESCHEDULE) {
-            ThreadUtils.postOnUiThread(buildRescheduleRunnable(callback));
+            // Do not pass in wrappedCallback because this is a short-circuit reschedule. For UMA
+            // purposes, tasks are started when runWithNative is called and does not consider
+            // short-circuit reschedules such as this.
+            PostTask.postTask(UiThreadTaskTraits.DEFAULT, buildRescheduleRunnable(callback));
             return true;
         }
 
         assert beforeNativeResult == StartBeforeNativeResult.LOAD_NATIVE;
-        runWithNative(context, buildStartWithNativeRunnable(context, taskParameters, callback),
-                buildRescheduleRunnable(callback));
+        runWithNative(buildStartWithNativeRunnable(context, taskParameters, wrappedCallback),
+                buildRescheduleRunnable(wrappedCallback));
         return true;
     }
 
@@ -77,7 +114,8 @@ public abstract class NativeBackgroundTask implements BackgroundTask {
     public final boolean onStopTask(Context context, TaskParameters taskParameters) {
         ThreadUtils.assertOnUiThread();
         mTaskStopped = true;
-        if (isNativeLoaded()) {
+        recordTaskFinishedMetric();
+        if (isNativeLoadedInFullBrowserMode()) {
             return onStopTaskWithNative(context, taskParameters);
         } else {
             return onStopTaskBeforeNativeLoaded(context, taskParameters);
@@ -89,50 +127,62 @@ public abstract class NativeBackgroundTask implements BackgroundTask {
      * going to be rescheduled, by issuing a {@see TaskFinishedCallback} with parameter set to
      * <c>true</c>.
      *
-     * @param context the current context
      * @param startWithNativeRunnable A runnable that will execute #onStartTaskWithNative, after the
      *    native is loaded.
      * @param rescheduleRunnable A runnable that will be called to reschedule the task in case
      *    native initialization fails.
      */
-    protected final void runWithNative(final Context context,
+    private final void runWithNative(
             final Runnable startWithNativeRunnable, final Runnable rescheduleRunnable) {
-        if (isNativeLoaded()) {
-            ThreadUtils.postOnUiThread(startWithNativeRunnable);
+        if (isNativeLoadedInFullBrowserMode()) {
+            mRunningInServiceManagerOnlyMode = false;
+            mExternalUma.reportNativeTaskStarted(mTaskId, mRunningInServiceManagerOnlyMode);
+            recordMemoryUsageWithRandomDelay(mRunningInServiceManagerOnlyMode);
+            PostTask.postTask(UiThreadTaskTraits.DEFAULT, startWithNativeRunnable);
             return;
         }
+
+        boolean wasInServiceManagerOnlyMode = isNativeLoadedInServiceManagerOnlyMode();
+        mRunningInServiceManagerOnlyMode = supportsServiceManagerOnly();
+        mExternalUma.reportNativeTaskStarted(mTaskId, mRunningInServiceManagerOnlyMode);
 
         final BrowserParts parts = new EmptyBrowserParts() {
             @Override
             public void finishNativeInitialization() {
-                ThreadUtils.postOnUiThread(startWithNativeRunnable);
+                PostTask.postTask(UiThreadTaskTraits.DEFAULT, startWithNativeRunnable);
+                recordMemoryUsageWithRandomDelay(mRunningInServiceManagerOnlyMode);
             }
             @Override
             public boolean startServiceManagerOnly() {
-                return supportsServiceManagerOnly();
+                return mRunningInServiceManagerOnlyMode;
             }
             @Override
             public void onStartupFailure() {
-                ThreadUtils.postOnUiThread(rescheduleRunnable);
+                PostTask.postTask(UiThreadTaskTraits.DEFAULT, rescheduleRunnable);
             }
         };
 
-        ThreadUtils.postOnUiThread(new Runnable() {
+        PostTask.postTask(UiThreadTaskTraits.DEFAULT, new Runnable() {
             @Override
             public void run() {
                 // If task was stopped before we got here, don't start native initialization.
                 if (mTaskStopped) return;
 
-                BackgroundTaskSchedulerExternalUma.reportTaskStartedNative(mTaskId);
-                try {
-                    ChromeBrowserInitializer.getInstance(context).handlePreNativeStartup(parts);
+                // Record transitions from No Native to Service Manager Only Mode and from No Native
+                // to Full Browser mode, but not cases in which Service Manager Only Mode was
+                // already started.
+                if (!wasInServiceManagerOnlyMode) {
+                    mExternalUma.reportTaskStartedNative(mTaskId, mRunningInServiceManagerOnlyMode);
+                }
 
-                    ChromeBrowserInitializer.getInstance(context).handlePostNativeStartup(
+                try {
+                    ChromeBrowserInitializer.getInstance().handlePreNativeStartup(parts);
+
+                    ChromeBrowserInitializer.getInstance().handlePostNativeStartup(
                             true /* isAsync */, parts);
                 } catch (ProcessInitException e) {
-                    Log.e(TAG, "ProcessInitException while starting the browser process.");
+                    Log.e(TAG, "Background Launch Error", e);
                     rescheduleRunnable.run();
-                    return;
                 }
             }
         });
@@ -205,13 +255,39 @@ public abstract class NativeBackgroundTask implements BackgroundTask {
         };
     }
 
-    /** Whether the native part of the browser is loaded. */
-    private boolean isNativeLoaded() {
-        return getBrowserStartupController().isStartupSuccessfullyCompleted();
+    /** Whether the native part of the browser is loaded in Full Browser Mode. */
+    private boolean isNativeLoadedInFullBrowserMode() {
+        return getBrowserStartupController().isFullBrowserStarted();
+    }
+
+    /** Whether the native part of the browser is loaded in Service Manager Only Mode. */
+    private boolean isNativeLoadedInServiceManagerOnlyMode() {
+        return getBrowserStartupController().isRunningInServiceManagerMode();
     }
 
     @VisibleForTesting
     protected BrowserStartupController getBrowserStartupController() {
         return BrowserStartupController.get(LibraryProcessType.PROCESS_BROWSER);
+    }
+  
+    private void recordTaskFinishedMetric() {
+      ThreadUtils.assertOnUiThread();
+      if (!mFinishMetricRecorded) {
+        mFinishMetricRecorded = true;
+        mExternalUma.reportNativeTaskFinished(mTaskId, mRunningInServiceManagerOnlyMode);
+      }
+    }
+
+    private void recordMemoryUsageWithRandomDelay(boolean serviceManagerOnlyMode) {
+        // The metrics are emitted only once so that the average does not converge towards the
+        // memory usage after the task is executed, but reflects the task being executed.
+        // The statistical distribution of the delay is uniform between 0s and 60s. The Offline
+        // Prefetch background task, for example, starts downloads ~25s after the start of the task.
+        final int delay = (int) (new Random().nextFloat() * MAX_MEMORY_MEASUREMENT_DELAY_MS);
+
+        PostTask.postDelayedTask(UiThreadTaskTraits.DEFAULT, () -> {
+            BackgroundTaskMemoryMetricsEmitter.reportMemoryUsage(serviceManagerOnlyMode,
+                    BackgroundTaskSchedulerExternalUma.toMemoryHistogramAffixFromTaskId(mTaskId));
+        }, delay);
     }
 }

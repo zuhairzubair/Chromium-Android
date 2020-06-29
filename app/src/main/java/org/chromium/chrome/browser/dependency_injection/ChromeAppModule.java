@@ -9,13 +9,17 @@ import static org.chromium.chrome.browser.dependency_injection.ChromeCommonQuali
 
 import android.content.Context;
 
+import androidx.browser.trusted.TrustedWebActivityServiceConnectionPool;
+
 import org.chromium.base.ContextUtils;
 import org.chromium.chrome.browser.WarmupManager;
-import org.chromium.chrome.browser.contextual_suggestions.EnabledStateMonitor;
-import org.chromium.chrome.browser.contextual_suggestions.EnabledStateMonitorImpl;
+import org.chromium.chrome.browser.browserservices.permissiondelegation.TrustedWebActivityPermissionStore;
 import org.chromium.chrome.browser.init.ChromeBrowserInitializer;
-import org.chromium.chrome.browser.preferences.ChromePreferenceManager;
+import org.chromium.chrome.browser.night_mode.SystemNightModeMonitor;
+import org.chromium.chrome.browser.notifications.channels.SiteChannelsManager;
+import org.chromium.chrome.browser.preferences.SharedPreferencesManager;
 import org.chromium.chrome.browser.profiles.Profile;
+import org.chromium.chrome.browser.webapps.WebappRegistry;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -38,14 +42,8 @@ public class ChromeAppModule {
     }
 
     @Provides
-    @Singleton
-    public EnabledStateMonitor provideEnabledStateMonitor() {
-        return new EnabledStateMonitorImpl();
-    }
-
-    @Provides
-    public ChromePreferenceManager providesChromePreferenceManager() {
-        return ChromePreferenceManager.getInstance();
+    public SharedPreferencesManager providesSharedPreferencesManager() {
+        return SharedPreferencesManager.getInstance();
     }
 
     @Provides
@@ -62,5 +60,30 @@ public class ChromeAppModule {
     @Provides
     public WarmupManager provideWarmupManager() {
         return WarmupManager.getInstance();
+    }
+
+    @Provides
+    @Singleton
+    public TrustedWebActivityPermissionStore providesTwaPermissionStore() {
+        return WebappRegistry.getInstance().getTrustedWebActivityPermissionStore();
+    }
+
+    @Provides
+    public SiteChannelsManager providesSiteChannelsManager() {
+        return SiteChannelsManager.getInstance();
+    }
+
+    @Provides
+    @Singleton
+    public TrustedWebActivityServiceConnectionPool providesTwaServiceConnectionManager(
+            @Named(APP_CONTEXT) Context context) {
+        // TrustedWebActivityServiceConnectionManager comes from AndroidX Browser
+        // so we can't make it injectable.
+        return TrustedWebActivityServiceConnectionPool.create(context);
+    }
+
+    @Provides
+    public SystemNightModeMonitor provideSystemNightModeMonitor() {
+        return SystemNightModeMonitor.getInstance();
     }
 }

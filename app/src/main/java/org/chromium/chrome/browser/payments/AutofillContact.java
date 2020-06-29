@@ -5,12 +5,14 @@
 package org.chromium.chrome.browser.payments;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
+
+import androidx.annotation.Nullable;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.autofill.PersonalDataManager.AutofillProfile;
-import org.chromium.chrome.browser.widget.prefeditor.EditableOption;
+import org.chromium.chrome.browser.autofill.prefeditor.EditableOption;
+import org.chromium.payments.mojom.PayerDetail;
 
 /**
  * The locally stored contact details.
@@ -74,6 +76,18 @@ public class AutofillContact extends EditableOption {
     /** @return The autofill profile where this contact data lives. */
     public AutofillProfile getProfile() {
         return mProfile;
+    }
+
+    /** @return The payer detail information for the merchant. */
+    public PayerDetail toPayerDetail() {
+        assert mIsComplete;
+        PayerDetail result = new PayerDetail();
+
+        result.name = getPayerName();
+        result.phone = getPayerPhone();
+        result.email = getPayerEmail();
+
+        return result;
     }
 
     /** @return Whether the contact is complete and ready to be sent to the merchant as-is. */

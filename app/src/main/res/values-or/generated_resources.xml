@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"ଜାରି ରଖନ୍ତୁ"</string>
+<string name="tos_notification_title">"Chromeର ସେବାର ସର୍ତ୍ତାବଳୀ ମାର୍ଚ୍ଚ 31ରୁ ବଦଳିବାକୁ ଯାଉଛି"</string>
+<string name="tos_notification_body_text">"ଦୟାକରି ନୂଆ ସର୍ତ୍ତାବଳୀର ସମୀକ୍ଷା କରନ୍ତୁ"</string>
+<string name="tos_notification_ack_button_text">"ବୁଝିଗଲି"</string>
+<string name="tos_notification_review_button_text">"ସମୀକ୍ଷା କରନ୍ତୁ"</string>
+<string name="search_or_type_web_address">"ୱେବ୍‌ ଠିକଣା ସନ୍ଧାନ କିମ୍ବା ଟାଇପ୍‌ କରନ୍ତୁ"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"କ୍ଲିପ୍‍‍ବୋର୍ଡରୁ ପ୍ରସ୍ତାବ କାଢ଼ି ଦେବେ?"</string>
+<string name="options_homepage_title">"ମୂଳପୃଷ୍ଠା"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"ଏହି ସାଇଟ୍ ଇନ୍‌କଗ୍ନିଟୋ ମୋଡ୍‍‍ରେ ବାହାରର କୌଣସି ଆପ୍ ସହ ସୂଚନା ସେୟାର୍ କରିବାକୁ ଯାଉଛି।"</string>
+<string name="external_app_leave_incognito_warning_title">"ଇନ୍‌କଗ୍ନିଟୋ ମୋଡ୍ ଛାଡ଼ିବେ?"</string>
+<string name="external_app_leave_incognito_stay">"ରୁହନ୍ତୁ"</string>
+<string name="external_app_leave_incognito_leave">"ଛାଡ଼ନ୍ତୁ"</string>
+<string name="external_app_restricted_access_error">"Chrome ପାଖରେ ଅନୁରୋଧ କରାଯାଇଥିବା ସମ୍ବଳକୁ ଆକ୍ସେସ୍‌ ନାହିଁ।"</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"ନିକଟରେ କୌଣସି ଡିଭାଇସ୍ ମିଳି ନାହିଁ।"</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"ଅନୁମତି"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"ଅବରୋଧ କରନ୍ତୁ"</string>
+<string name="blocked_ads_prompt_title">"ବିଜ୍ଞାପନଗୁଡ଼ିକ ଅବରୋଧ ହୋ‍ଇଛି"</string>
+<string name="video_call_notification_text_2">"ଭିଡିଓ ଇନପୁଟ୍ ଆକ୍ସେସ୍ ହେଉଛି"</string>
+<string name="audio_call_notification_text_2">"ଅଡିଓ ଇନ୍‍ପୁଟ୍‍ ଆକ୍ସେସ୍‌ କରୁଛି"</string>
+<string name="video_audio_call_notification_text_2">"ଅଡିଓ ଓ ଭିଡିଓ ଇନ୍‌ପୁଟ୍ ଆକ୍ସେସ୍ କରାଯାଉଛି"</string>
+<string name="video_call_incognito_notification_text_2">"ଏକ ସାଇଟ୍ ଭିଡିଓ ଇନ୍‍ପୁଟ୍ ଆକ୍ସେସ୍ କରୁଛି"</string>
+<string name="audio_call_incognito_notification_text_2">"ଗୋଟିଏ ସାଇଟ୍ ଅଡିଓ ଇନ୍‌ପୁଟ୍ ଆକ୍‌ସେସ୍ କରୁଛି"</string>
+<string name="video_audio_call_incognito_notification_text_2">"ଏକ ସାଇଟ୍ ଅଡିଓ ଓ ଭିଡିଓ ଇନ୍‍ପୁଟ୍ ଆକ୍ସେସ୍ କରୁଛି"</string>
+</resources>

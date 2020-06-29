@@ -4,12 +4,14 @@
 
 package org.chromium.chrome.browser.firstrun;
 
+import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.annotation.StringRes;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.StringRes;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.customtabs.CustomTabActivity;
@@ -46,7 +48,7 @@ public class LightweightFirstRunActivity extends FirstRunActivityBase {
 
                 @ChildAccountStatus.Status
                 int childAccountStatus = freProperties.getInt(
-                        AccountFirstRunFragment.CHILD_ACCOUNT_STATUS, ChildAccountStatus.NOT_CHILD);
+                        SigninFirstRunFragment.CHILD_ACCOUNT_STATUS, ChildAccountStatus.NOT_CHILD);
                 onChildAccountKnown(ChildAccountStatus.isChild(childAccountStatus));
             }
         };
@@ -59,12 +61,13 @@ public class LightweightFirstRunActivity extends FirstRunActivityBase {
         setContentView(LayoutInflater.from(LightweightFirstRunActivity.this)
                                .inflate(R.layout.lightweight_fre_tos, null));
 
+        final Resources resources = getResources();
         NoUnderlineClickableSpan clickableTermsSpan = new NoUnderlineClickableSpan(
-                (view) -> showInfoPage(R.string.chrome_terms_of_service_url));
+                resources, (view) -> showInfoPage(R.string.chrome_terms_of_service_url));
         NoUnderlineClickableSpan clickablePrivacySpan = new NoUnderlineClickableSpan(
-                (view) -> showInfoPage(R.string.chrome_privacy_notice_url));
+                resources, (view) -> showInfoPage(R.string.chrome_privacy_notice_url));
         NoUnderlineClickableSpan clickableFamilyLinkPrivacySpan = new NoUnderlineClickableSpan(
-                (view) -> showInfoPage(R.string.family_link_privacy_policy_url));
+                resources, (view) -> showInfoPage(R.string.family_link_privacy_policy_url));
         String associatedAppName =
                 IntentUtils.safeGetStringExtra(getIntent(), EXTRA_ASSOCIATED_APP_NAME);
         if (associatedAppName == null) {

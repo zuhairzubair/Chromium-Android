@@ -4,21 +4,19 @@
 
 package org.chromium.chrome.browser.download;
 
-import android.view.View;
-
 import org.chromium.base.ActivityState;
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.ApplicationStatus.ActivityStateListener;
 import org.chromium.base.ThreadUtils;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ChromeActivity;
-import org.chromium.chrome.browser.UrlConstants;
 import org.chromium.chrome.browser.download.home.DownloadManagerCoordinator;
 import org.chromium.chrome.browser.download.home.DownloadManagerCoordinatorFactory;
 import org.chromium.chrome.browser.download.home.DownloadManagerUiConfig;
-import org.chromium.chrome.browser.native_page.BasicNativePage;
-import org.chromium.chrome.browser.native_page.NativePageHost;
-import org.chromium.chrome.browser.snackbar.SnackbarManager.SnackbarManageable;
+import org.chromium.chrome.browser.download.home.DownloadManagerUiConfigHelper;
+import org.chromium.chrome.browser.ui.native_page.BasicNativePage;
+import org.chromium.chrome.browser.ui.native_page.NativePageHost;
+import org.chromium.chrome.browser.util.UrlConstants;
 
 /**
  * Native page for managing downloads handled through Chrome.
@@ -35,19 +33,18 @@ public class DownloadPage extends BasicNativePage implements DownloadManagerCoor
      * @param host A NativePageHost to load urls.
      */
     public DownloadPage(ChromeActivity activity, NativePageHost host) {
-        super(activity, host);
-    }
+        super(host);
 
-    @Override
-    protected void initialize(ChromeActivity activity, final NativePageHost host) {
         ThreadUtils.assertOnUiThread();
+        DownloadManagerUiConfig config =
+                DownloadManagerUiConfigHelper.fromFlags()
+                        .setIsOffTheRecord(activity.getCurrentTabModel().isIncognito())
+                        .setIsSeparateActivity(false)
+                        .setShowPaginationHeaders(DownloadUtils.shouldShowPaginationHeaders())
+                        .build();
 
-        DownloadManagerUiConfig config = new DownloadManagerUiConfig.Builder()
-                                                 .setIsOffTheRecord(host.isIncognito())
-                                                 .setIsSeparateActivity(false)
-                                                 .build();
-        mDownloadCoordinator = DownloadManagerCoordinatorFactory.create(activity, config,
-                ((SnackbarManageable) activity).getSnackbarManager(), activity.getComponentName());
+        mDownloadCoordinator = DownloadManagerCoordinatorFactory.create(
+                activity, config, activity.getSnackbarManager(), activity.getModalDialogManager());
 
         mDownloadCoordinator.addObserver(this);
         mTitle = activity.getString(R.string.menu_downloads);
@@ -59,15 +56,13 @@ public class DownloadPage extends BasicNativePage implements DownloadManagerCoor
         // resumed.
         mActivityStateListener = (activity1, newState) -> {
             if (newState == ActivityState.RESUMED) {
-                DownloadUtils.checkForExternallyRemovedDownloads(host.isIncognito());
+                DownloadUtils.checkForExternallyRemovedDownloads(
+                        activity.getCurrentTabModel().isIncognito());
             }
         };
         ApplicationStatus.registerStateListenerForActivity(mActivityStateListener, activity);
-    }
 
-    @Override
-    public View getView() {
-        return mDownloadCoordinator.getView();
+        initWithView(mDownloadCoordinator.getView());
     }
 
     @Override

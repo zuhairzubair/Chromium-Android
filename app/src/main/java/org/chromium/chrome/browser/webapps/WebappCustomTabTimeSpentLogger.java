@@ -9,8 +9,6 @@ import android.os.SystemClock;
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.chrome.browser.customtabs.CustomTabIntentDataProvider.LaunchSourceType;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Logs to UMA the amount of time user spends in a CCT for CCTs launched from webapps.
  *
@@ -44,17 +42,14 @@ public class WebappCustomTabTimeSpentLogger {
         String umaSuffix;
         // TODO(peconn): Combine this with TrustedWebActivityOpenTimeRecorder.
         switch (mActivityType) {
-            case LaunchSourceType.WEBAPP:
-                umaSuffix = ".Webapp";
-                break;
-            case LaunchSourceType.WEBAPK:
-                umaSuffix = ".WebApk";
+            case LaunchSourceType.MEDIA_LAUNCHER_ACTIVITY:
+                umaSuffix = ".MediaLauncherActivity";
                 break;
             default:
                 umaSuffix = ".Other";
                 break;
         }
         RecordHistogram.recordLongTimesHistogram(
-                "CustomTab.SessionDuration" + umaSuffix, timeSpent, TimeUnit.MILLISECONDS);
+                "CustomTab.SessionDuration" + umaSuffix, timeSpent);
     }
 }

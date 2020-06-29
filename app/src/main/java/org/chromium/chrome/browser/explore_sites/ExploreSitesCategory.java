@@ -8,10 +8,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.IntDef;
+
+import androidx.annotation.IntDef;
 
 import org.chromium.base.annotations.CalledByNative;
-import org.chromium.chrome.browser.UrlConstants;
+import org.chromium.chrome.browser.util.UrlConstants;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,18 +28,15 @@ public class ExploreSitesCategory {
     // button.
     private static final int PLACEHOLDER_ID = -1;
 
-    static final int MAX_COLUMNS = 4;
-
     // This enum must match the numbering for ExploreSites.CategoryClick in histograms.xml.  Do not
-    // reorder or remove items, only add new items before COUNT.
-    @Retention(RetentionPolicy.SOURCE)
+    // reorder or remove items, only add new items before NUM_ENTRIES.
     @IntDef({CategoryType.MORE_BUTTON, CategoryType.DEFAULT, CategoryType.SOCIAL,
             CategoryType.ENTERTAINMENT, CategoryType.SPORT, CategoryType.NEWS,
             CategoryType.SHOPPING, CategoryType.REFERENCE, CategoryType.BANKING,
             CategoryType.GOVERNMENT, CategoryType.TRAVEL, CategoryType.EDUCATION, CategoryType.JOBS,
             CategoryType.APPS_GAMES, CategoryType.FAVORITE, CategoryType.GOOGLE, CategoryType.FOOD,
-            CategoryType.HEALTH, CategoryType.BOOKS, CategoryType.TECHNOLOGY, CategoryType.SCIENCE,
-            CategoryType.COUNT})
+            CategoryType.HEALTH, CategoryType.BOOKS, CategoryType.TECHNOLOGY, CategoryType.SCIENCE})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface CategoryType {
         int MORE_BUTTON = -1; // This is not included in histograms.xml.
         int DEFAULT = 0;
@@ -62,7 +60,7 @@ public class ExploreSitesCategory {
         int TECHNOLOGY = 18;
         int SCIENCE = 19;
         // This must always be one higher than the last category number.
-        int COUNT = 20;
+        int NUM_ENTRIES = 20;
     }
 
     public static ExploreSitesCategory createPlaceholder(
@@ -81,7 +79,7 @@ public class ExploreSitesCategory {
     private int mInteractionCount;
     // Populated only for ESP.
     private List<ExploreSitesSite> mSites;
-    private int mNumBlacklisted;
+    private int mNumRemoved;
 
     /**
      * Creates an explore sites category data structure.
@@ -142,16 +140,25 @@ public class ExploreSitesCategory {
     public void addSite(ExploreSitesSite site) {
         mSites.add(site);
         if (site.getModel().get(ExploreSitesSite.BLACKLISTED_KEY)) {
-            mNumBlacklisted++;
+            mNumRemoved++;
         }
     }
 
     public int getNumDisplayed() {
-        return mSites.size() - mNumBlacklisted;
+        return mSites.size() - mNumRemoved;
     }
 
-    public int getMaxRows() {
-        return mSites.size() / MAX_COLUMNS;
+    /**
+     * Get the number of rows that could be filled completely with sites, if no site is blacklisted.
+     * @param numColumns - number of columns wide the layout holding this category is. This
+     *                   parameter must not be zero.
+     */
+    public int getMaxRows(int numColumns) {
+        return mSites.size() / numColumns;
+    }
+
+    public int getNumberRemoved() {
+        return mNumRemoved;
     }
 
     public boolean removeSite(int tileIndex) {
@@ -190,7 +197,7 @@ public class ExploreSitesCategory {
                 tileIndex++;
             }
         }
-        mNumBlacklisted++;
+        mNumRemoved++;
         return true;
     }
 

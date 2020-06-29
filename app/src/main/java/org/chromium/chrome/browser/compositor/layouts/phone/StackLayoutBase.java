@@ -4,26 +4,27 @@
 
 package org.chromium.chrome.browser.compositor.layouts.phone;
 
-import static org.chromium.chrome.browser.compositor.layouts.ChromeAnimation.AnimatableAnimation.createAnimation;
-
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
+import android.util.Pair;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 
-import org.chromium.base.VisibleForTesting;
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
+
+import org.chromium.base.MathUtils;
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.base.metrics.RecordUserAction;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.ChromeFeatureList;
 import org.chromium.chrome.browser.compositor.LayerTitleCache;
 import org.chromium.chrome.browser.compositor.animation.CompositorAnimator;
-import org.chromium.chrome.browser.compositor.layouts.ChromeAnimation;
-import org.chromium.chrome.browser.compositor.layouts.ChromeAnimation.Animatable;
+import org.chromium.chrome.browser.compositor.animation.FloatProperty;
 import org.chromium.chrome.browser.compositor.layouts.Layout;
 import org.chromium.chrome.browser.compositor.layouts.LayoutManager;
 import org.chromium.chrome.browser.compositor.layouts.LayoutRenderHost;
@@ -39,6 +40,8 @@ import org.chromium.chrome.browser.compositor.layouts.phone.stack.Stack;
 import org.chromium.chrome.browser.compositor.layouts.phone.stack.StackTab;
 import org.chromium.chrome.browser.compositor.scene_layer.SceneLayer;
 import org.chromium.chrome.browser.compositor.scene_layer.TabListSceneLayer;
+import org.chromium.chrome.browser.flags.ChromeFeatureList;
+import org.chromium.chrome.browser.flags.FeatureUtilities;
 import org.chromium.chrome.browser.fullscreen.ChromeFullscreenManager;
 import org.chromium.chrome.browser.partnercustomizations.HomepageManager;
 import org.chromium.chrome.browser.tab.Tab;
@@ -46,8 +49,6 @@ import org.chromium.chrome.browser.tabmodel.TabList;
 import org.chromium.chrome.browser.tabmodel.TabModelSelector;
 import org.chromium.chrome.browser.tabmodel.TabModelSelectorTabModelObserver;
 import org.chromium.chrome.browser.tabmodel.TabModelUtils;
-import org.chromium.chrome.browser.util.FeatureUtilities;
-import org.chromium.chrome.browser.util.MathUtils;
 import org.chromium.ui.UiUtils;
 import org.chromium.ui.base.LocalizationUtils;
 import org.chromium.ui.resources.ResourceManager;
@@ -63,14 +64,47 @@ import java.util.List;
 /**
  * Base class for layouts that show one or more stacks of tabs.
  */
-public abstract class StackLayoutBase extends Layout implements Animatable {
-    @IntDef({Property.INNER_MARGIN_PERCENT, Property.STACK_SNAP, Property.STACK_OFFSET_Y_PERCENT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Property {
-        int INNER_MARGIN_PERCENT = 0;
-        int STACK_SNAP = 1;
-        int STACK_OFFSET_Y_PERCENT = 2;
-    }
+public abstract class StackLayoutBase extends Layout {
+    private static final FloatProperty<StackLayoutBase> INNER_MARGIN_PERCENT =
+            new FloatProperty<StackLayoutBase>("INNER_MARGIN_PERCENT") {
+                @Override
+                public void setValue(StackLayoutBase layoutBase, float v) {
+                    layoutBase.mInnerMarginPercent = v;
+                }
+
+                @Override
+                public Float get(StackLayoutBase layoutBase) {
+                    return layoutBase.mInnerMarginPercent;
+                }
+            };
+
+    private static final FloatProperty<StackLayoutBase> STACK_OFFSET_Y_PERCENT =
+            new FloatProperty<StackLayoutBase>("STACK_OFFSET_Y_PERCENT") {
+                @Override
+                public void setValue(StackLayoutBase layoutBase, float v) {
+                    layoutBase.mStackOffsetYPercent = v;
+                }
+
+                @Override
+                public Float get(StackLayoutBase layoutBase) {
+                    return layoutBase.mStackOffsetYPercent;
+                }
+            };
+
+    private static final FloatProperty<StackLayoutBase> STACK_SNAP =
+            new FloatProperty<StackLayoutBase>("STACK_SNAP") {
+                @Override
+                public void setValue(StackLayoutBase layoutBase, float v) {
+                    layoutBase.setStackSnap(v);
+                }
+
+                @Override
+                public Float get(StackLayoutBase layoutBase) {
+                    return layoutBase.mRenderedScrollOffset == layoutBase.mScrollIndexOffset
+                            ? layoutBase.mRenderedScrollOffset
+                            : null;
+                }
+            };
 
     @IntDef({DragDirection.NONE, DragDirection.HORIZONTAL, DragDirection.VERTICAL})
     @Retention(RetentionPolicy.SOURCE)
@@ -125,6 +159,8 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
     /** Rectangles that defines the area where each stack need to be laid out. */
     protected final ArrayList<RectF> mStackRects;
 
+    private final float mDpToPx;
+
     private int mStackAnimationCount;
 
     private float mFlingSpeed; // pixel/ms
@@ -154,7 +190,7 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
 
     private float mWidth;
     private float mHeight;
-    private int mOrientation;
+    private @Orientation int mOrientation;
 
     // Pre-allocated temporary arrays that store id of visible tabs.
     // They can be used to call populatePriorityVisibilityList.
@@ -194,7 +230,8 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
 
     private StackLayoutGestureHandler mGestureHandler;
 
-    private ChromeAnimation<Animatable> mLayoutAnimations;
+    private final ArrayList<Pair<CompositorAnimator, FloatProperty>> mLayoutAnimations =
+            new ArrayList<>();
 
     private class StackLayoutGestureHandler implements GestureHandler {
         @Override
@@ -301,7 +338,10 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
 
         private void onUpOrCancel(long time) {
             if (shouldIgnoreTouchInput()) return;
+            cancelDragTabs(time);
+        }
 
+        private void cancelDragTabs(long time) {
             int currentIndex = getTabStackIndex();
             if (!mClicked
                     && Math.abs(currentIndex + mRenderedScrollOffset) > THRESHOLD_TO_SWITCH_STACK) {
@@ -346,6 +386,17 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
         mStackRects = new ArrayList<RectF>();
         mViewContainer = new FrameLayout(getContext());
         mSceneLayer = new TabListSceneLayer();
+        mDpToPx = context.getResources().getDisplayMetrics().density;
+    }
+
+    /**
+     * Sets the stack stap value.
+     *
+     * @param v Value to set.
+     */
+    private void setStackSnap(float v) {
+        mRenderedScrollOffset = v;
+        mScrollIndexOffset = v;
     }
 
     /**
@@ -542,11 +593,6 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
     }
 
     @Override
-    public void onTabsAllClosing(long time, boolean incognito) {
-        super.onTabsAllClosing(time, incognito);
-    }
-
-    @Override
     public boolean handlesCloseAll() {
         return true;
     }
@@ -646,16 +692,13 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
     @Override
     public boolean onUpdateAnimation(long time, boolean jumpToEnd) {
         boolean animationsWasDone = true;
-        if (mLayoutAnimations != null) {
+        if (!mLayoutAnimations.isEmpty()) {
             if (jumpToEnd) {
-                animationsWasDone = mLayoutAnimations.finished();
-                mLayoutAnimations.updateAndFinish();
+                forceAnimationToFinish();
             } else {
-                animationsWasDone = mLayoutAnimations.update(time);
+                animationsWasDone = !isLayoutAnimating();
             }
-
             if (animationsWasDone || jumpToEnd) {
-                mLayoutAnimations = null;
                 onAnimationFinished();
             }
         }
@@ -734,7 +777,27 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
      * @param canUndo   Whether or not this close can be undone.
      * @param incognito Whether or not this was for the incognito stack or not.
      */
-    public void uiDoneClosingTab(long time, int id, boolean canUndo, boolean incognito) {
+    public void uiDoneClosingTab(
+            final long time, final int id, boolean canUndo, final boolean incognito) {
+        // If there are any ongoing layout animations, postpone this until they are done since
+        // closeTabById does a lot of work.
+        for (int i = 0; i < mLayoutAnimations.size(); i++) {
+            if (mLayoutAnimations.get(i).first.isRunning()) {
+                final boolean cachedCanUndo = canUndo;
+                final AnimatorListenerAdapter adapter = new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        uiDoneClosingTab(time, id, cachedCanUndo, incognito);
+                        animation.removeListener(this);
+                    }
+                };
+                mLayoutAnimations.get(i).first.addListener(adapter);
+                return;
+            }
+        }
+
+        assert !isLayoutAnimating();
+
         // If homepage is enabled and there is a maximum of 1 tab in both models
         // (this is the last tab), the tab closure cannot be undone.
         canUndo &= !(HomepageManager.shouldCloseAppWithZeroTabs()
@@ -775,23 +838,23 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
 
     protected void startMarginAnimation(boolean enter, boolean showMargin) {
         // Any outstanding animations must be cancelled to avoid race condition.
-        cancelAnimation(this, Property.INNER_MARGIN_PERCENT);
+        cancelAnimation(INNER_MARGIN_PERCENT);
 
         float start = mInnerMarginPercent;
         float end = enter && showMargin ? 1.0f : 0.0f;
         if (start != end) {
-            addToAnimation(this, Property.INNER_MARGIN_PERCENT, start, end, 200, 0);
+            addToAnimation(INNER_MARGIN_PERCENT, start, end, 200, 0);
         }
     }
 
     private void startYOffsetAnimation(boolean enter) {
         // Any outstanding animations must be cancelled to avoid race condition.
-        cancelAnimation(this, Property.STACK_OFFSET_Y_PERCENT);
+        cancelAnimation(STACK_OFFSET_Y_PERCENT);
 
         float start = mStackOffsetYPercent;
         float end = enter ? 1.f : 0.f;
         if (start != end) {
-            addToAnimation(this, Property.STACK_OFFSET_Y_PERCENT, start, end, 300, 0);
+            addToAnimation(STACK_OFFSET_Y_PERCENT, start, end, 300, 0);
         }
     }
 
@@ -852,7 +915,7 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
     }
 
     @Override
-    public void notifySizeChanged(float width, float height, int orientation) {
+    public void notifySizeChanged(float width, float height, @Orientation int orientation) {
         mWidth = width;
         mHeight = height;
         mOrientation = orientation;
@@ -939,7 +1002,8 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
     }
 
     class PortraitViewport {
-        protected float mWidth, mHeight;
+        protected float mWidth;
+        protected float mHeight;
         PortraitViewport() {
             mWidth = StackLayoutBase.this.getWidth();
             mHeight = StackLayoutBase.this.getHeightMinusBrowserControls();
@@ -1132,7 +1196,7 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
      * @param delta The amount to scroll by.
      */
     private void scrollStacks(float delta) {
-        cancelAnimation(this, Property.STACK_SNAP);
+        cancelAnimation(STACK_SNAP);
         float fullDistance = getFullScrollDistance();
         mScrollIndexOffset += MathUtils.flipSignIf(delta / fullDistance,
                 !isUsingHorizontalLayout() && LocalizationUtils.isLayoutRtl());
@@ -1160,16 +1224,16 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
      * incognito to non-incognito, which leaves the up event in the incognito side.
      */
     private void finishScrollStacks() {
-        cancelAnimation(this, Property.STACK_SNAP);
+        cancelAnimation(STACK_SNAP);
         final int currentModelIndex = getTabStackIndex();
         float delta = Math.abs(currentModelIndex + mRenderedScrollOffset);
         float target = -currentModelIndex;
         if (delta != 0) {
             long duration = FLING_MIN_DURATION
                     + (long) Math.abs(delta * getFullScrollDistance() / mFlingSpeed);
-            addToAnimation(this, Property.STACK_SNAP, mRenderedScrollOffset, target, duration, 0);
+            addToAnimation(STACK_SNAP, mRenderedScrollOffset, target, duration, 0);
         } else {
-            setProperty(Property.STACK_SNAP, target);
+            setStackSnap(target);
             onAnimationFinished();
         }
     }
@@ -1358,6 +1422,7 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
         mIsHidingBecauseOfNewTabCreation = false;
 
         super.doneHiding();
+        RecordUserAction.record("MobileExitStackView");
 
         mInnerMarginPercent = 0.0f;
         mStackOffsetYPercent = 0.0f;
@@ -1488,30 +1553,6 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
     }
 
     /**
-     * Sets properties for animations.
-     * @param prop The property to update
-     * @param p New value of the property
-     */
-    @Override
-    public void setProperty(@Property int prop, float p) {
-        switch (prop) {
-            case Property.STACK_SNAP:
-                mRenderedScrollOffset = p;
-                mScrollIndexOffset = p;
-                break;
-            case Property.INNER_MARGIN_PERCENT:
-                mInnerMarginPercent = p;
-                break;
-            case Property.STACK_OFFSET_Y_PERCENT:
-                mStackOffsetYPercent = p;
-                break;
-        }
-    }
-
-    @Override
-    public void onPropertyAnimationFinished(@Property int prop) {}
-
-    /**
      * Called by the stacks whenever they start an animation.
      */
     public void onStackAnimationStarted() {
@@ -1544,34 +1585,46 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
         assert mSceneLayer != null;
 
         mSceneLayer.pushLayers(getContext(), viewport, contentViewport, this, layerTitleCache,
-                tabContentManager, resourceManager, fullscreenManager);
+                tabContentManager, resourceManager, fullscreenManager,
+                SceneLayer.INVALID_RESOURCE_ID, 0, 0);
     }
 
     /**
-     * Creates an {@link org.chromium.chrome.browser.compositor.layouts.ChromeAnimation
-     * .AnimatableAnimation} and adds it to the animation.
+     * Creates an {@link CompositorAnimator} and adds it to the animation.
      * Automatically sets the start value at the beginning of the animation.
      */
-    protected void addToAnimation(
-            Animatable object, int prop, float start, float end, long duration, long startTime) {
-        ChromeAnimation.Animation<Animatable> component = createAnimation(object, prop, start, end,
-                duration, startTime, false, CompositorAnimator.DECELERATE_INTERPOLATOR);
-        if (mLayoutAnimations == null || mLayoutAnimations.finished()) {
-            mLayoutAnimations = new ChromeAnimation<Animatable>();
-            mLayoutAnimations.start();
+    protected void addToAnimation(FloatProperty<StackLayoutBase> property, float start, float end,
+            long duration, long startTime) {
+        CompositorAnimator compositorAnimator = CompositorAnimator.ofFloatProperty(
+                getAnimationHandler(), this, property, start, end, duration);
+        compositorAnimator.setStartDelay(startTime);
+        compositorAnimator.start();
+
+        for (int i = mLayoutAnimations.size() - 1; i >= 0; i--) {
+            if (mLayoutAnimations.get(i).second == property
+                    && !mLayoutAnimations.get(i).first.isRunning()) {
+                mLayoutAnimations.set(i,
+                        new Pair<CompositorAnimator, FloatProperty>(compositorAnimator, property));
+
+                requestUpdate();
+                return;
+            }
         }
-        component.start();
-        mLayoutAnimations.add(component);
+
+        mLayoutAnimations.add(
+                new Pair<CompositorAnimator, FloatProperty>(compositorAnimator, property));
+
         requestUpdate();
     }
 
     @Override
     protected void forceAnimationToFinish() {
         super.forceAnimationToFinish();
-        if (mLayoutAnimations != null) {
-            mLayoutAnimations.updateAndFinish();
-            mLayoutAnimations = null;
+
+        for (int i = 0; i < mLayoutAnimations.size(); i++) {
+            mLayoutAnimations.get(i).first.end();
         }
+        mLayoutAnimations.clear();
     }
 
     /**
@@ -1579,13 +1632,20 @@ public abstract class StackLayoutBase extends Layout implements Animatable {
      * @param object The object being animated.
      * @param prop   The property to search for.
      */
-    protected void cancelAnimation(Animatable object, int prop) {
-        if (mLayoutAnimations != null) mLayoutAnimations.cancel(object, prop);
+    protected void cancelAnimation(FloatProperty<StackLayoutBase> property) {
+        for (int i = mLayoutAnimations.size() - 1; i >= 0; i--) {
+            if (mLayoutAnimations.get(i).second == property) {
+                mLayoutAnimations.get(i).first.cancel();
+            }
+        }
     }
 
     @Override
     @VisibleForTesting
     public boolean isLayoutAnimating() {
-        return mLayoutAnimations != null && !mLayoutAnimations.finished();
+        for (int i = 0; i < mLayoutAnimations.size(); i++) {
+            if (mLayoutAnimations.get(i).first.isRunning()) return true;
+        }
+        return false;
     }
 }

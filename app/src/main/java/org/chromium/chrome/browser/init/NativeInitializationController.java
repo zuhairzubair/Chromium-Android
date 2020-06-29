@@ -5,12 +5,12 @@
 package org.chromium.chrome.browser.init;
 
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
 
-import org.chromium.base.ContextUtils;
+import org.chromium.base.CommandLine;
+import org.chromium.base.Log;
 import org.chromium.base.ThreadUtils;
 import org.chromium.base.library_loader.LibraryLoader;
+import org.chromium.chrome.browser.ChromeSwitches;
 import org.chromium.chrome.browser.firstrun.FirstRunFlowSequencer;
 
 import java.util.ArrayList;
@@ -23,10 +23,9 @@ import java.util.List;
  *    the library has been loaded.
  */
 class NativeInitializationController {
-    private static final String TAG = "NativeInitializationController";
+    private static final String TAG = "NIController";
 
     private final ChromeActivityNativeDelegate mActivityDelegate;
-    private final Handler mHandler;
 
     private boolean mOnStartPending;
     private boolean mOnResumePending;
@@ -60,7 +59,6 @@ class NativeInitializationController {
      * @param activityDelegate The activity delegate for the owning activity.
      */
     public NativeInitializationController(ChromeActivityNativeDelegate activityDelegate) {
-        mHandler = new Handler(Looper.getMainLooper());
         mActivityDelegate = activityDelegate;
     }
 
@@ -73,9 +71,14 @@ class NativeInitializationController {
      */
     public void startBackgroundTasks(final boolean allocateChildConnection) {
         ThreadUtils.assertOnUiThread();
+        if (CommandLine.getInstance().hasSwitch(ChromeSwitches.DISABLE_NATIVE_INITIALIZATION)) {
+            Log.i(TAG, "Exit early and start Chrome without loading native library!");
+            return;
+        }
+
         assert mBackgroundTasksComplete == null;
         boolean fetchVariationsSeed = FirstRunFlowSequencer.checkIfFirstRunIsNecessary(
-                ContextUtils.getApplicationContext(), mActivityDelegate.getInitialIntent(), false);
+                mActivityDelegate.getInitialIntent(), false);
 
         mBackgroundTasksComplete = false;
         new AsyncInitTaskRunner() {
@@ -108,15 +111,8 @@ class NativeInitializationController {
             assert !mHasSignaledLibraryLoaded;
             mHasSignaledLibraryLoaded = true;
 
-            // Allow the UI thread to continue its initialization - so that this call back
-            // doesn't block priority work on the UI thread until it's idle.
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mActivityDelegate.isActivityDestroyed()) return;
-                    mActivityDelegate.onCreateWithNative();
-                }
-            });
+            if (mActivityDelegate.isActivityFinishingOrDestroyed()) return;
+            mActivityDelegate.onCreateWithNative();
         }
     }
 
@@ -146,7 +142,7 @@ class NativeInitializationController {
             onResume();
         }
 
-        LibraryLoader.getInstance().onNativeInitializationComplete();
+        LibraryLoader.getInstance().onBrowserNativeInitializationComplete();
     }
 
     /**

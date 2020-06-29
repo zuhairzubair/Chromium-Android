@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"सुरू ठेवा"</string>
+<string name="tos_notification_title">"Chrome च्या सेवा अटी ३१ मार्च रोजी बदलणार आहेत"</string>
+<string name="tos_notification_body_text">"कृपया नवीन अटींचे पुनरावलोकन करा"</string>
+<string name="tos_notification_ack_button_text">"समजले"</string>
+<string name="tos_notification_review_button_text">"पुनरावलोकन करा"</string>
+<string name="search_or_type_web_address">"वेब पत्ता शोधा किंवा टाइप करा"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"क्लिपबोर्डवरून सूचना काढून टाकायची आहे का?"</string>
+<string name="options_homepage_title">"होम"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"ही साइट गुप्त मोडच्या बाहेरील एखाद्या अ‍ॅपबरोबर ही माहिती शेअर करणार आहे."</string>
+<string name="external_app_leave_incognito_warning_title">"गुप्त मोड सोडायचा?"</string>
+<string name="external_app_leave_incognito_stay">"यावर रहा"</string>
+<string name="external_app_leave_incognito_leave">"सोडा"</string>
+<string name="external_app_restricted_access_error">"Chrome ला विनंती केलेल्या संसाधनांचा ॲक्सेस नाही."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"कोणतीही जवळपासची डिव्हाइस आढळली नाहीत."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"परवानगी द्या"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"अवरोधित करा"</string>
+<string name="blocked_ads_prompt_title">"जाहिराती ब्लॉक केल्या"</string>
+<string name="video_call_notification_text_2">"व्हिडिओ इनपुटमध्‍ये प्रवेश करत आहे"</string>
+<string name="audio_call_notification_text_2">"ऑडिओ इनपुटमध्‍ये प्रवेश करीत आहे"</string>
+<string name="video_audio_call_notification_text_2">"ऑडिओ आणि व्हिडिओ इनपुटमध्‍ये प्रवेश करत आहे"</string>
+<string name="video_call_incognito_notification_text_2">"साइट व्हिडिओ इनपुट ॲक्सेस करत आहे"</string>
+<string name="audio_call_incognito_notification_text_2">"साइट ऑडिओ इनपुट ॲक्सेस करत आहे"</string>
+<string name="video_audio_call_incognito_notification_text_2">"साइट ऑडिओ आणि व्हिडिओ इनपुट ॲक्सेस करत आहे"</string>
+</resources>

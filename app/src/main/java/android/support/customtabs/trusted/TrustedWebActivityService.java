@@ -349,31 +349,17 @@ public class TrustedWebActivityService extends Service {
     }
 
     /**
-     * Sets the package that this service will accept connections from. This should only be used for
-     * testing as the appropriate provider will be set when the client app launches a Trusted
-     * Web Activity.
-     * @param context A context to be used to access SharedPreferences.
-     * @param provider The package of the provider to accept connections from or null to clear.
-     */
-    public static final void setVerifiedProviderForTesting(Context context,
-            @Nullable String provider) {
-        setVerifiedProvider(context, provider);
-    }
-
-    /**
-     * Sets the package that this service will accept connections from.
+     * Sets (asynchronously) the package that this service will accept connections from.
      * @param context A context to be used to access SharedPreferences.
      * @param provider The package of the provider to accept connections from or null to clear.
      * @hide
      */
-    public static final void setVerifiedProvider(final Context context,
-            @Nullable String provider) {
+    public static final void setVerifiedProvider(Context context, @Nullable String provider) {
         final String providerEmptyChecked =
                 (provider == null || provider.isEmpty()) ? null : provider;
 
         // Perform on a background thread as accessing Preferences may cause disk access.
         new AsyncTask<Void, Void, Void>() {
-
             @Override
             protected Void doInBackground(Void... voids) {
                 SharedPreferences.Editor editor = getPreferences(context).edit();
@@ -381,8 +367,26 @@ public class TrustedWebActivityService extends Service {
                 editor.apply();
                 return null;
             }
-
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    /**
+     * See {@link #setVerifiedProvider}, the main difference being that this approach sets the
+     * provider synchronously, so may trigger a disk read.
+     * @hide
+     */
+    public static final void setVerifiedProviderSynchronouslyForTesting(Context context,
+            @Nullable String provider) {
+        String providerEmptyChecked = (provider == null || provider.isEmpty()) ? null : provider;
+
+        StrictMode.ThreadPolicy policy = StrictMode.allowThreadDiskReads();
+        try {
+            SharedPreferences.Editor editor = getPreferences(context).edit();
+            editor.putString(PREFS_VERIFIED_PROVIDER, providerEmptyChecked);
+            editor.apply();
+        } finally {
+            StrictMode.setThreadPolicy(policy);
+        }
     }
 
     private static String channelNameToId(String name) {

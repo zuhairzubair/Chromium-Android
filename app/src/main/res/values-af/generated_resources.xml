@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Gaan voort"</string>
+<string name="tos_notification_title">"Chrome se diensbepalings verander op 31 Maart"</string>
+<string name="tos_notification_body_text">"Lees asseblief die nuwe bepalings"</string>
+<string name="tos_notification_ack_button_text">"Het dit"</string>
+<string name="tos_notification_review_button_text">"Gaan na"</string>
+<string name="search_or_type_web_address">"Soek of tik webadres in"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Verwyder voorstel van knipbord af?"</string>
+<string name="options_homepage_title">"Tuisblad"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"Hierdie werf is op die punt om inligting met \'n program buite incognitomodus te deel."</string>
+<string name="external_app_leave_incognito_warning_title">"Verlaat incognitomodus?"</string>
+<string name="external_app_leave_incognito_stay">"Bly"</string>
+<string name="external_app_leave_incognito_leave">"Gaan uit"</string>
+<string name="external_app_restricted_access_error">"Chrome het nie toegang tot die hulpbron wat versoek is nie."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Geen nabygeleë toestelle gevind nie."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"Laat toe"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Blokkeer"</string>
+<string name="blocked_ads_prompt_title">"Advertensies is geblokkeer"</string>
+<string name="video_call_notification_text_2">"Gaan tans by video-invoer in"</string>
+<string name="audio_call_notification_text_2">"Gaan tans by oudio-invoer in"</string>
+<string name="video_audio_call_notification_text_2">"Gaan tans by oudio- en video-invoer in"</string>
+<string name="video_call_incognito_notification_text_2">"\'n Werf het tans toegang tot video-invoer"</string>
+<string name="audio_call_incognito_notification_text_2">"\'n Werf het tans toegang tot oudio-invoer"</string>
+<string name="video_audio_call_incognito_notification_text_2">"\'n Werf het tans toegang tot oudio- en video-invoer"</string>
+</resources>

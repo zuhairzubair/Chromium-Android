@@ -7,9 +7,12 @@ package org.chromium.chrome.browser.compositor.layouts;
 import android.content.Context;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import org.chromium.base.ObserverList;
-import org.chromium.base.VisibleForTesting;
 import org.chromium.base.metrics.RecordUserAction;
+import org.chromium.chrome.browser.accessibility_tab_switcher.OverviewListLayout;
 import org.chromium.chrome.browser.compositor.TitleCache;
 import org.chromium.chrome.browser.compositor.bottombar.OverlayPanel.StateChangeReason;
 import org.chromium.chrome.browser.compositor.layouts.components.LayoutTab;
@@ -23,16 +26,18 @@ import org.chromium.chrome.browser.compositor.overlays.SceneOverlay;
 import org.chromium.chrome.browser.compositor.overlays.strip.StripLayoutHelperManager;
 import org.chromium.chrome.browser.contextualsearch.ContextualSearchManagementDelegate;
 import org.chromium.chrome.browser.device.DeviceClassManager;
+import org.chromium.chrome.browser.flags.FeatureUtilities;
 import org.chromium.chrome.browser.fullscreen.FullscreenManager;
 import org.chromium.chrome.browser.tab.Tab;
+import org.chromium.chrome.browser.tab.TabLaunchType;
 import org.chromium.chrome.browser.tabmodel.TabCreatorManager;
-import org.chromium.chrome.browser.tabmodel.TabLaunchType;
 import org.chromium.chrome.browser.tabmodel.TabModelSelector;
 import org.chromium.chrome.browser.tabmodel.TabModelUtils;
+import org.chromium.chrome.browser.tasks.tab_management.TabManagementDelegate;
+import org.chromium.chrome.browser.tasks.tab_management.TabManagementModuleProvider;
 import org.chromium.chrome.browser.toolbar.ToolbarManager;
 import org.chromium.chrome.browser.util.AccessibilityUtil;
-import org.chromium.chrome.browser.util.FeatureUtilities;
-import org.chromium.chrome.browser.widget.OverviewListLayout;
+import org.chromium.chrome.features.start_surface.StartSurface;
 import org.chromium.ui.resources.dynamics.DynamicResourceLoader;
 
 import java.util.List;
@@ -41,7 +46,7 @@ import java.util.List;
  * A {@link Layout} controller for the more complicated Chrome browser.  This is currently a
  * superset of {@link LayoutManager}.
  */
-public class LayoutManagerChrome extends LayoutManager implements OverviewModeBehavior {
+public class LayoutManagerChrome extends LayoutManager implements OverviewModeController {
     // Layouts
     /** An {@link Layout} that should be used as the accessibility tab switcher. */
     protected OverviewListLayout mOverviewListLayout;
@@ -64,9 +69,12 @@ public class LayoutManagerChrome extends LayoutManager implements OverviewModeBe
 
     /**
      * Creates the {@link LayoutManagerChrome} instance.
-     * @param host              A {@link LayoutManagerHost} instance.
+     * @param host         A {@link LayoutManagerHost} instance.
+     * @param startSurface An interface to talk to the Grid Tab Switcher. If it's NULL, VTS
+     *                     should be used, otherwise GTS should be used.
      */
-    public LayoutManagerChrome(LayoutManagerHost host, boolean createOverviewLayout) {
+    public LayoutManagerChrome(LayoutManagerHost host, boolean createOverviewLayout,
+            @Nullable StartSurface startSurface) {
         super(host);
         Context context = host.getContext();
         LayoutRenderHost renderHost = host.getLayoutRenderHost();
@@ -74,13 +82,32 @@ public class LayoutManagerChrome extends LayoutManager implements OverviewModeBe
         mOverviewModeObservers = new ObserverList<OverviewModeObserver>();
 
         // Build Event Filter Handlers
-        mToolbarSwipeHandler = new ToolbarSwipeHandler();
+        mToolbarSwipeHandler = createToolbarSwipeHandler(/* supportSwipeDown = */ true);
 
         // Build Layouts
         mOverviewListLayout = new OverviewListLayout(context, this, renderHost);
         mToolbarSwipeLayout = new ToolbarSwipeLayout(context, this, renderHost);
         if (createOverviewLayout) {
-            mOverviewLayout = new StackLayout(context, this, renderHost);
+            if (startSurface != null) {
+                assert FeatureUtilities.isGridTabSwitcherEnabled();
+                TabManagementDelegate tabManagementDelegate =
+                        TabManagementModuleProvider.getDelegate();
+                assert tabManagementDelegate != null;
+                startSurface.setStateChangeObserver(new StartSurface.StateObserver() {
+                    @Override
+                    public void onStateChanged(@OverviewModeState int overviewModeState,
+                            boolean shouldShowTabSwitcherToolbar) {
+                        for (OverviewModeObserver observer : mOverviewModeObservers) {
+                            observer.onOverviewModeStateChanged(
+                                    overviewModeState, shouldShowTabSwitcherToolbar);
+                        }
+                    }
+                });
+                mOverviewLayout = tabManagementDelegate.createStartSurfaceLayout(
+                        context, this, renderHost, startSurface);
+            } else {
+                mOverviewLayout = new StackLayout(context, this, renderHost);
+            }
         }
     }
 
@@ -103,20 +130,27 @@ public class LayoutManagerChrome extends LayoutManager implements OverviewModeBe
     }
 
     @Override
+    public EdgeSwipeHandler createToolbarSwipeHandler(boolean supportSwipeDown) {
+        return new ToolbarSwipeHandler(supportSwipeDown);
+    }
+
+    @Override
     public void init(TabModelSelector selector, TabCreatorManager creator,
             TabContentManager content, ViewGroup androidContentContainer,
             ContextualSearchManagementDelegate contextualSearchDelegate,
             DynamicResourceLoader dynamicResourceLoader) {
+        super.init(selector, creator, content, androidContentContainer, contextualSearchDelegate,
+                dynamicResourceLoader);
+
         // TODO: TitleCache should be a part of the ResourceManager.
         mTitleCache = mHost.getTitleCache();
 
         // Initialize Layouts
         mToolbarSwipeLayout.setTabModelSelector(selector, content);
         mOverviewListLayout.setTabModelSelector(selector, content);
-        if (mOverviewLayout != null) mOverviewLayout.setTabModelSelector(selector, content);
-
-        super.init(selector, creator, content, androidContentContainer, contextualSearchDelegate,
-                dynamicResourceLoader);
+        if (mOverviewLayout != null) {
+            mOverviewLayout.setTabModelSelector(selector, content);
+        }
     }
 
     /**
@@ -316,6 +350,7 @@ public class LayoutManagerChrome extends LayoutManager implements OverviewModeBe
      * all of the {@link Tab}s opened by the user.
      * @param animate Whether or not to animate the transition to overview mode.
      */
+    @Override
     public void showOverview(boolean animate) {
         boolean useAccessibility = DeviceClassManager.enableAccessibilityLayout();
 
@@ -338,6 +373,7 @@ public class LayoutManagerChrome extends LayoutManager implements OverviewModeBe
      * Hides the current {@link Layout}, returning to the default {@link Layout}.
      * @param animate Whether or not to animate the transition to the default {@link Layout}.
      */
+    @Override
     public void hideOverview(boolean animate) {
         Layout activeLayout = getActiveLayout();
         if (activeLayout != null && !activeLayout.isHiding()) {
@@ -395,6 +431,12 @@ public class LayoutManagerChrome extends LayoutManager implements OverviewModeBe
          */
         private static final float SWIPE_RANGE_DEG = 25;
 
+        private final boolean mSupportSwipeDown;
+
+        public ToolbarSwipeHandler(boolean supportSwipeDown) {
+            mSupportSwipeDown = supportSwipeDown;
+        }
+
         @Override
         public void swipeStarted(@ScrollDirection int direction, float x, float y) {
             mScrollDirection = ScrollDirection.UNKNOWN;
@@ -413,12 +455,12 @@ public class LayoutManagerChrome extends LayoutManager implements OverviewModeBe
             mScrollDirection = computeScrollDirection(dx, dy);
             if (mScrollDirection == ScrollDirection.UNKNOWN) return;
 
-            if (mOverviewLayout != null && mScrollDirection == ScrollDirection.DOWN) {
+            if (mSupportSwipeDown && mOverviewLayout != null
+                    && mScrollDirection == ScrollDirection.DOWN) {
                 RecordUserAction.record("MobileToolbarSwipeOpenStackView");
-                startShowing(mOverviewLayout, true);
-            } else if (mToolbarSwipeLayout != null
-                    && (mScrollDirection == ScrollDirection.LEFT
-                               || mScrollDirection == ScrollDirection.RIGHT)) {
+                showOverview(true);
+            } else if (mScrollDirection == ScrollDirection.LEFT
+                    || mScrollDirection == ScrollDirection.RIGHT) {
                 startShowing(mToolbarSwipeLayout, true);
             }
 

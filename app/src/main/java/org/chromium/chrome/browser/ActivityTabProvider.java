@@ -4,10 +4,11 @@
 
 package org.chromium.chrome.browser;
 
-import android.support.annotation.CallSuper;
+import androidx.annotation.CallSuper;
 
 import org.chromium.base.ObserverList;
 import org.chromium.base.ObserverList.RewindableIterator;
+import org.chromium.base.supplier.Supplier;
 import org.chromium.chrome.browser.compositor.layouts.Layout;
 import org.chromium.chrome.browser.compositor.layouts.LayoutManager;
 import org.chromium.chrome.browser.compositor.layouts.SceneChangeObserver;
@@ -15,15 +16,15 @@ import org.chromium.chrome.browser.compositor.layouts.StaticLayout;
 import org.chromium.chrome.browser.compositor.layouts.phone.SimpleAnimationLayout;
 import org.chromium.chrome.browser.tab.EmptyTabObserver;
 import org.chromium.chrome.browser.tab.Tab;
+import org.chromium.chrome.browser.tab.TabSelectionType;
 import org.chromium.chrome.browser.tabmodel.TabModel;
 import org.chromium.chrome.browser.tabmodel.TabModelSelector;
 import org.chromium.chrome.browser.tabmodel.TabModelSelectorTabModelObserver;
-import org.chromium.chrome.browser.tabmodel.TabSelectionType;
 
 /**
  * A class that provides the current {@link Tab} for various states of the browser's activity.
  */
-public class ActivityTabProvider {
+public class ActivityTabProvider implements Supplier<Tab> {
     /** An interface to track the visible tab for the activity. */
     public interface ActivityTabObserver {
         /**
@@ -40,7 +41,7 @@ public class ActivityTabProvider {
     }
 
     /** An {@link ActivityTabObserver} that can be used to explicitly watch non-hint events. */
-    public static abstract class HintlessActivityTabObserver implements ActivityTabObserver {
+    public abstract static class HintlessActivityTabObserver implements ActivityTabObserver {
         @Override
         public final void onActivityTabChanged(Tab tab, boolean hint) {
             // Only pass the event through if it isn't a hint.
@@ -79,7 +80,7 @@ public class ActivityTabProvider {
                 onObservingDifferentTab(tab);
             };
             mTabProvider.addObserver(mActivityTabObserver);
-            updateObservedTab(mTabProvider.getActivityTab());
+            updateObservedTab(mTabProvider.get());
         }
 
         /**
@@ -174,7 +175,8 @@ public class ActivityTabProvider {
     /**
      * @return The activity's current tab.
      */
-    public Tab getActivityTab() {
+    @Override
+    public Tab get() {
         return mActivityTab;
     }
 

@@ -6,6 +6,7 @@
 -->
 <org.chromium.chrome.browser.firstrun.FirstRunView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -43,7 +44,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/fre_image_height"
                     tools:ignore="ContentDescription"
-                    android:src="@drawable/data_reduction_illustration" />
+                    app:srcCompat="@drawable/data_reduction_illustration" />
 
                 <LinearLayout
                     android:id="@+id/fre_content_wrapper"
@@ -55,14 +56,14 @@
                     android:layout_marginStart="@dimen/fre_content_margin"
                     android:orientation="vertical" >
 
-                    <TextView
+                    <org.chromium.ui.widget.TextViewWithClickableSpans
+                        android:id="@+id/data_reduction_promo_summary_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/fre_vertical_spacing"
                         android:gravity="start"
                         android:lineSpacingMultiplier="1.4"
-                        android:text="@string/data_reduction_promo_summary_lite_mode"
-                        android:textAppearance="@style/TextAppearance.BlackBodyDefault" />
+                        android:textAppearance="@style/TextAppearance.TextMedium.Secondary" />
 
                     <android.support.v7.widget.SwitchCompat
                         android:id="@+id/enable_data_saver_switch"
@@ -71,7 +72,7 @@
                         android:lineSpacingMultiplier="1.4"
                         android:showText="false"
                         android:text="@string/data_reduction_enabled_switch_lite_mode"
-                        style="@style/TextAppearance.BlackTitle2" />
+                        style="@style/TextAppearance.TextMediumThick.Primary" />
 
                 </LinearLayout>
             </LinearLayout>
@@ -82,8 +83,8 @@
     <org.chromium.ui.widget.ButtonCompat
         android:id="@+id/next_button"
         android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_marginBottom="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         android:layout_gravity="bottom|center_horizontal"
         android:paddingStart="@dimen/fre_button_padding"
         android:paddingEnd="@dimen/fre_button_padding"

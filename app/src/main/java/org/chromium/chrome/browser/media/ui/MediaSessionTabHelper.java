@@ -10,30 +10,35 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import org.chromium.base.Log;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import org.chromium.base.SysUtils;
-import org.chromium.base.VisibleForTesting;
 import org.chromium.chrome.R;
+import org.chromium.chrome.browser.document.ChromeIntentUtil;
 import org.chromium.chrome.browser.favicon.LargeIconBridge;
 import org.chromium.chrome.browser.metrics.MediaNotificationUma;
 import org.chromium.chrome.browser.metrics.MediaSessionUMA;
 import org.chromium.chrome.browser.tab.EmptyTabObserver;
 import org.chromium.chrome.browser.tab.Tab;
+import org.chromium.chrome.browser.tab.TabImpl;
 import org.chromium.chrome.browser.tab.TabObserver;
-import org.chromium.chrome.browser.tabmodel.TabSelectionType;
+import org.chromium.chrome.browser.tab.TabSelectionType;
 import org.chromium.components.url_formatter.UrlFormatter;
 import org.chromium.content_public.browser.MediaSession;
 import org.chromium.content_public.browser.MediaSessionObserver;
+import org.chromium.content_public.browser.NavigationHandle;
 import org.chromium.content_public.browser.WebContents;
 import org.chromium.media_session.mojom.MediaSessionAction;
+import org.chromium.net.GURLUtils;
+import org.chromium.services.media_session.MediaImage;
 import org.chromium.services.media_session.MediaMetadata;
+import org.chromium.services.media_session.MediaPosition;
 import org.chromium.ui.base.WindowAndroid;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -69,6 +74,7 @@ public class MediaSessionTabHelper implements MediaImageCallback {
     private MediaMetadata mCurrentMetadata;
     private MediaImageManager mMediaImageManager;
     private Set<Integer> mMediaSessionActions;
+    private @Nullable MediaPosition mMediaPosition;
     private Handler mHandler;
     // The delayed task to hide notification. Hiding notification can be immediate or delayed.
     // Delayed hiding will schedule this delayed task to |mHandler|. The task will be canceled when
@@ -129,6 +135,12 @@ public class MediaSessionTabHelper implements MediaImageCallback {
             if (mMediaSessionObserver != null) {
                 mMediaSessionObserver.getMediaSession().didReceiveAction(action);
             }
+        }
+
+        @Override
+        public void onMediaSessionSeekTo(long pos) {
+            if (mMediaSessionObserver == null) return;
+            mMediaSessionObserver.getMediaSession().seekTo(pos);
         }
     };
 
@@ -196,7 +208,7 @@ public class MediaSessionTabHelper implements MediaImageCallback {
                     return;
                 }
 
-                Intent contentIntent = Tab.createBringTabToFrontIntent(mTab.getId());
+                Intent contentIntent = ChromeIntentUtil.createBringTabToFrontIntent(mTab.getId());
                 if (contentIntent != null) {
                     contentIntent.putExtra(MediaNotificationUma.INTENT_EXTRA_NAME,
                             MediaNotificationUma.Source.MEDIA);
@@ -221,7 +233,8 @@ public class MediaSessionTabHelper implements MediaImageCallback {
                                 .setContentIntent(contentIntent)
                                 .setId(R.id.media_playback_notification)
                                 .setListener(mControlsListener)
-                                .setMediaSessionActions(mMediaSessionActions);
+                                .setMediaSessionActions(mMediaSessionActions)
+                                .setMediaPosition(mMediaPosition);
 
                 // Do not show notification icon till we get the favicon from the LargeIconBridge
                 // since we do not need to show default icon then change it to favicon. It is ok to
@@ -242,9 +255,6 @@ public class MediaSessionTabHelper implements MediaImageCallback {
             @Override
             public void mediaSessionMetadataChanged(MediaMetadata metadata) {
                 mPageMetadata = metadata;
-                mMediaImageManager.downloadImage(
-                        (mPageMetadata != null) ? mPageMetadata.getArtwork() : null,
-                        MediaSessionTabHelper.this);
                 updateNotificationMetadata();
             }
 
@@ -252,6 +262,18 @@ public class MediaSessionTabHelper implements MediaImageCallback {
             public void mediaSessionActionsChanged(Set<Integer> actions) {
                 mMediaSessionActions = actions;
                 updateNotificationActions();
+            }
+
+            @Override
+            public void mediaSessionArtworkChanged(List<MediaImage> images) {
+                mMediaImageManager.downloadImage(images, MediaSessionTabHelper.this);
+                updateNotificationMetadata();
+            }
+
+            @Override
+            public void mediaSessionPositionChanged(@Nullable MediaPosition position) {
+                mMediaPosition = position;
+                updateNotificationPosition();
             }
         };
     }
@@ -292,26 +314,16 @@ public class MediaSessionTabHelper implements MediaImageCallback {
         }
 
         @Override
-        public void onDidFinishNavigation(Tab tab, String url, boolean isInMainFrame,
-                boolean isErrorPage, boolean hasCommitted, boolean isSameDocument,
-                boolean isFragmentNavigation, Integer pageTransition, int errorCode,
-                int httpStatusCode) {
+        public void onDidFinishNavigation(Tab tab, NavigationHandle navigation) {
             assert tab == mTab;
 
-            if (!hasCommitted || !isInMainFrame || isSameDocument) return;
-
-            String origin = mTab.getUrl();
-            try {
-                URI uri = new URI(origin);
-                origin = UrlFormatter.formatUrlForSecurityDisplay(origin);
-            } catch (URISyntaxException | UnsatisfiedLinkError e) {
-                // UnstatisfiedLinkError can only happen in tests as the natives are not initialized
-                // yet.
-                Log.e(TAG, "Unable to parse the origin from the URL. "
-                                + "Using the full URL instead.");
+            if (!navigation.hasCommitted() || !navigation.isInMainFrame()
+                    || navigation.isSameDocument()) {
+                return;
             }
 
-            mOrigin = origin;
+            mOrigin = UrlFormatter.formatUrlForDisplayOmitSchemeOmitTrivialSubdomains(
+                    GURLUtils.getOrigin(mTab.getUrl()));
             mFavicon = null;
             mPageMediaImage = null;
             mPageMetadata = null;
@@ -503,6 +515,13 @@ public class MediaSessionTabHelper implements MediaImageCallback {
         showNotification();
     }
 
+    private void updateNotificationPosition() {
+        if (isNotificationHiddingOrHidden()) return;
+
+        mNotificationInfoBuilder.setMediaPosition(mMediaPosition);
+        showNotification();
+    }
+
     @Override
     public void onImageDownloaded(Bitmap image) {
         mPageMediaImage = MediaNotificationManager.downscaleIconToIdealSize(image);
@@ -542,7 +561,7 @@ public class MediaSessionTabHelper implements MediaImageCallback {
         String pageUrl = webContents.getLastCommittedUrl();
         int size = MediaNotificationManager.MINIMAL_MEDIA_IMAGE_SIZE_PX;
         if (mLargeIconBridge == null) {
-            mLargeIconBridge = new LargeIconBridge(mTab.getProfile());
+            mLargeIconBridge = new LargeIconBridge(((TabImpl) mTab).getProfile());
         }
         LargeIconBridge.LargeIconCallback callback = new LargeIconBridge.LargeIconCallback() {
             @Override

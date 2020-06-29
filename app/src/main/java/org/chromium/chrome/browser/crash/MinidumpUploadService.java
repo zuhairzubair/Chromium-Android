@@ -11,19 +11,20 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Build;
 import android.os.PersistableBundle;
-import android.support.annotation.StringDef;
+
+import androidx.annotation.StringDef;
+import androidx.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;
 import org.chromium.base.StreamUtil;
-import org.chromium.base.VisibleForTesting;
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.metrics.RecordHistogram;
-import org.chromium.chrome.browser.preferences.ChromePreferenceManager;
-import org.chromium.chrome.browser.preferences.privacy.PrivacyPreferencesManager;
+import org.chromium.chrome.browser.settings.privacy.PrivacyPreferencesManager;
 import org.chromium.components.background_task_scheduler.TaskIds;
 import org.chromium.components.minidump_uploader.CrashFileManager;
 import org.chromium.components.minidump_uploader.MinidumpUploadCallable;
+import org.chromium.components.minidump_uploader.MinidumpUploadCallable.MinidumpUploadStatus;
 import org.chromium.components.minidump_uploader.MinidumpUploadJobService;
 import org.chromium.components.minidump_uploader.util.CrashReportingPermissionManager;
 
@@ -31,6 +32,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -65,6 +68,7 @@ public class MinidumpUploadService extends IntentService {
     private static AtomicBoolean sDidBrowserCrashRecently = new AtomicBoolean();
 
     @StringDef({ProcessType.BROWSER, ProcessType.RENDERER, ProcessType.GPU, ProcessType.OTHER})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessType {
         String BROWSER = "Browser";
         String RENDERER = "Renderer";
@@ -115,7 +119,7 @@ public class MinidumpUploadService extends IntentService {
     /**
      * Stores the successes and failures from uploading crash to UMA,
      */
-    public static void storeBreakpadUploadStatsInUma(ChromePreferenceManager pref) {
+    public static void storeBreakpadUploadStatsInUma(CrashUploadCountStore pref) {
         sBrowserCrashMetricsInitialized.set(true);
         for (String type : TYPES) {
             for (int success = pref.getCrashSuccessUploadCount(type); success > 0; success--) {
@@ -129,8 +133,7 @@ public class MinidumpUploadService extends IntentService {
                 if (ProcessType.BROWSER.equals(type)) sDidBrowserCrashRecently.set(true);
             }
 
-            pref.setCrashSuccessUploadCount(type, 0);
-            pref.setCrashFailureUploadCount(type, 0);
+            pref.resetCrashUploadCounts(type);
         }
     }
 
@@ -196,13 +199,13 @@ public class MinidumpUploadService extends IntentService {
         // Try to upload minidump
         MinidumpUploadCallable minidumpUploadCallable =
                 createMinidumpUploadCallable(minidumpFile, logfile);
-        @MinidumpUploadCallable.MinidumpUploadStatus int uploadStatus =
-                minidumpUploadCallable.call();
+        @MinidumpUploadStatus
+        int uploadStatus = minidumpUploadCallable.call();
 
-        if (uploadStatus == MinidumpUploadCallable.UPLOAD_SUCCESS) {
+        if (uploadStatus == MinidumpUploadStatus.SUCCESS) {
             // Only update UMA stats if an intended and successful upload.
             incrementCrashSuccessUploadCount(minidumpFileName);
-        } else if (uploadStatus == MinidumpUploadCallable.UPLOAD_FAILURE) {
+        } else if (uploadStatus == MinidumpUploadStatus.FAILURE) {
             // Unable to upload minidump. Incrementing try number and restarting.
             ++tries;
             if (tries == MAX_TRIES_ALLOWED) {
@@ -281,7 +284,7 @@ public class MinidumpUploadService extends IntentService {
         if (ProcessType.BROWSER.equals(process_type)) {
             sDidBrowserCrashRecently.set(true);
         }
-        ChromePreferenceManager.getInstance().incrementCrashSuccessUploadCount(process_type);
+        CrashUploadCountStore.getInstance().incrementCrashSuccessUploadCount(process_type);
     }
 
     /**
@@ -297,7 +300,7 @@ public class MinidumpUploadService extends IntentService {
         if (ProcessType.BROWSER.equals(process_type)) {
             sDidBrowserCrashRecently.set(true);
         }
-        ChromePreferenceManager.getInstance().incrementCrashFailureUploadCount(process_type);
+        CrashUploadCountStore.getInstance().incrementCrashFailureUploadCount(process_type);
     }
 
     /**

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Nastavi"</string>
+<string name="tos_notification_title">"Chromeovi Uslovi korištenja usluge će se promijeniti 31. marta"</string>
+<string name="tos_notification_body_text">"Pročitajte nove Uslove"</string>
+<string name="tos_notification_ack_button_text">"Razumijem"</string>
+<string name="tos_notification_review_button_text">"Pregled"</string>
+<string name="search_or_type_web_address">"Pretražite ili unesite web adresu"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Ukloniti prijedlog iz međumemorije?"</string>
+<string name="options_homepage_title">"Početna stranica"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"Ova stranica će podijeliti informacije s aplikacijom izvan anonimnog načina rada."</string>
+<string name="external_app_leave_incognito_warning_title">"Izaći iz anonimnog načina rada?"</string>
+<string name="external_app_leave_incognito_stay">"Ostani"</string>
+<string name="external_app_leave_incognito_leave">"Napusti"</string>
+<string name="external_app_restricted_access_error">"Chrome nema pristup traženom resursu."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Nije pronađen nijedan uređaj u blizini."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"Dozvoli"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Blokiraj"</string>
+<string name="blocked_ads_prompt_title">"Oglasi su blokirani"</string>
+<string name="video_call_notification_text_2">"Pristupanje video ulazu"</string>
+<string name="audio_call_notification_text_2">"Pristupanje audioulazu"</string>
+<string name="video_audio_call_notification_text_2">"Pristupanje unosu zvuka i videozapisa"</string>
+<string name="video_call_incognito_notification_text_2">"Web lokacija pristupa video ulazu"</string>
+<string name="audio_call_incognito_notification_text_2">"Web lokacija pristupa audio ulazu"</string>
+<string name="video_audio_call_incognito_notification_text_2">"Web-lokacija pristupa audio i videoulazu"</string>
+</resources>

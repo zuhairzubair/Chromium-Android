@@ -5,14 +5,18 @@
 package org.chromium.chrome.browser.download.home;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import org.chromium.base.ApiCompatibilityUtils;
+import org.chromium.base.Callback;
+import org.chromium.base.DiscardableReferencePool;
 import org.chromium.base.ObserverList;
 import org.chromium.base.metrics.RecordUserAction;
+import org.chromium.base.supplier.ObservableSupplier;
 import org.chromium.chrome.browser.download.home.filter.Filters;
 import org.chromium.chrome.browser.download.home.filter.Filters.FilterType;
 import org.chromium.chrome.browser.download.home.list.DateOrderedListCoordinator;
@@ -20,13 +24,12 @@ import org.chromium.chrome.browser.download.home.list.DateOrderedListCoordinator
 import org.chromium.chrome.browser.download.home.list.ListItem;
 import org.chromium.chrome.browser.download.home.snackbars.DeleteUndoCoordinator;
 import org.chromium.chrome.browser.download.home.toolbar.ToolbarCoordinator;
-import org.chromium.chrome.browser.download.items.OfflineContentAggregatorFactory;
-import org.chromium.chrome.browser.preferences.PreferencesLauncher;
-import org.chromium.chrome.browser.preferences.download.DownloadPreferences;
-import org.chromium.chrome.browser.profiles.Profile;
-import org.chromium.chrome.browser.snackbar.SnackbarManager;
-import org.chromium.chrome.browser.widget.selection.SelectionDelegate;
+import org.chromium.chrome.browser.ui.messages.snackbar.SnackbarManager;
 import org.chromium.chrome.download.R;
+import org.chromium.components.browser_ui.widget.selectable_list.SelectionDelegate;
+import org.chromium.components.feature_engagement.Tracker;
+import org.chromium.components.offline_items_collection.OfflineContentProvider;
+import org.chromium.ui.modaldialog.ModalDialogManager;
 
 import java.io.Closeable;
 
@@ -44,23 +47,30 @@ class DownloadManagerCoordinatorImpl
     private final SelectionDelegate<ListItem> mSelectionDelegate;
 
     private final Activity mActivity;
+    private final Callback<Context> mSettingsLauncher;
 
     private ViewGroup mMainView;
 
     private boolean mMuteFilterChanges;
 
     /** Builds a {@link DownloadManagerCoordinatorImpl} instance. */
-    public DownloadManagerCoordinatorImpl(Profile profile, Activity activity,
-            DownloadManagerUiConfig config, SnackbarManager snackbarManager) {
+    public DownloadManagerCoordinatorImpl(Activity activity, DownloadManagerUiConfig config,
+            ObservableSupplier<Boolean> isPrefetchEnabledSupplier,
+            Callback<Context> settingsLauncher, SnackbarManager snackbarManager,
+            ModalDialogManager modalDialogManager, Tracker tracker, FaviconProvider faviconProvider,
+            OfflineContentProvider provider, LegacyDownloadProvider legacyProvider,
+            DiscardableReferencePool discardableReferencePool) {
         mActivity = activity;
+        mSettingsLauncher = settingsLauncher;
         mDeleteCoordinator = new DeleteUndoCoordinator(snackbarManager);
         mSelectionDelegate = new SelectionDelegate<ListItem>();
         mListCoordinator = new DateOrderedListCoordinator(mActivity, config,
-                OfflineContentAggregatorFactory.forProfile(profile),
-                mDeleteCoordinator::showSnackbar, mSelectionDelegate, this ::notifyFilterChanged,
-                createDateOrderedListObserver());
+                isPrefetchEnabledSupplier, provider, legacyProvider,
+                mDeleteCoordinator::showSnackbar, mSelectionDelegate, this::notifyFilterChanged,
+                createDateOrderedListObserver(), modalDialogManager, faviconProvider,
+                discardableReferencePool);
         mToolbarCoordinator = new ToolbarCoordinator(mActivity, this, mListCoordinator,
-                mSelectionDelegate, config.isSeparateActivity, profile);
+                mSelectionDelegate, config.isSeparateActivity, tracker);
 
         initializeView();
         RecordUserAction.record("Android.DownloadManager.Open");
@@ -132,11 +142,6 @@ class DownloadManagerCoordinatorImpl
     }
 
     @Override
-    public void showPrefetchSection() {
-        updateForUrl(Filters.toUrl(Filters.FilterType.PREFETCHED));
-    }
-
-    @Override
     public void addObserver(Observer observer) {
         mObservers.addObserver(observer);
     }
@@ -155,7 +160,7 @@ class DownloadManagerCoordinatorImpl
     @Override
     public void openSettings() {
         RecordUserAction.record("Android.DownloadManager.Settings");
-        PreferencesLauncher.launchSettingsPage(mActivity, DownloadPreferences.class);
+        mSettingsLauncher.onResult(mActivity);
     }
 
     private void notifyFilterChanged(@FilterType int filter) {

@@ -10,25 +10,28 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
-import android.support.customtabs.CustomTabsSessionToken;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+
+import androidx.annotation.IntDef;
+import androidx.browser.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.chrome.R;
+import org.chromium.chrome.browser.browserservices.BrowserServicesIntentDataProvider;
 import org.chromium.chrome.browser.dependency_injection.ActivityScope;
 import org.chromium.chrome.browser.prerender.ExternalPrerenderHandler;
 import org.chromium.chrome.browser.share.ShareHelper;
+import org.chromium.chrome.browser.ssl.SecurityStateModel;
 import org.chromium.chrome.browser.tab.EmptyTabObserver;
 import org.chromium.chrome.browser.tab.Tab;
-import org.chromium.chrome.browser.tab.Tab.TabHidingType;
+import org.chromium.chrome.browser.tab.TabHidingType;
 import org.chromium.chrome.browser.tab.TabObserver;
-import org.chromium.components.security_state.ConnectionSecurityLevel;
 import org.chromium.content_public.browser.LoadUrlParams;
+import org.chromium.content_public.browser.NavigationHandle;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -62,7 +65,7 @@ public class CustomTabObserver extends EmptyTabObserver {
 
     @Inject
     public CustomTabObserver(@Named(APP_CONTEXT) Context appContext,
-            CustomTabIntentDataProvider intentDataProvider, CustomTabsConnection connection) {
+            BrowserServicesIntentDataProvider intentDataProvider, CustomTabsConnection connection) {
         mOpenedByChrome = intentDataProvider.isOpenedByChrome();
         mCustomTabsConnection = mOpenedByChrome ? null : connection;
         mSession = intentDataProvider.getSession();
@@ -146,16 +149,14 @@ public class CustomTabObserver extends EmptyTabObserver {
                 // failed/aborted page loads.
                 RecordHistogram.recordCustomTimesHistogram(
                         histogramPrefix + ".IntentToFirstNavigationStartTime.ZoomedOut",
-                        timeToPageLoadStartedMs, 50, TimeUnit.MINUTES.toMillis(10),
-                        TimeUnit.MILLISECONDS, 50);
+                        timeToPageLoadStartedMs, 50, DateUtils.MINUTE_IN_MILLIS * 10, 50);
                 RecordHistogram.recordCustomTimesHistogram(
                         histogramPrefix + ".IntentToFirstNavigationStartTime.ZoomedIn",
-                        timeToPageLoadStartedMs, 200, 1000, TimeUnit.MILLISECONDS, 100);
+                        timeToPageLoadStartedMs, 200, DateUtils.SECOND_IN_MILLIS, 100);
             }
             // Same bounds and bucket count as PLT histograms.
             RecordHistogram.recordCustomTimesHistogram(histogramPrefix + ".IntentToPageLoadedTime",
-                    timeToPageLoadFinishedMs, 10, TimeUnit.MINUTES.toMillis(10),
-                    TimeUnit.MILLISECONDS, 100);
+                    timeToPageLoadFinishedMs, 10, DateUtils.MINUTE_IN_MILLIS * 10, 100);
 
             // Not all page loads go through a navigation commit (prerender for instance).
             if (mPageLoadStartedTimestamp != 0) {
@@ -164,13 +165,12 @@ public class CustomTabObserver extends EmptyTabObserver {
                 // the median and ZoomedOut gives a good overview.
                 RecordHistogram.recordCustomTimesHistogram(
                         "CustomTabs.IntentToFirstCommitNavigationTime3.ZoomedIn",
-                        timeToFirstCommitMs, 200, 1000, TimeUnit.MILLISECONDS, 100);
+                        timeToFirstCommitMs, 200, DateUtils.SECOND_IN_MILLIS, 100);
                 // For ZoomedOut very rarely is it under 50ms and this range matches
                 // CustomTabs.IntentToFirstCommitNavigationTime2.ZoomedOut.
                 RecordHistogram.recordCustomTimesHistogram(
                         "CustomTabs.IntentToFirstCommitNavigationTime3.ZoomedOut",
-                        timeToFirstCommitMs, 50, TimeUnit.MINUTES.toMillis(10),
-                        TimeUnit.MILLISECONDS, 50);
+                        timeToFirstCommitMs, 50, DateUtils.MINUTE_IN_MILLIS * 10, 50);
             }
         }
         resetPageLoadTracking();
@@ -179,7 +179,7 @@ public class CustomTabObserver extends EmptyTabObserver {
 
     @Override
     public void onDidAttachInterstitialPage(Tab tab) {
-        if (tab.getSecurityLevel() != ConnectionSecurityLevel.DANGEROUS) return;
+        if (SecurityStateModel.isContentDangerous(tab.getWebContents())) return;
         resetPageLoadTracking();
     }
 
@@ -189,13 +189,11 @@ public class CustomTabObserver extends EmptyTabObserver {
     }
 
     @Override
-    public void onDidFinishNavigation(Tab tab, String url, boolean isInMainFrame,
-            boolean isErrorPage, boolean hasCommitted, boolean isSameDocument,
-            boolean isFragmentNavigation, Integer pageTransition, int errorCode,
-            int httpStatusCode) {
+    public void onDidFinishNavigation(Tab tab, NavigationHandle navigation) {
         boolean firstNavigation = mFirstCommitTimestamp == 0;
-        boolean isFirstMainFrameCommit = firstNavigation && hasCommitted && !isErrorPage
-                && isInMainFrame && !isSameDocument && !isFragmentNavigation;
+        boolean isFirstMainFrameCommit = firstNavigation && navigation.hasCommitted()
+                && !navigation.isErrorPage() && navigation.isInMainFrame()
+                && !navigation.isSameDocument() && !navigation.isFragmentNavigation();
         if (isFirstMainFrameCommit) mFirstCommitTimestamp = SystemClock.elapsedRealtime();
     }
 

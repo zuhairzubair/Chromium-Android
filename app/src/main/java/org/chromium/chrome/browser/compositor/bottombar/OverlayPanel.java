@@ -8,13 +8,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.RectF;
 import android.os.Handler;
-import android.support.annotation.IntDef;
 import android.view.ViewGroup;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 import org.chromium.base.ActivityState;
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.ApplicationStatus.ActivityStateListener;
-import org.chromium.base.VisibleForTesting;
 import org.chromium.chrome.browser.ChromeActivity;
 import org.chromium.chrome.browser.compositor.LayerTitleCache;
 import org.chromium.chrome.browser.compositor.bottombar.OverlayPanelManager.PanelPriority;
@@ -27,8 +28,9 @@ import org.chromium.chrome.browser.compositor.layouts.eventfilter.OverlayPanelEv
 import org.chromium.chrome.browser.compositor.layouts.eventfilter.ScrollDirection;
 import org.chromium.chrome.browser.compositor.overlays.SceneOverlay;
 import org.chromium.chrome.browser.compositor.scene_layer.SceneOverlayLayer;
+import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.multiwindow.MultiWindowUtils;
-import org.chromium.chrome.browser.tab.Tab;
+import org.chromium.chrome.browser.tab.TabBrowserControlsConstraintsHelper;
 import org.chromium.content_public.browser.SelectionPopupController;
 import org.chromium.content_public.browser.WebContents;
 import org.chromium.content_public.common.BrowserControlsState;
@@ -45,20 +47,23 @@ import java.util.List;
 public class OverlayPanel extends OverlayPanelAnimation implements ActivityStateListener,
         EdgeSwipeHandler, GestureHandler, OverlayPanelContentFactory, SceneOverlay {
 
-    /** The extra dp added around the close button touch target. */
-    private static final int CLOSE_BUTTON_TOUCH_SLOP_DP = 5;
-
     /** The delay after which the hide progress will be hidden. */
     private static final long HIDE_PROGRESS_BAR_DELAY_MS = 1000 / 60 * 4;
 
     /** State of the Overlay Panel. */
-    public static enum PanelState {
+    @IntDef({PanelState.UNDEFINED, PanelState.CLOSED, PanelState.PEEKED, PanelState.EXPANDED,
+            PanelState.MAXIMIZED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PanelState {
+        // Values can't have gaps and should be numerated from 0.
+        // Values CLOSED - MAXIMIZED are sorted and show next states.
         // TODO(pedrosimonetti): consider removing the UNDEFINED state
-        UNDEFINED,
-        CLOSED,
-        PEEKED,
-        EXPANDED,
-        MAXIMIZED
+        int UNDEFINED = 0;
+        int CLOSED = 1;
+        int PEEKED = 2;
+        int EXPANDED = 3;
+        int MAXIMIZED = 4;
+        int NUM_ENTRIES = 5;
     }
 
     /**
@@ -72,7 +77,8 @@ public class OverlayPanel extends OverlayPanelAnimation implements ActivityState
             StateChangeReason.TAB_PROMOTION, StateChangeReason.CLICK, StateChangeReason.SWIPE,
             StateChangeReason.FLING, StateChangeReason.OPTIN, StateChangeReason.OPTOUT,
             StateChangeReason.CLOSE_BUTTON, StateChangeReason.PANEL_SUPPRESS,
-            StateChangeReason.PANEL_UNSUPPRESS, StateChangeReason.TAP_SUPPRESS})
+            StateChangeReason.PANEL_UNSUPPRESS, StateChangeReason.TAP_SUPPRESS,
+            StateChangeReason.NAVIGATION})
     @Retention(RetentionPolicy.SOURCE)
     public @interface StateChangeReason {
         int UNKNOWN = 0;
@@ -96,8 +102,9 @@ public class OverlayPanel extends OverlayPanelAnimation implements ActivityState
         int PANEL_SUPPRESS = 18;
         int PANEL_UNSUPPRESS = 19;
         int TAP_SUPPRESS = 20;
+        int NAVIGATION = 21;
         // Always update MAX_VALUE to match the last StateChangeReason in the list.
-        int MAX_VALUE = 20;
+        int MAX_VALUE = 21;
     }
 
     /** The activity this panel is in. */
@@ -147,7 +154,6 @@ public class OverlayPanel extends OverlayPanelAnimation implements ActivityState
     /**
      * @param context The current Android {@link Context}.
      * @param updateHost The {@link LayoutUpdateHost} used to request updates in the Layout.
-     * @param eventHost The {@link EventFilterHost} used to propagate events.
      * @param panelManager The {@link OverlayPanelManager} responsible for showing panels.
      */
     public OverlayPanel(
@@ -359,6 +365,12 @@ public class OverlayPanel extends OverlayPanelAnimation implements ActivityState
         return mPanelShown;
     }
 
+    /** @return Whether we're using the new Overlay layout feature. */
+    public static boolean isNewLayout() {
+        return ChromeFeatureList.isInitialized()
+                && ChromeFeatureList.isEnabled(ChromeFeatureList.OVERLAY_NEW_LAYOUT);
+    }
+
     // ============================================================================================
     // ActivityStateListener
     // ============================================================================================
@@ -428,7 +440,7 @@ public class OverlayPanel extends OverlayPanelAnimation implements ActivityState
         }
 
         @Override
-        public void onProgressBarUpdated(int progress) {
+        public void onProgressBarUpdated(float progress) {
             setProgressBarCompletion(progress);
             requestUpdate();
         }
@@ -494,17 +506,14 @@ public class OverlayPanel extends OverlayPanelAnimation implements ActivityState
     /**
      * Updates the browser controls state for the base tab.  As these values are set at the renderer
      * level, there is potential for this impacting other tabs that might share the same
-     * process. See {@link Tab#updateBrowserControlsState(int current, boolean animate)}
+     * process. See {@link BrowserControlsState.update(Tab, tab, int current, boolean animate)}
      * @param current The desired current state for the controls.  Pass
      *                {@link BrowserControlsState#BOTH} to preserve the current position.
      * @param animate Whether the controls should animate to the specified ending condition or
      *                should jump immediately.
      */
     public void updateBrowserControlsState(int current, boolean animate) {
-        Tab currentTab = mActivity.getActivityTab();
-        if (currentTab != null) {
-            currentTab.updateBrowserControlsState(current, animate);
-        }
+        TabBrowserControlsConstraintsHelper.update(mActivity.getActivityTab(), current, animate);
     }
 
     /**
@@ -639,10 +648,20 @@ public class OverlayPanel extends OverlayPanelAnimation implements ActivityState
      */
     protected boolean isCoordinateInsideCloseButton(float x) {
         if (LocalizationUtils.isLayoutRtl()) {
-            return x <= (getCloseIconX() + getCloseIconDimension() + CLOSE_BUTTON_TOUCH_SLOP_DP);
+            return x <= (getCloseIconX() + getCloseIconDimension() + mButtonPaddingDps);
         } else {
-            return x >= (getCloseIconX() - CLOSE_BUTTON_TOUCH_SLOP_DP);
+            return x >= (getCloseIconX() - mButtonPaddingDps);
         }
+    }
+
+    /**
+     * @param x The x coordinate in dp.
+     * @return Whether the given |x| coordinate is inside the open-in-new-tab button.
+     */
+    protected boolean isCoordinateInsideOpenTabButton(float x) {
+        // Calculation is the same for RTL: within the button plus padding.
+        return getOpenTabIconX() - mButtonPaddingDps <= x
+                && x <= getOpenTabIconX() + getOpenTabIconDimension() + mButtonPaddingDps;
     }
 
     /**

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Davom etish"</string>
+<string name="tos_notification_title">"Chrome xizmat shartlari 31-mart kuni yangilanadi."</string>
+<string name="tos_notification_body_text">"Yangi shartlar bilan tanishib chiqing"</string>
+<string name="tos_notification_ack_button_text">"Tushunarli"</string>
+<string name="tos_notification_review_button_text">"Tekshirish"</string>
+<string name="search_or_type_web_address">"Qidiring yoki sayt manzilini kiriting"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Klipbord taklifi olib tashlansinmi?"</string>
+<string name="options_homepage_title">"Bosh sahifa"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"Bu sayt inkognito oynasidan tashqaridagi ilova bilan axborot ulashmoqchi."</string>
+<string name="external_app_leave_incognito_warning_title">"Inkognito rejimi tark etilsinmi?"</string>
+<string name="external_app_leave_incognito_stay">"Qolaman"</string>
+<string name="external_app_leave_incognito_leave">"Tark etish"</string>
+<string name="external_app_restricted_access_error">"So‘ralgan manbadan foydalanish uchun Chrome brauzeriga ruxsat berilmagan."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Yaqin-atrofda hech qanday qurilma topilmadi."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"Ruxsat berish"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Taqiqlash"</string>
+<string name="blocked_ads_prompt_title">"Reklamalar bloklandi"</string>
+<string name="video_call_notification_text_2">"Video-kirish qurilmasi faollashtirildi"</string>
+<string name="audio_call_notification_text_2">"Audio-kirish qurilmasi faollashtirildi"</string>
+<string name="video_audio_call_notification_text_2">"Audio va video-kirish qurilmalari faollashtirildi"</string>
+<string name="video_call_incognito_notification_text_2">"Sayt video translatsiyadan foydalanmoqda"</string>
+<string name="audio_call_incognito_notification_text_2">"Sayt audio translatsiyasidan foydalanmoqda"</string>
+<string name="video_audio_call_incognito_notification_text_2">"Sayt audio va video translatsiyasidan foydalanmoqda"</string>
+</resources>

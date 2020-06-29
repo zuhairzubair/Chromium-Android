@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Цааш"</string>
+<string name="tos_notification_title">"Chrome-н Үйлчилгээний нөхцөлийг гуравдугаар сарын 31-ний өдөр өөрчлөх болно."</string>
+<string name="tos_notification_body_text">"Шинэ нөхцөлийг шалгаж үзнэ үү"</string>
+<string name="tos_notification_ack_button_text">"Ойлголоо"</string>
+<string name="tos_notification_review_button_text">"Шалгах"</string>
+<string name="search_or_type_web_address">"Хайх эсвэл вэб хаяг бичих"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Түр санах ойгоос зөвлөмжийг устгах уу?"</string>
+<string name="options_homepage_title">"Нүүр хуудас"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"Энэ сайт нууцлалын горимоос гадуурх апп-тай мэдээлэл хуваалцах гэж байна."</string>
+<string name="external_app_leave_incognito_warning_title">"Нууцлалын горимоос гарах уу?"</string>
+<string name="external_app_leave_incognito_stay">"Үлдэх"</string>
+<string name="external_app_leave_incognito_leave">"Үлдээх"</string>
+<string name="external_app_restricted_access_error">"Chrome хүсэлт тавьсан нөөцөд хандах эрхгүй."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Ойролцоох төхөөрөмж олдсонгүй."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"Зөвшөөрөх"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Блоклох"</string>
+<string name="blocked_ads_prompt_title">"Зарыг блоклосон"</string>
+<string name="video_call_notification_text_2">"Видео оролт руу нэвтрэх"</string>
+<string name="audio_call_notification_text_2">"Дууны оролтод нэвтэрч байна"</string>
+<string name="video_audio_call_notification_text_2">"Аудио болон видео оролт руу нэвтрэх"</string>
+<string name="video_call_incognito_notification_text_2">"Сайт видео оролтод хандаж байна"</string>
+<string name="audio_call_incognito_notification_text_2">"Сайт аудио оролтод хандаж байна"</string>
+<string name="video_audio_call_incognito_notification_text_2">"Сайт аудио болон видео оролтод хандаж байна"</string>
+</resources>

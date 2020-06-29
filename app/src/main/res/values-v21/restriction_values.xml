@@ -2,6 +2,26 @@
 <!--DO NOT MODIFY THIS FILE DIRECTLY!
 IT IS GENERATED FROM policy_templates.json.-->
 <resources>
+  <string name="AllowPopupsDuringPageUnloadTitle">Allows a page to show popups during its unloading</string>
+  <string name="AllowPopupsDuringPageUnloadDesc">This policy allows an admin to specify that a page may show popups during its unloading.
+
+When the policy is set to enabled, pages are allowed to show popups while they are being unloaded.
+
+When the policy is set to disabled or not set, pages are not allowed to show popups while they are being unloaded, as per the spec (https://html.spec.whatwg.org/#apis-for-creating-and-navigating-browsing-contexts-by-name).
+
+This policy will be removed in Chrome 88.
+
+See https://www.chromestatus.com/feature/5989473649164288 .</string>
+  <string name="AllowSyncXHRInPageDismissalTitle">Allows a page to perform synchronous XHR requests during page dismissal.</string>
+  <string name="AllowSyncXHRInPageDismissalDesc">This policy allows an admin to specify that a page may send synchronous XHR requests during page dismissal.
+
+When the policy is set to enabled, pages are allowed to send synchronous XHR requests during page dismissal.
+
+When the policy is set to disabled or not set, pages are not allowed to send synchronous XHR requests during page dismissal.
+
+This policy will be removed in Chrome 88.
+
+See https://www.chromestatus.com/feature/4664843055398912 .</string>
   <string name="AllowedDomainsForAppsTitle">Define domains allowed to access G Suite</string>
   <string name="AllowedDomainsForAppsDesc">Enables Chromium\'s restricted log in feature in G Suite and prevents users from changing this setting.
 
@@ -73,7 +93,7 @@ If the policy is set to \\&quot;Disable browser sign-in\\&quot; then the user ca
 
 If the policy is set to \\&quot;Enable browser sign-in,\\&quot; then the user is allowed to sign in to the browser and is automatically signed in to the browser when signed in to Google web services like Gmail. Being signed in to the browser means the user\'s account information will be kept by the browser. However, it does not mean that Chrome sync will be turned on per default; the user must separately opt-in to use this feature. Enabling this policy will prevent the user from turning off the setting that allows browser sign-in. To control the availability of Chrome sync, use the \\&quot;SyncDisabled\\&quot; policy.
 
-If the policy is set to \\&quot;Force browser sign-in\\&quot; the user is presented with an account selection dialog and has to choose and sign in to an account to use the browser. This ensures that for managed accounts the policies associated with the account are applied and enforced. By default this turns on Chrome sync for the account, except for the case when sync was disabled by the domain admin or via the \\&quot;SyncDisabled\\&quot; policy. The default value of BrowserGuestModeEnabled will be set to false. Note that existing unsigned profiles will be locked and inaccessible after enabling this policy. For more information, see help center article: https://support.google.com/chrome/a/answer/7572556.
+If the policy is set to \\&quot;Force browser sign-in\\&quot; the user is presented with an account selection dialog and has to choose and sign in to an account to use the browser. This ensures that for managed accounts the policies associated with the account are applied and enforced. By default this turns on Chrome sync for the account, except for the case when sync was disabled by the domain admin or via the \\&quot;SyncDisabled\\&quot; policy. The default value of BrowserGuestModeEnabled will be set to false. Note that existing unsigned profiles will be locked and inaccessible after enabling this policy. For more information, see help center article: https://support.google.com/chrome/a/answer/7572556. This option does not support Linux and will fallback to \\&quot;Enable browser sign-in\\&quot; if used.
 
 If this policy is not set then the user can decide if they want to enable the browser sign in option and use it as they see fit.</string>
   <string-array name="BrowserSigninEntries">
@@ -117,19 +137,14 @@ This policy allows certificates for the hostnames in the specified URLs to not b
 A URL pattern is formatted according to https://www.chromium.org/administrators/url-blacklist-filter-format. However, because certificates are valid for a given hostname independent of the scheme, port, or path, only the hostname portion of the URL is considered. Wildcard hosts are not supported.
 
 If this policy is not set, any certificate that is required to be disclosed via Certificate Transparency will be treated as untrusted if it is not disclosed according to the Certificate Transparency policy.</string>
-  <string name="ContextualSearchEnabledTitle">Enable Tap to Search</string>
-  <string name="ContextualSearchEnabledDesc">Enables the availability of Tap to Search in Chromium\'s content view.
+  <string name="ContextualSearchEnabledTitle">Enable Touch to Search</string>
+  <string name="ContextualSearchEnabledDesc">Enables the availability of Touch to Search in Chromium\'s content view.
 
-If you enable this setting, Tap to Search will be available to the user and they can choose to turn the feature on or off.
+If you enable this setting, Touch to Search will be available to the user and they can choose to turn the feature on or off.
 
-If you disable this setting, Tap to Search will be disabled completely.
+If you disable this setting, Touch to Search will be disabled completely.
 
 If this policy is left not set, it is equivalent to being enabled, see description above.</string>
-  <string name="ContextualSuggestionsEnabledTitle">Enable contextual suggestions of related web pages</string>
-  <string name="ContextualSuggestionsEnabledDesc">If this is set to true or unset, Chromium will suggest pages related to the current page.
-These suggestions are fetched remotely from Google servers.
-
-If this setting is set to false, suggestions will not be fetched or displayed.</string>
   <string name="CookiesAllowedForUrlsTitle">Allow cookies on these sites</string>
   <string name="CookiesAllowedForUrlsDesc">Allows you to set a list of url patterns that specify sites which are allowed to set cookies.
 
@@ -333,6 +348,8 @@ If you disable this setting or leave it not set, the canonical name of the serve
   <string name="DisableSafeBrowsingProceedAnywayTitle">Disable proceeding from the Safe Browsing warning page</string>
   <string name="DisableSafeBrowsingProceedAnywayDesc">The Safe Browsing service shows a warning page when users navigate to sites that are flagged as potentially malicious. Enabling this setting prevents users from proceeding anyway from the warning page to the malicious site.
 
+This policy only prevents users from proceeding on Safe Browsing warnings (e.g. malware and phishing) not for SSL certificate related issues like invalid or expired certificates.
+
 If this setting is disabled or not configured then users can choose to proceed to the flagged site after being shown the warning.
 
 See https://developers.google.com/safe-browsing for more info on Safe Browsing.</string>
@@ -359,14 +376,6 @@ While the policy itself is supported on the above platforms, the feature it is e
   <string name="EnableMediaRouterDesc">If this policy is set to true or is not set, Google Cast will be enabled, and users will be able to launch it from the app menu, page context menus, media controls on Cast-enabled websites, and (if shown) the Cast toolbar icon.
 
 If this policy set to false, Google Cast will be disabled.</string>
-  <string name="EnableSymantecLegacyInfrastructureTitle">Whether to enable trust in Symantec Corporation\'s Legacy PKI Infrastructure</string>
-  <string name="EnableSymantecLegacyInfrastructureDesc">When this setting is enabled, Chromium allows certificates issued by Symantec Corporation\'s Legacy PKI operations to be trusted if they otherwise successfully validate and chain to a recognized CA certificate.
-
-Note that this policy depends on the operating system still recognizing certificates from Symantec\'s legacy infrastructure. If an OS update changes the OS handling of such certificates, this policy no longer has effect.  Further, this policy is intended as a temporary workaround to give enterprises more time to transition away from legacy Symantec certificates.  This policy will be removed on or around January 1st 2019.
-
-If this policy is not set, or it is set to false, then Chromium follows the publicly announced deprecation schedule.
-
-See https://g.co/chrome/symantecpkicerts for more details on this deprecation.</string>
   <string name="EnterpriseHardwarePlatformAPIEnabledTitle">Enables managed extensions to use the Enterprise Hardware Platform API</string>
   <string name="EnterpriseHardwarePlatformAPIEnabledDesc">When this policy is set to enabled, extensions installed by enterprise policy are allowed to use the Enterprise Hardware Platform API.
 When this policy is set to disabled or not set, no extensions are allowed to use the Enterprise Hardware Platform API.
@@ -397,6 +406,22 @@ If this setting is set to Off or no value is set, Restricted Mode on YouTube is 
     <item>1</item>
     <item>2</item>
   </string-array>
+  <string name="HSTSPolicyBypassListTitle">List of names that will bypass the HSTS policy check</string>
+  <string name="HSTSPolicyBypassListDesc">Hostnames specified in this list will be exempt from the HSTS policy check that could potentially upgrade requests from http to https. Only single-label hostnames are allowed in this policy. Hostnames must be canonicalized: any IDNs must be converted to their A-label format, and all ASCII letters must be lowercase. This policy only applies to the specific hostnames specified; it does not apply to subdomains of the names specified.</string>
+  <string name="HomepageLocationTitle">Configure the home page URL</string>
+  <string name="HomepageLocationDesc">Configures the default home page URL in Chromium and prevents users from changing it.
+
+The home page is the page opened by the Home button. On desktop, the pages that open on startup are controlled by the RestoreOnStartup policies.
+
+The home page type can either be set to a URL you specify here or set to the New Tab Page. If you select the New Tab Page, then this policy does not take effect.
+
+If you enable this setting, users cannot change their home page URL in Chromium, but they can still choose the New Tab Page as their home page.
+
+Leaving this policy not set will allow the user to choose their home page on their own if HomepageIsNewTabPage is not set too.
+
+The URL must have a standard scheme, e.g. \\&quot;http://example.com\\&quot; or \\&quot;https://example.com\\&quot;.
+
+This policy is available only on Windows instances that are joined to a Microsoft® Active Directory® domain. or Windows 10 Pro or Enterprise instances that enrolled for device management.</string>
   <string name="IncognitoModeAvailabilityTitle">Incognito mode availability</string>
   <string name="IncognitoModeAvailabilityDesc">Specifies whether the user may open pages in Incognito mode in Chromium.
 
@@ -404,16 +429,14 @@ If \'Enabled\' is selected or the policy is left unset, pages may be opened in I
 
 If \'Disabled\' is selected, pages may not be opened in Incognito mode.
 
-If \'Forced\' is selected, pages may be opened ONLY in Incognito mode.</string>
+If \'Forced\' is selected, pages may be opened ONLY in Incognito mode. Note that \'Forced\' does not work for Android-on-Chrome</string>
   <string-array name="IncognitoModeAvailabilityEntries">
     <item>Incognito mode available</item>
     <item>Incognito mode disabled</item>
-    <item>Incognito mode forced</item>
   </string-array>
   <string-array name="IncognitoModeAvailabilityValues">
     <item>0</item>
     <item>1</item>
-    <item>2</item>
   </string-array>
   <string name="IsolateOriginsAndroidTitle">Enable Site Isolation for specified origins on Android devices</string>
   <string name="IsolateOriginsAndroidDesc">
@@ -437,6 +460,24 @@ If this policy is left not set the global default value will be used for all sit
   <string name="JavaScriptBlockedForUrlsDesc">Allows you to set a list of url patterns that specify sites which are not allowed to run JavaScript.
 
 If this policy is left not set the global default value will be used for all sites either from the \'DefaultJavaScriptSetting\' policy if it is set, or the user\'s personal configuration otherwise.</string>
+  <string name="LegacySameSiteCookieBehaviorEnabledTitle">Default legacy SameSite cookie behavior setting</string>
+  <string name="LegacySameSiteCookieBehaviorEnabledDesc">Allows you to revert all cookies to legacy SameSite behavior. Reverting to legacy behavior causes cookies that don\'t specify a SameSite attribute to be treated as if they were \\&quot;SameSite=None\\&quot;, and removes the requirement for \\&quot;SameSite=None\\&quot; cookies to carry the \\&quot;Secure\\&quot; attribute. See https://www.chromium.org/administrators/policy-list-3/cookie-legacy-samesite-policies for full description.
+
+When this policy is not set, the default SameSite behavior for cookies that don\'t specify a SameSite attribute will depend on the user\'s personal configuration for the SameSite-by-default feature, which may be set by a field trial or by enabling or disabling the flag same-site-by-default-cookies flag.</string>
+  <string-array name="LegacySameSiteCookieBehaviorEnabledEntries">
+    <item>Revert to legacy SameSite behavior for cookies on all sites</item>
+    <item>Use SameSite-by-default behavior for cookies on all sites</item>
+  </string-array>
+  <string-array name="LegacySameSiteCookieBehaviorEnabledValues">
+    <item>1</item>
+    <item>2</item>
+  </string-array>
+  <string name="LegacySameSiteCookieBehaviorEnabledForDomainListTitle">Revert to legacy SameSite behavior for cookies on these sites</string>
+  <string name="LegacySameSiteCookieBehaviorEnabledForDomainListDesc">Cookies set for domains matching these patterns will revert to legacy SameSite behavior. Reverting to legacy behavior causes cookies that don\'t specify a SameSite attribute to be treated as if they were \\&quot;SameSite=None\\&quot;, and removes the requirement for \\&quot;SameSite=None\\&quot; cookies to carry the \\&quot;Secure\\&quot; attribute. See https://www.chromium.org/administrators/policy-list-3/cookie-legacy-samesite-policies for full description.
+
+For cookies on domains not covered by the patterns specified here, or for all cookies if this policy is not set, the global default value will be used either from the LegacySameSiteCookieBehaviorEnabled policy, if it is set, or the user\'s personal configuration otherwise.
+
+Note that patterns you list here are treated as domains, not URLs, so you should not specify a scheme or port.</string>
   <string name="ManagedBookmarksTitle">Managed Bookmarks</string>
   <string name="ManagedBookmarksDesc">Configures a list of managed bookmarks.
 
@@ -468,7 +509,7 @@ If this policy is left not set, network prediction will be enabled but the user 
     <item>1</item>
     <item>2</item>
   </string-array>
-  <string name="NtlmV2EnabledTitle">Whether NTLMv2 authentication is enabled.</string>
+  <string name="NtlmV2EnabledTitle">Enable NTLMv2 authentication.</string>
   <string name="NtlmV2EnabledDesc">Controls whether NTLMv2 is enabled.
 
 All recent versions of Samba and Windows servers support NTLMv2. This should only be disabled for backwards compatibility and reduces the security of authentication.
@@ -498,6 +539,12 @@ This policy will override UnsafelyTreatInsecureOriginAsSecure, if present.
 For more information on secure contexts, see
 https://www.w3.org/TR/secure-contexts/.
 </string>
+  <string name="PasswordLeakDetectionEnabledTitle">Enable leak detection for entered credentials</string>
+  <string name="PasswordLeakDetectionEnabledDesc">This policy can be used to force enable or force disable credential leak checking in Chromium.
+
+Note that even if this policy is set to True, the behavior will not trigger if Safe Browsing is disabled (either by policy or by the user). In order to force Safe Browsing on, use the SafeBrowsingEnabled policy.
+
+If this policy is enabled or disabled, users cannot change or override it in Chromium. If this policy is unset, credential leak checking is allowed (but can be turned off by the user).</string>
   <string name="PasswordManagerEnabledTitle">Enable saving passwords to the password manager</string>
   <string name="PasswordManagerEnabledDesc">If this setting is enabled, users can have Chromium memorize passwords and provide them automatically the next time they log in to a site.
 
@@ -505,6 +552,12 @@ If this settings is disabled, users cannot save new passwords but they
 may still use passwords that have been saved previously.
 
 If this policy is enabled or disabled, users cannot change or override it in Chromium. If this policy is unset, password saving is allowed (but can be turned off by the user).</string>
+  <string name="PaymentMethodQueryEnabledTitle">Allow websites to query for available payment methods.</string>
+  <string name="PaymentMethodQueryEnabledDesc">Allows you to set whether websites are allowed to check if the user has payment methods saved.
+
+If this policy is set to disabled, websites that use PaymentRequest.canMakePayment or PaymentRequest.hasEnrolledInstrument API will be informed that no payment methods are available.
+
+If the setting is enabled or not set then websites are allowed to check if the user has payment methods saved.</string>
   <string name="PopupsAllowedForUrlsTitle">Allow popups on these sites</string>
   <string name="PopupsAllowedForUrlsDesc">Allows you to set a list of url patterns that specify sites which are allowed to open popups.
 
@@ -522,7 +575,7 @@ If this setting is disabled, users cannot print from Chromium. Printing is disab
   <string name="ProxyBypassListTitle">Proxy bypass rules</string>
   <string name="ProxyBypassListDesc">Chromium will bypass any proxy for the list of hosts given here.
 
-This policy only takes effect if you have selected manual proxy settings at \'Choose how to specify proxy server settings\'.
+This policy only takes effect if you have selected manual proxy settings at \'Choose how to specify proxy server settings\' and if the ProxySettings policy has not been specified.
 
 You should leave this policy not set if you have selected any other mode for setting proxy policies.
 
@@ -530,6 +583,8 @@ For more detailed examples, visit:
 https://www.chromium.org/developers/design-documents/network-settings#TOC-Command-line-options-for-proxy-sett.</string>
   <string name="ProxyModeTitle">Choose how to specify proxy server settings</string>
   <string name="ProxyModeDesc">Allows you to specify the proxy server used by Chromium and prevents users from changing proxy settings.
+
+This policy only takes effect if the ProxySettings policy has not been specified.
 
 If you choose to never use a proxy server and always connect directly, all other options are ignored.
 
@@ -564,7 +619,7 @@ Leaving this policy not set will allow the users to choose the proxy settings on
   <string name="ProxyPacUrlTitle">URL to a proxy .pac file</string>
   <string name="ProxyPacUrlDesc">You can specify a URL to a proxy .pac file here.
 
-This policy only takes effect if you have selected manual proxy settings at \'Choose how to specify proxy server settings\'.
+This policy only takes effect if you have selected manual proxy settings at \'Choose how to specify proxy server settings\' and if the ProxySettings policy has not been specified.
 
 You should leave this policy not set if you have selected any other mode for setting proxy policies.
 
@@ -573,14 +628,42 @@ https://www.chromium.org/developers/design-documents/network-settings#TOC-Comman
   <string name="ProxyServerTitle">Address or URL of proxy server</string>
   <string name="ProxyServerDesc">You can specify the URL of the proxy server here.
 
-This policy only takes effect if you have selected manual proxy settings at \'Choose how to specify proxy server settings\'.
+This policy only takes effect if you have selected manual proxy settings at \'Choose how to specify proxy server settings\' and if the ProxySettings policy has not been specified.
 
 You should leave this policy not set if you have selected any other mode for setting proxy policies.
 
 For more options and detailed examples, visit:
 https://www.chromium.org/developers/design-documents/network-settings#TOC-Command-line-options-for-proxy-sett.</string>
+  <string name="ProxySettingsTitle">Proxy settings</string>
+  <string name="ProxySettingsDesc">Configures the proxy settings for Chromium. These proxy settings will be available for ARC-apps too.
+
+If you enable this setting, Chromium and ARC-apps ignore all proxy-related options specified from the command line.
+
+Leaving this policy not set will allow the users to choose the proxy settings on their own.
+
+If the ProxySettings policy is set, it will override any of the individual policies ProxyMode, ProxyPacUrl, ProxyServer, ProxyBypassList and ProxyServerMode.
+
+The ProxyMode field allows you to specify the proxy server used by Chromium and prevents users from changing proxy settings.
+
+The ProxyPacUrl field is a URL to a proxy .pac file.
+
+The ProxyServer field is a URL of the proxy server.
+
+The ProxyBypassList field is a list of proxy hosts that Chromium will bypass.
+
+The ProxyServerMode field is deprecated in favor of the field \'ProxyMode\'. It allows you to specify the proxy server used by Chromium and prevents users from changing proxy settings.
+
+If you choose the value \'direct\' as \'ProxyMode\', a proxy will never be used and all other fields will be ignored.
+
+If you choose the value \'system\' as \'ProxyMode\', the systems\'s proxy will be used and all other fields will be ignored.
+
+If you choose the value \'auto_detect\' as \'ProxyMode\', all other fields will be ignored.
+
+If you choose the value \'fixed_server\' as \'ProxyMode\', the \'ProxyServer\' and \'ProxyBypassList\' fields will be used.
+
+If you choose the value \'pac_script\' as \'ProxyMode\', the \'ProxyPacUrl\' and \'ProxyBypassList\' fields will be used.</string>
   <string name="RestrictAccountsToPatternsTitle">Restrict accounts that are visible in Chromium</string>
-  <string name="RestrictAccountsToPatternsDesc">Contains a list of patterns which are used to control the visiblity of accounts in Chromium.
+  <string name="RestrictAccountsToPatternsDesc">Contains a list of patterns which are used to control the visibility of accounts in Chromium.
 
 Each Google account on the device will be compared to patterns stored in this policy to determine the account visibility in Chromium. The account will be visible if its name matches any pattern on the list. Otherwise, the account will be hidden.
 
@@ -590,20 +673,6 @@ If this policy is not set, all Google accounts on the device will be visible in 
   <string name="SSLErrorOverrideAllowedTitle">Allow proceeding from the SSL warning page</string>
   <string name="SSLErrorOverrideAllowedDesc">Chrome shows a warning page when users navigate to sites that have SSL errors. By default or when this policy is set to true, users are allowed to click through these warning pages.
 Setting this policy to false disallows users to click through any warning page.</string>
-  <string name="SSLVersionMaxTitle">Maximum SSL version enabled</string>
-  <string name="SSLVersionMaxDesc">Warning: The max TLS version policy will be entirely removed from Chromium around version 75 (around June 2019).
-
-If this policy is not configured then Chromium uses the default maximum version.
-
-Otherwise it may be set to one of the following values: \\&quot;tls1.2\\&quot; or \\&quot;tls1.3\\&quot;. When set, Chromium will not use SSL/TLS versions greater than the specified version. An unrecognized value will be ignored.</string>
-  <string-array name="SSLVersionMaxEntries">
-    <item>TLS 1.2</item>
-    <item>TLS 1.3</item>
-  </string-array>
-  <string-array name="SSLVersionMaxValues">
-    <item>tls1.2</item>
-    <item>tls1.3</item>
-  </string-array>
   <string name="SSLVersionMinTitle">Minimum SSL version enabled</string>
   <string name="SSLVersionMinDesc">If this policy is not configured then Chromium uses a default minimum version which is TLS 1.0.
 
@@ -648,6 +717,18 @@ If you disable this setting, search suggestions are never used.
 If you enable or disable this setting, users cannot change or override this setting in Chromium.
 
 If this policy is left not set, this will be enabled but the user will be able to change it.</string>
+  <string name="SharedClipboardEnabledTitle">Enable the Shared Clipboard Feature</string>
+  <string name="SharedClipboardEnabledDesc">Enable the Shared Clipboard feature which allows users to send text between Chrome Desktops and an Android device when Sync is enabled and the user is Signed-in.
+
+If this policy is set to true, the capability of sending text, cross device, for chrome user is enabled.
+
+If this policy is set to false, the capability of sending text, cross device, for chrome user is disabled.
+
+If you set this policy, users cannot change or override it.
+
+If this policy is left unset, the shared clipboard feature is enabled by default.
+
+It is up to the admins to set policies in all platforms they care about. It\'s recommended to set this policy to one value in all platforms.</string>
   <string name="SitePerProcessAndroidTitle">Enable Site Isolation for every site</string>
   <string name="SitePerProcessAndroidDesc">
 You might want to look at the IsolateOriginsAndroid policy setting to get the best of both worlds, isolation and limited impact for users, by using IsolateOriginsAndroid with a list of the sites you want to isolate. This setting, SitePerProcessAndroid, isolates all sites.
@@ -658,6 +739,19 @@ If the policy is not configured, the user will be able to change this setting.
 NOTE: On Android, Site Isolation is experimental. Support will improve over time, but currently it may cause performance problems.
 
 NOTE: This policy applies only to Chrome on Android running on devices with strictly more than 1GB of RAM. To apply the policy on non-Android platforms, use SitePerProcess.
+</string>
+  <string name="SyncTypesListDisabledTitle">List of types that should be excluded from synchronization</string>
+  <string name="SyncTypesListDisabledDesc">If this policy is set all specified data types will be excluded from syncronzation both for Google Sync as well as for roaming profile synchronization. This can be beneficial to reduce the size of the roaming profile or limit the type of data uploaded to the Google Sync Servers.
+
+The current data types for this policy are: \\&quot;bookmarks\\&quot;, \\&quot;preferences\\&quot;, \\&quot;passwords\\&quot;, \\&quot;autofill\\&quot;, \\&quot;themes\\&quot;, \\&quot;typedUrls\\&quot;, \\&quot;extensions\\&quot;, \\&quot;apps\\&quot;, \\&quot;tabs\\&quot;, \\&quot;wifiConfiguration\\&quot;. Those names are case sensitive!</string>
+  <string name="TLS13HardeningForLocalAnchorsEnabledTitle">Enable a TLS 1.3 security feature for local trust anchors.</string>
+  <string name="TLS13HardeningForLocalAnchorsEnabledDesc">This policy controls a security feature in TLS 1.3 which protects connections against downgrade attacks. It is backwards-compatible and will not affect connections to compliant TLS 1.2 servers or proxies. However, older versions of some TLS-intercepting proxies have an implementation flaw which causes them to be incompatible.
+
+If this policy is set to True or not set, Chromium will enable these security protections for all connections.
+
+If this policy is set to False, Chromium will disable these security protections for connections authenticated with locally-installed CA certificates. These protections are always enabled for connections authenticated with publicly-trusted CA certificates.
+
+The default value for this policy was changed in Chromium 81 from false to true. Affected proxies are expected to fail connections with an error code of ERR_TLS13_DOWNGRADE_DETECTED. Administrators who need more time to upgrade affected proxies may use this policy to temporarily disable this security feature. This policy will be removed after version 85.
 </string>
   <string name="TranslateEnabledTitle">Enable Translate</string>
   <string name="TranslateEnabledDesc">Enables the integrated Google Translate service on Chromium.
@@ -678,7 +772,7 @@ Exceptions can be defined in the URL whitelist policy. These policies are limite
 
 Note that it is not recommended to block internal \'chrome://*\' URLs since this may lead to unexpected errors.
 
-Note that this policy does not prevent the page updating dynamically through JavaScript. For example, if you block \'example.com/abc\', users might still be able to visit \'example.com\' and click on a link to visit \'example.com/abc\', as long as the page does not refresh.
+From M73 you can block \'javascript://*\' URLs. However, it affects only JavaScript typed in address bar (or, for example, bookmarklets). Note that in-page JavaScript URLs, as long as dynamically loaded data, are not subject to this policy. For example, if you block \'example.com/abc\', page \'example.com\' will still be able to load \'example.com/abc\' via XMLHTTPRequest.
 
 If this policy is not set no URL will be blacklisted in the browser.</string>
   <string name="URLWhitelistTitle">Allow access to a list of URLs</string>
@@ -703,10 +797,26 @@ If you enable this policy, URL-keyed anonymized data collection is always active
 If you disable this policy, URL-keyed anonymized data collection is never active.
 
 If this policy is left not set, URL-keyed anonymized data collection will be enabled but the user will be able to change it.</string>
+  <string name="WebComponentsV0EnabledTitle">Re-enable Web Components v0 API until M84.</string>
+  <string name="WebComponentsV0EnabledDesc">The Web Components v0 APIs (Shadow DOM v0, Custom Elements v0, and HTML Imports) were deprecated in 2018, and have been disabled by default starting in M80. This policy allows these features to be selectively re-enabled until M84.
+
+     If this policy is set to True, the Web Components v0 features will be enabled for all sites.
+
+     If this policy is set to False or not set, the Web Components v0 features will be disabled by default, starting in M80.
+
+     This policy will be removed after Chrome 84.</string>
   <string name="WebRtcUdpPortRangeTitle">Restrict the range of local UDP ports used by WebRTC</string>
   <string name="WebRtcUdpPortRangeDesc">If the policy is set, the UDP port range used by WebRTC is restricted to the specified port interval (endpoints included).
 
 If the policy is not set, or if it is set to the empty string or an invalid port range, WebRTC is allowed to use any available local UDP port.</string>
+  <string name="WebUsbAllowDevicesForUrlsTitle">Automatically grant permission to these sites to connect to USB devices with the given vendor and product IDs.</string>
+  <string name="WebUsbAllowDevicesForUrlsDesc">Allows you to set a list of urls that specify which sites will automatically be granted permission to access a USB device with the given vendor and product IDs. Each item in the list must contain both devices and urls in order for the policy to be valid. Each item in devices can contain a vendor ID and product ID field. Any ID that is omitted is treated as a wildcard with one exception, and that exception is that a product ID cannot be specified without a vendor ID also being specified. Otherwise, the policy will not be valid and will be ignored.
+
+The USB permission model uses the URL of the requesting site (\\&quot;requesting URL\\&quot;) and the URL of the top-level frame site (\\&quot;embedding URL\\&quot;) to grant permission to the requesting URL to access the USB device. The requesting URL may be different than the embedding URL when the requesting site is loaded in an iframe. Therefore, the \\&quot;urls\\&quot; field can contain up to two URL strings delimited by a comma to specify the requesting and embedding URL respectively. If only one URL is specified, then access to the corresponding USB devices will be granted when the requesting site\'s URL matches this URL regardless of embedding status. The URLs in \\&quot;urls\\&quot; must be valid URLs, otherwise the policy will be ignored.
+
+If this policy is left not set, the global default value will be used for all sites either from the \'DefaultWebUsbGuardSetting\' policy if it is set, or the user\'s personal configuration otherwise.
+
+URL patterns in this policy should not clash with the ones configured via WebUsbBlockedForUrls. If there is a clash, this policy will take precedence over WebUsbBlockedForUrls and WebUsbAskForUrls.</string>
   <string name="WebUsbAskForUrlsTitle">Allow WebUSB on these sites</string>
   <string name="WebUsbAskForUrlsDesc">Allows you to set a list of url patterns that specify sites which are allowed to ask the user to grant them access to a USB device.
 

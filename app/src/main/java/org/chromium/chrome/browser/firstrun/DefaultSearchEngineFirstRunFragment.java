@@ -11,14 +11,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import org.chromium.base.ThreadUtils;
 import org.chromium.base.metrics.RecordUserAction;
+import org.chromium.base.task.PostTask;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.locale.DefaultSearchEngineDialogHelper;
 import org.chromium.chrome.browser.locale.LocaleManager;
 import org.chromium.chrome.browser.locale.LocaleManager.SearchEnginePromoType;
-import org.chromium.chrome.browser.search_engines.TemplateUrlService;
-import org.chromium.chrome.browser.widget.RadioButtonLayout;
+import org.chromium.chrome.browser.search_engines.TemplateUrlServiceFactory;
+import org.chromium.components.browser_ui.widget.RadioButtonLayout;
+import org.chromium.content_public.browser.UiThreadTaskTraits;
 
 /** A {@link Fragment} that presents a set of search engines for the user to choose from. */
 public class DefaultSearchEngineFirstRunFragment extends Fragment implements FirstRunFragment {
@@ -50,7 +51,7 @@ public class DefaultSearchEngineFirstRunFragment extends Fragment implements Fir
         mButton = (Button) rootView.findViewById(R.id.button_primary);
         mButton.setEnabled(false);
 
-        assert TemplateUrlService.getInstance().isLoaded();
+        assert TemplateUrlServiceFactory.get().isLoaded();
         mSearchEnginePromoDialoType = LocaleManager.getInstance().getSearchEnginePromoShowType();
         if (mSearchEnginePromoDialoType != LocaleManager.SearchEnginePromoType.DONT_SHOW) {
             Runnable dismissRunnable = new Runnable() {
@@ -72,7 +73,7 @@ public class DefaultSearchEngineFirstRunFragment extends Fragment implements Fir
 
         if (isVisibleToUser) {
             if (mSearchEnginePromoDialoType == LocaleManager.SearchEnginePromoType.DONT_SHOW) {
-                ThreadUtils.postOnUiThread(new Runnable() {
+                PostTask.postTask(UiThreadTaskTraits.DEFAULT, new Runnable() {
                     @Override
                     public void run() {
                         getPageDelegate().advanceToNextPage();

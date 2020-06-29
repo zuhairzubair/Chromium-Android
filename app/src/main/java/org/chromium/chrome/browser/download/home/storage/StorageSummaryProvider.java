@@ -5,16 +5,16 @@
 package org.chromium.chrome.browser.download.home.storage;
 
 import android.content.Context;
-import android.os.Environment;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import org.chromium.base.task.AsyncTask;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.download.DirectoryOption;
+import org.chromium.chrome.browser.download.DownloadDirectoryProvider;
 import org.chromium.chrome.browser.download.DownloadUtils;
 import org.chromium.chrome.browser.download.home.filter.OfflineItemFilterObserver;
 import org.chromium.chrome.browser.download.home.filter.OfflineItemFilterSource;
-import org.chromium.chrome.browser.download.ui.DownloadHistoryAdapter;
 import org.chromium.components.offline_items_collection.OfflineItem;
 import org.chromium.components.offline_items_collection.OfflineItemState;
 
@@ -39,23 +39,6 @@ public class StorageSummaryProvider implements OfflineItemFilterObserver {
     // The total size in bytes used by downloads.
     private long mTotalDownloadSize;
 
-    /**
-     * Asynchronous task to query the default download directory option on primary storage.
-     * Pass one String parameter as the name of the directory option.
-     */
-    private static class DefaultDirectoryTask extends AsyncTask<DirectoryOption> {
-        @Override
-        protected DirectoryOption doInBackground() {
-            File defaultDownloadDir =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            DirectoryOption directoryOption =
-                    new DirectoryOption("", defaultDownloadDir.getAbsolutePath(),
-                            defaultDownloadDir.getUsableSpace(), defaultDownloadDir.getTotalSpace(),
-                            DirectoryOption.DownloadLocationDirectoryType.DEFAULT);
-            return directoryOption;
-        }
-    }
-
     public StorageSummaryProvider(
             Context context, Delegate delegate, @Nullable OfflineItemFilterSource filterSource) {
         mContext = context;
@@ -67,16 +50,6 @@ public class StorageSummaryProvider implements OfflineItemFilterObserver {
         }
 
         computeTotalStorage();
-    }
-
-    /**
-     * Sets the total size used by downloads. Used to support legacy download home UI, see
-     * {@link DownloadHistoryAdapter}.
-     * @param totalSize
-     */
-    public void setUsedStorage(long totalSize) {
-        mTotalDownloadSize = totalSize;
-        update();
     }
 
     // OfflineItemFilterObserver implementation.
@@ -102,14 +75,24 @@ public class StorageSummaryProvider implements OfflineItemFilterObserver {
     }
 
     private void computeTotalStorage() {
-        DefaultDirectoryTask task = new DefaultDirectoryTask() {
+        // Asynchronous task to query the default download directory option on primary storage.
+        new AsyncTask<DirectoryOption>() {
+            @Override
+            protected DirectoryOption doInBackground() {
+                File defaultDownloadDir = DownloadDirectoryProvider.getPrimaryDownloadDirectory();
+                DirectoryOption directoryOption = new DirectoryOption("",
+                        defaultDownloadDir.getAbsolutePath(), defaultDownloadDir.getUsableSpace(),
+                        defaultDownloadDir.getTotalSpace(),
+                        DirectoryOption.DownloadLocationDirectoryType.DEFAULT);
+                return directoryOption;
+            }
+
             @Override
             protected void onPostExecute(DirectoryOption directoryOption) {
                 mDirectoryOption = directoryOption;
                 update();
             }
-        };
-        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private long getTotalSize(Collection<OfflineItem> items) {

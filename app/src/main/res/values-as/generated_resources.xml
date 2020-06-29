@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"অব্যাহত ৰাখক"</string>
+<string name="tos_notification_title">"৩১ মাৰ্চৰ পৰা Chromeৰ সেৱাৰ চর্তাৱলী সলনি হ’ব"</string>
+<string name="tos_notification_body_text">"অনুগ্ৰহ কৰি নতুন চৰ্তাৱলী পৰ্যালোচনা কৰক"</string>
+<string name="tos_notification_ack_button_text">"বুজি পালোঁ"</string>
+<string name="tos_notification_review_button_text">"পৰ্যালোচনা কৰক"</string>
+<string name="search_or_type_web_address">"সন্ধান কৰক বা ৱেব ঠিকনা টাইপ কৰক"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"ক্লিপব’ৰ্ডৰ পৰা পৰামৰ্শ আঁতৰাবনে?"</string>
+<string name="options_homepage_title">"গৃহ পৃষ্ঠা"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"এই ছাইটটোৱে ইনক\'গনিট\' ম\'ডৰ বাহিৰৰ এটা এপৰ সৈতে তথ্য শ্বেয়াৰ কৰিব ওলাইছে।"</string>
+<string name="external_app_leave_incognito_warning_title">"ইনক’গনিট’ ম’ডৰ পৰা বাহিৰ হ’বনে?"</string>
+<string name="external_app_leave_incognito_stay">"ইয়াতে থাকক"</string>
+<string name="external_app_leave_incognito_leave">"ত্যাগ কৰক"</string>
+<string name="external_app_restricted_access_error">"অনুৰোধ জনোৱা সমললৈ Chromeৰ এক্সেছ নাই।"</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"কোনো নিকটৱৰ্তী ডিভাইচ বিচাৰি পোৱা নগ’ল।"</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"অনুমতি দিয়ক"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"অৱৰোধ কৰক"</string>
+<string name="blocked_ads_prompt_title">"বিজ্ঞাপন অৱৰোধ কৰা হৈছে"</string>
+<string name="video_call_notification_text_2">"ভিডিঅ’ ইনপুট এক্সেছ কৰি আছে"</string>
+<string name="audio_call_notification_text_2">"অডিঅ’ ইনপুট এক্সেছ কৰি আছে"</string>
+<string name="video_audio_call_notification_text_2">"অডিঅ’ আৰু ভিডিঅ’ ইনপুটত এক্সেছ কৰি আছে"</string>
+<string name="video_call_incognito_notification_text_2">"এটা ছাইটে ভিডিঅ’ ইনপুট এক্সেছ কৰিছে"</string>
+<string name="audio_call_incognito_notification_text_2">"ছাইটটোৱে অডিঅ’ ইনপুট এক্সেছ কৰিছে"</string>
+<string name="video_audio_call_incognito_notification_text_2">"ছাইটটোৱে অডিঅ’ আৰু ভিডিঅ’ ইনপুট এক্সেছ কৰিছে"</string>
+</resources>

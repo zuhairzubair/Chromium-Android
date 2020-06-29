@@ -22,6 +22,7 @@ import org.chromium.base.Log;
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.JNINamespace;
 import org.chromium.base.annotations.MainDex;
+import org.chromium.base.annotations.NativeMethods;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -32,7 +33,7 @@ import java.util.Queue;
  */
 @JNINamespace("media")
 class MediaCodecBridge {
-    private static final String TAG = "cr_MediaCodecBridge";
+    private static final String TAG = "MediaCodecBridge";
 
     // After a flush(), dequeueOutputBuffer() can often produce empty presentation timestamps
     // for several frames. As a result, the player may find that the time does not increase
@@ -58,9 +59,7 @@ class MediaCodecBridge {
     private ByteBuffer[] mInputBuffers;
     private ByteBuffer[] mOutputBuffers;
 
-    private boolean mFlushed;
-    private long mLastPresentationTimeUs;
-    private BitrateAdjuster mBitrateAdjuster;
+    private @BitrateAdjuster.Type int mBitrateAdjuster;
 
     // To support both the synchronous and asynchronous version of MediaCodec
     // (since we need to work on <M devices), we implement async support as a
@@ -238,11 +237,10 @@ class MediaCodecBridge {
         }
     };
 
-    MediaCodecBridge(MediaCodec mediaCodec, BitrateAdjuster bitrateAdjuster, boolean useAsyncApi) {
+    MediaCodecBridge(
+            MediaCodec mediaCodec, @BitrateAdjuster.Type int bitrateAdjuster, boolean useAsyncApi) {
         assert mediaCodec != null;
         mMediaCodec = mediaCodec;
-        mLastPresentationTimeUs = 0;
-        mFlushed = true;
         mBitrateAdjuster = bitrateAdjuster;
         mUseAsyncApi = useAsyncApi;
 
@@ -283,12 +281,16 @@ class MediaCodecBridge {
         mNativeMediaCodecBridge = nativeMediaCodecBridge;
 
         // If any buffers or errors occurred before this, trigger the callback now.
-        if (!mPendingInputBuffers.isEmpty() || !mPendingOutputBuffers.isEmpty() || mPendingError)
+        if (!mPendingInputBuffers.isEmpty() || !mPendingOutputBuffers.isEmpty() || mPendingError) {
             notifyBuffersAvailable();
+        }
     }
 
     private synchronized void notifyBuffersAvailable() {
-        if (mNativeMediaCodecBridge != 0) nativeOnBuffersAvailable(mNativeMediaCodecBridge);
+        if (mNativeMediaCodecBridge != 0) {
+            MediaCodecBridgeJni.get().onBuffersAvailable(
+                    mNativeMediaCodecBridge, MediaCodecBridge.this);
+        }
     }
 
     public synchronized void onError(MediaCodec.CodecException e) {
@@ -309,7 +311,6 @@ class MediaCodecBridge {
         // Drop buffers that come in during a flush.
         if (mPendingStart) return;
 
-        updateLastPresentationTime(info);
         mPendingOutputBuffers.add(new DequeueOutputResult(MediaCodecStatus.OK, index, info.flags,
                 info.offset, info.presentationTimeUs, info.size));
         notifyBuffersAvailable();
@@ -328,16 +329,6 @@ class MediaCodecBridge {
         mPendingStart = false;
     }
 
-    void updateLastPresentationTime(MediaCodec.BufferInfo info) {
-        if (info.presentationTimeUs < mLastPresentationTimeUs) {
-            // TODO(qinmin): return a special code through DequeueOutputResult
-            // to notify the native code the the frame has a wrong presentation
-            // timestamp and should be skipped.
-            info.presentationTimeUs = mLastPresentationTimeUs;
-        }
-        mLastPresentationTimeUs = info.presentationTimeUs;
-    }
-
     @CalledByNative
     void release() {
         if (mUseAsyncApi) {
@@ -348,10 +339,7 @@ class MediaCodecBridge {
             }
         }
         try {
-            String codecName = "unknown";
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                codecName = mMediaCodec.getName();
-            }
+            String codecName = mMediaCodec.getName();
             // This logging is to help us identify hung MediaCodecs in crash reports.
             Log.w(TAG, "Releasing: " + codecName);
             mMediaCodec.release();
@@ -413,8 +401,9 @@ class MediaCodecBridge {
         if (mUseAsyncApi) {
             synchronized (this) {
                 if (mPendingError) return new DequeueInputResult(MediaCodecStatus.ERROR, -1);
-                if (mPendingStart || mPendingInputBuffers.isEmpty())
+                if (mPendingStart || mPendingInputBuffers.isEmpty()) {
                     return new DequeueInputResult(MediaCodecStatus.TRY_AGAIN_LATER, -1);
+                }
                 return mPendingInputBuffers.remove();
             }
         }
@@ -441,7 +430,6 @@ class MediaCodecBridge {
     @CalledByNative
     private int flush() {
         try {
-            mFlushed = true;
             mMediaCodec.flush();
 
             // MediaCodec.flush() invalidates all returned indices, but there
@@ -532,7 +520,6 @@ class MediaCodecBridge {
     @CalledByNative
     private int queueInputBuffer(
             int index, int offset, int size, long presentationTimeUs, int flags) {
-        resetLastPresentationTimeIfNeeded(presentationTimeUs);
         try {
             mMediaCodec.queueInputBuffer(index, offset, size, presentationTimeUs, flags);
         } catch (Exception e) {
@@ -545,7 +532,7 @@ class MediaCodecBridge {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @CalledByNative
     private void setVideoBitrate(int bps, int frameRate) {
-        int targetBps = mBitrateAdjuster.getTargetBitrate(bps, frameRate);
+        int targetBps = BitrateAdjuster.getTargetBitrate(mBitrateAdjuster, bps, frameRate);
         Bundle b = new Bundle();
         b.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, targetBps);
         try {
@@ -572,13 +559,13 @@ class MediaCodecBridge {
     // Incoming |native| values are as defined in media/base/encryption_scheme.h. Translated values
     // are from MediaCodec. At present, these values are in sync. Returns
     // MEDIA_CODEC_UNKNOWN_CIPHER_MODE in the case of unknown incoming value.
-    private int translateCipherModeValue(int nativeValue) {
+    private int translateEncryptionSchemeValue(int nativeValue) {
         switch (nativeValue) {
-            case CipherMode.UNENCRYPTED:
+            case EncryptionScheme.UNENCRYPTED:
                 return MediaCodec.CRYPTO_MODE_UNENCRYPTED;
-            case CipherMode.AES_CTR:
+            case EncryptionScheme.CENC:
                 return MediaCodec.CRYPTO_MODE_AES_CTR;
-            case CipherMode.AES_CBC:
+            case EncryptionScheme.CBCS:
                 return MediaCodec.CRYPTO_MODE_AES_CBC;
             default:
                 Log.e(TAG, "Unsupported cipher mode: " + nativeValue);
@@ -591,9 +578,8 @@ class MediaCodecBridge {
     private int queueSecureInputBuffer(int index, int offset, byte[] iv, byte[] keyId,
             int[] numBytesOfClearData, int[] numBytesOfEncryptedData, int numSubSamples,
             int cipherMode, int patternEncrypt, int patternSkip, long presentationTimeUs) {
-        resetLastPresentationTimeIfNeeded(presentationTimeUs);
         try {
-            cipherMode = translateCipherModeValue(cipherMode);
+            cipherMode = translateEncryptionSchemeValue(cipherMode);
             if (cipherMode == MEDIA_CODEC_UNKNOWN_CIPHER_MODE) {
                 return MediaCodecStatus.ERROR;
             }
@@ -651,8 +637,9 @@ class MediaCodecBridge {
     private DequeueOutputResult dequeueOutputBuffer(long timeoutUs) {
         if (mUseAsyncApi) {
             synchronized (this) {
-                if (mPendingError)
+                if (mPendingError) {
                     return new DequeueOutputResult(MediaCodecStatus.ERROR, -1, 0, 0, 0, 0);
+                }
                 if (mPendingOutputBuffers.isEmpty()) {
                     return new DequeueOutputResult(
                             MediaCodecStatus.TRY_AGAIN_LATER, -1, 0, 0, 0, 0);
@@ -671,7 +658,6 @@ class MediaCodecBridge {
         int index = -1;
         try {
             int indexOrStatus = dequeueOutputBufferInternal(info, timeoutUs);
-            updateLastPresentationTime(info);
 
             if (indexOrStatus >= 0) { // index!
                 status = MediaCodecStatus.OK;
@@ -747,14 +733,6 @@ class MediaCodecBridge {
         return false;
     }
 
-    private void resetLastPresentationTimeIfNeeded(long presentationTimeUs) {
-        if (mFlushed) {
-            mLastPresentationTimeUs =
-                    Math.max(presentationTimeUs - MAX_PRESENTATION_TIMESTAMP_SHIFT_US, 0);
-            mFlushed = false;
-        }
-    }
-
     @SuppressWarnings("deprecation")
     private int getAudioFormat(int channelCount) {
         switch (channelCount) {
@@ -786,5 +764,8 @@ class MediaCodecBridge {
         sCallbackHandler = new Handler(sCallbackHandlerThread.getLooper());
     }
 
-    private native void nativeOnBuffersAvailable(long nativeMediaCodecBridge);
+    @NativeMethods
+    interface Natives {
+        void onBuffersAvailable(long nativeMediaCodecBridge, MediaCodecBridge caller);
+    }
 }

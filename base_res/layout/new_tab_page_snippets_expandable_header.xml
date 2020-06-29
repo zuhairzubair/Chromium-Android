@@ -9,8 +9,8 @@
     android:layout_height="wrap_content"
     android:minHeight="@dimen/snippets_article_header_height"
     android:orientation="horizontal"
-    android:paddingStart="@dimen/snippets_padding"
-    android:paddingEnd="@dimen/snippets_padding"
+    android:paddingStart="@dimen/card_padding"
+    android:paddingEnd="@dimen/card_padding"
     android:gravity="center_vertical">
 
     <TextView
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textAlignment="viewStart"
-        android:textAppearance="@style/TextAppearance.BlackCaption" />
+        android:textAppearance="@style/TextAppearance.TextSmall.Secondary" />
 
     <TextView
         android:id="@+id/header_status"

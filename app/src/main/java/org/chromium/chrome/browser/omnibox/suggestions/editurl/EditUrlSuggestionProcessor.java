@@ -5,26 +5,31 @@
 package org.chromium.chrome.browser.omnibox.suggestions.editurl;
 
 import android.content.Context;
-import android.support.annotation.IntDef;
+import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
+import androidx.annotation.IntDef;
+
 import org.chromium.base.metrics.CachedMetrics;
 import org.chromium.base.metrics.CachedMetrics.EnumeratedHistogramSample;
+import org.chromium.base.supplier.Supplier;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ActivityTabProvider;
-import org.chromium.chrome.browser.ChromeFeatureList;
+import org.chromium.chrome.browser.favicon.LargeIconBridge;
+import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.omnibox.OmniboxSuggestionType;
-import org.chromium.chrome.browser.omnibox.UrlBar;
-import org.chromium.chrome.browser.omnibox.UrlBar.OmniboxAction;
-import org.chromium.chrome.browser.omnibox.suggestions.AutocompleteCoordinator.SuggestionProcessor;
 import org.chromium.chrome.browser.omnibox.suggestions.OmniboxSuggestion;
 import org.chromium.chrome.browser.omnibox.suggestions.OmniboxSuggestionUiType;
-import org.chromium.chrome.browser.share.ShareMenuActionHandler;
+import org.chromium.chrome.browser.omnibox.suggestions.SuggestionProcessor;
+import org.chromium.chrome.browser.omnibox.suggestions.basic.SuggestionHost;
+import org.chromium.chrome.browser.search_engines.TemplateUrlServiceFactory;
+import org.chromium.chrome.browser.tab.SadTab;
 import org.chromium.chrome.browser.tab.Tab;
+import org.chromium.chrome.browser.tab.TabImpl;
 import org.chromium.ui.base.Clipboard;
 import org.chromium.ui.modelutil.PropertyModel;
 
@@ -83,15 +88,6 @@ public class EditUrlSuggestionProcessor implements OnClickListener, SuggestionPr
     private static final CachedMetrics.ActionEvent ACTION_EDIT_URL_SUGGESTION_SHARE =
             new CachedMetrics.ActionEvent("Omnibox.EditUrlSuggestion.Share");
 
-    /** The name of the parameter for getting the experiment variation. */
-    private static final String FIELD_TRIAL_PARAM_NAME = "variation";
-
-    /** The name of the experiment variation that shows the copy icon. */
-    private static final String COPY_ICON_VARIATION_NAME = "copy_icon";
-
-    /** The name of the experiment variation that shows both the copy and share icon. */
-    private static final String COPY_SHARE_ICON_VARIATION_NAME = "copy_share_icon";
-
     /** The delegate for accessing the location bar for observation and modification. */
     private final LocationBarDelegate mLocationBarDelegate;
 
@@ -107,32 +103,37 @@ public class EditUrlSuggestionProcessor implements OnClickListener, SuggestionPr
     /** A handler for suggestion selection. */
     private SuggestionSelectionHandler mSelectionHandler;
 
-    /** The original URL that was in the omnibox when it was focused. */
-    private String mOriginalUrl;
-
     /** The original title of the page. */
     private String mOriginalTitle;
 
-    /** The last time that the omnibox was focused. */
-    private long mLastOmniboxFocusTime;
-
-    /** Whether a timing event should be recorded. This will be true once per omnibox focus. */
-    private boolean mShouldRecordTimingEvent;
-
-    /** Whether the first suggestion after an omnibox focus event has been processed. */
-    private boolean mFirstSuggestionProcessedForCurrentOmniboxFocus;
-
     /** Whether this processor should ignore all subsequent suggestion. */
     private boolean mIgnoreSuggestions;
+
+    /** Whether suggestion site favicons are enabled. */
+    private boolean mEnableSuggestionFavicons;
+
+    /** Edge size (in pixels) of the favicon. Used to request best matching favicon from cache. */
+    private final int mDesiredFaviconWidthPx;
+
+    /** Supplies site favicons. */
+    private final Supplier<LargeIconBridge> mIconBridgeSupplier;
+
+    /** Supplies additional control over suggestion model. */
+    private final SuggestionHost mSuggestionHost;
 
     /**
      * @param locationBarDelegate A means of modifying the location bar.
      * @param selectionHandler A mechanism for handling selection of the edit URL suggestion item.
      */
-    public EditUrlSuggestionProcessor(
-            LocationBarDelegate locationBarDelegate, SuggestionSelectionHandler selectionHandler) {
+    public EditUrlSuggestionProcessor(Context context, SuggestionHost suggestionHost,
+            LocationBarDelegate locationBarDelegate, SuggestionSelectionHandler selectionHandler,
+            Supplier<LargeIconBridge> iconBridgeSupplier) {
         mLocationBarDelegate = locationBarDelegate;
         mSelectionHandler = selectionHandler;
+        mDesiredFaviconWidthPx = context.getResources().getDimensionPixelSize(
+                R.dimen.omnibox_suggestion_favicon_size);
+        mSuggestionHost = suggestionHost;
+        mIconBridgeSupplier = iconBridgeSupplier;
     }
 
     /**
@@ -148,30 +149,19 @@ public class EditUrlSuggestionProcessor implements OnClickListener, SuggestionPr
 
     @Override
     public boolean doesProcessSuggestion(OmniboxSuggestion suggestion) {
-        Tab activeTab = mTabProvider != null ? mTabProvider.getActivityTab() : null;
-
+        Tab activeTab = mTabProvider != null ? mTabProvider.get() : null;
         // The what-you-typed suggestion can potentially appear as the second suggestion in some
         // cases. If the first suggestion isn't the one we want, ignore all subsequent suggestions.
-        if (!mFirstSuggestionProcessedForCurrentOmniboxFocus) {
-            mFirstSuggestionProcessedForCurrentOmniboxFocus = true;
-            mIgnoreSuggestions = activeTab == null || activeTab.isNativePage()
-                    || activeTab.isIncognito()
-                    || OmniboxSuggestionType.URL_WHAT_YOU_TYPED != suggestion.getType()
-                    || !TextUtils.equals(suggestion.getUrl(), activeTab.getUrl());
-        }
-
-        if (OmniboxSuggestionType.URL_WHAT_YOU_TYPED != suggestion.getType()
-                || mIgnoreSuggestions) {
+        if (activeTab == null || activeTab.isNativePage() || activeTab.isIncognito()
+                || SadTab.isShowing(activeTab)) {
             return false;
         }
+
         mLastProcessedSuggestion = suggestion;
 
-        // Only use the URL provided by the "what you typed" suggestion on first omnibox focus.
-        // Subsequent suggestions will provide partial URLs which we do not want. If the suggestion
-        // URL matches the original, show the suggestion item.
-        if (mOriginalUrl == null) mOriginalUrl = mLastProcessedSuggestion.getUrl();
-
-        if (!TextUtils.equals(mLastProcessedSuggestion.getUrl(), mOriginalUrl)) return false;
+        if (!isSuggestionEquivalentToCurrentPage(mLastProcessedSuggestion, activeTab.getUrl())) {
+            return false;
+        }
 
         if (!mHasClearedOmniboxForFocus) {
             mHasClearedOmniboxForFocus = true;
@@ -193,28 +183,35 @@ public class EditUrlSuggestionProcessor implements OnClickListener, SuggestionPr
     @Override
     public void populateModel(OmniboxSuggestion suggestion, PropertyModel model, int position) {
         model.set(EditUrlSuggestionProperties.TEXT_CLICK_LISTENER, this);
-
-        // Check which variation of the experiment is being run.
-        String variation = getSearchReadyOmniboxVariation();
-        if (TextUtils.equals(COPY_ICON_VARIATION_NAME, variation)) {
-            model.set(EditUrlSuggestionProperties.COPY_ICON_VISIBLE, true);
-            model.set(EditUrlSuggestionProperties.SHARE_ICON_VISIBLE, false);
-        } else if (TextUtils.equals(COPY_SHARE_ICON_VARIATION_NAME, variation)) {
-            model.set(EditUrlSuggestionProperties.COPY_ICON_VISIBLE, true);
-            model.set(EditUrlSuggestionProperties.SHARE_ICON_VISIBLE, true);
-        } else {
-            model.set(EditUrlSuggestionProperties.COPY_ICON_VISIBLE, false);
-            model.set(EditUrlSuggestionProperties.SHARE_ICON_VISIBLE, true);
-        }
         model.set(EditUrlSuggestionProperties.BUTTON_CLICK_LISTENER, this);
-
-        if (mOriginalTitle == null) mOriginalTitle = mTabProvider.getActivityTab().getTitle();
+        if (mOriginalTitle == null) mOriginalTitle = mTabProvider.get().getTitle();
         model.set(EditUrlSuggestionProperties.TITLE_TEXT, mOriginalTitle);
         model.set(EditUrlSuggestionProperties.URL_TEXT, mLastProcessedSuggestion.getUrl());
+        fetchIcon(model, mLastProcessedSuggestion.getUrl());
+    }
+
+    private void fetchIcon(PropertyModel model, String url) {
+        if (!mEnableSuggestionFavicons || url == null) return;
+
+        final LargeIconBridge iconBridge = mIconBridgeSupplier.get();
+        if (iconBridge == null) return;
+
+        iconBridge.getLargeIconForUrl(url, mDesiredFaviconWidthPx,
+                (Bitmap icon, int fallbackColor, boolean isFallbackColorDefault,
+                        int iconType) -> model.set(EditUrlSuggestionProperties.SITE_FAVICON, icon));
     }
 
     @Override
-    public void onNativeInitialized() {}
+    public void onNativeInitialized() {
+        mEnableSuggestionFavicons =
+                ChromeFeatureList.isEnabled(ChromeFeatureList.OMNIBOX_SHOW_SUGGESTION_FAVICONS);
+    }
+
+    @Override
+    public void recordSuggestionPresented(OmniboxSuggestion suggestion, PropertyModel model) {}
+
+    @Override
+    public void recordSuggestionUsed(OmniboxSuggestion suggestion, PropertyModel model) {}
 
     /**
      * @param provider A means of accessing the activity's tab.
@@ -231,54 +228,36 @@ public class EditUrlSuggestionProcessor implements OnClickListener, SuggestionPr
         mSelectionHandler = null;
     }
 
-    /**
-     * @return The experiment variation for the Search Ready Omnibox.
-     */
-    private static String getSearchReadyOmniboxVariation() {
-        return ChromeFeatureList.getFieldTrialParamByFeature(
-                ChromeFeatureList.SEARCH_READY_OMNIBOX, FIELD_TRIAL_PARAM_NAME);
-    }
-
     @Override
     public void onUrlFocusChange(boolean hasFocus) {
-        if (hasFocus) {
-            mLastOmniboxFocusTime = System.currentTimeMillis();
-        } else {
-            mOriginalUrl = null;
-            mOriginalTitle = null;
-            mHasClearedOmniboxForFocus = false;
-            mLastProcessedSuggestion = null;
-            mFirstSuggestionProcessedForCurrentOmniboxFocus = false;
-            mIgnoreSuggestions = false;
-        }
-        mShouldRecordTimingEvent = hasFocus;
+        if (hasFocus) return;
+
+        mOriginalTitle = null;
+        mHasClearedOmniboxForFocus = false;
+        mLastProcessedSuggestion = null;
+        mIgnoreSuggestions = false;
     }
 
     @Override
     public void onClick(View view) {
-        Tab activityTab = mTabProvider.getActivityTab();
+        Tab activityTab = mTabProvider.get();
         assert activityTab != null : "A tab is required to make changes to the location bar.";
 
         if (R.id.url_copy_icon == view.getId()) {
             ENUMERATED_SUGGESTION_ACTION.record(SuggestionAction.COPY);
             ACTION_EDIT_URL_SUGGESTION_COPY.record();
-            if (mShouldRecordTimingEvent) {
-                UrlBar.recordTimedActionForMetrics(OmniboxAction.COPY, mLastOmniboxFocusTime);
-                mShouldRecordTimingEvent = false;
-            }
             Clipboard.getInstance().copyUrlToClipboard(mLastProcessedSuggestion.getUrl());
         } else if (R.id.url_share_icon == view.getId()) {
             ENUMERATED_SUGGESTION_ACTION.record(SuggestionAction.SHARE);
             ACTION_EDIT_URL_SUGGESTION_SHARE.record();
-            if (mShouldRecordTimingEvent) {
-                UrlBar.recordTimedActionForMetrics(OmniboxAction.SHARE, mLastOmniboxFocusTime);
-                mShouldRecordTimingEvent = false;
-            }
             mLocationBarDelegate.clearOmniboxFocus();
             // TODO(mdjones): This should only share the displayed URL instead of the background
             //                tab.
-            ShareMenuActionHandler.getInstance().onShareMenuItemSelected(
-                    activityTab.getActivity(), activityTab, false, activityTab.isIncognito());
+            ((TabImpl) activityTab)
+                    .getActivity()
+                    .getShareDelegateSupplier()
+                    .get()
+                    .share(activityTab, false);
         } else if (R.id.url_edit_icon == view.getId()) {
             ENUMERATED_SUGGESTION_ACTION.record(SuggestionAction.EDIT);
             ACTION_EDIT_URL_SUGGESTION_EDIT.record();
@@ -291,6 +270,24 @@ public class EditUrlSuggestionProcessor implements OnClickListener, SuggestionPr
             if (mSelectionHandler != null) {
                 mSelectionHandler.onEditUrlSuggestionSelected(mLastProcessedSuggestion);
             }
+        }
+    }
+
+    /**
+     * @return true if the suggestion is effectively the same as the current page, either because:
+     * 1. It's a search suggestion for the same search terms as the current SERP.
+     * 2. It's a URL suggestion for the current URL.
+     */
+    private boolean isSuggestionEquivalentToCurrentPage(
+            OmniboxSuggestion suggestion, String pageUrl) {
+        switch (suggestion.getType()) {
+            case OmniboxSuggestionType.SEARCH_WHAT_YOU_TYPED:
+                return TextUtils.equals(suggestion.getFillIntoEdit(),
+                        TemplateUrlServiceFactory.get().getSearchQueryForUrl(pageUrl));
+            case OmniboxSuggestionType.URL_WHAT_YOU_TYPED:
+                return TextUtils.equals(suggestion.getUrl(), pageUrl);
+            default:
+                return false;
         }
     }
 }

@@ -17,17 +17,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserManager;
-import android.support.annotation.AnyThread;
-import android.support.annotation.MainThread;
-import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
+
+import androidx.annotation.AnyThread;
+import androidx.annotation.MainThread;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.annotation.WorkerThread;
 
 import org.chromium.base.Callback;
 import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;
 import org.chromium.base.ObserverList;
 import org.chromium.base.ThreadUtils;
-import org.chromium.base.VisibleForTesting;
+import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.metrics.CachedMetrics;
 import org.chromium.base.task.AsyncTask;
 import org.chromium.components.signin.util.PatternMatcher;
@@ -38,7 +40,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
@@ -89,13 +90,13 @@ public class AccountManagerFacade {
             new AtomicReference<>();
     private final CountDownLatch mPopulateAccountCacheLatch = new CountDownLatch(1);
     private final CachedMetrics.TimesHistogramSample mPopulateAccountCacheWaitingTimeHistogram =
-            new CachedMetrics.TimesHistogramSample(
-                    "Signin.AndroidPopulateAccountCacheWaitingTime", TimeUnit.MILLISECONDS);
+            new CachedMetrics.TimesHistogramSample("Signin.AndroidPopulateAccountCacheWaitingTime");
 
     private final ArrayList<Runnable> mCallbacksWaitingForCachePopulation = new ArrayList<>();
 
     private int mUpdateTasksCounter;
     private final ArrayList<Runnable> mCallbacksWaitingForPendingUpdates = new ArrayList<>();
+    private ObservableValue<Boolean> mUpdatePendingState = new MutableObservableValue<>(true);
 
     /**
      * @param delegate the AccountManagerDelegate to use as a backend
@@ -165,6 +166,7 @@ public class AccountManagerFacade {
      * @return a singleton instance
      */
     @AnyThread
+    @CalledByNative
     public static AccountManagerFacade get() {
         AccountManagerFacade instance = sAtomicInstance.get();
         assert instance != null : "AccountManagerFacade is not initialized!";
@@ -436,7 +438,7 @@ public class AccountManagerFacade {
      * @return The OAuth2 access token as a string.
      */
     @WorkerThread
-    String getAccessToken(Account account, String scope) throws AuthException {
+    public String getAccessToken(Account account, String scope) throws AuthException {
         assert account != null;
         assert scope != null;
         // TODO(bsazonov): Rename delegate's getAuthToken to getAccessToken.
@@ -449,7 +451,7 @@ public class AccountManagerFacade {
      * @param accessToken The access token to invalidate.
      */
     @WorkerThread
-    void invalidateAccessToken(String accessToken) throws AuthException {
+    public void invalidateAccessToken(String accessToken) throws AuthException {
         assert accessToken != null;
         // TODO(bsazonov): Rename delegate's invalidateAuthToken to invalidateAccessToken.
         mDelegate.invalidateAuthToken(accessToken);
@@ -520,7 +522,7 @@ public class AccountManagerFacade {
     @MainThread
     public void waitForPendingUpdates(Runnable callback) {
         ThreadUtils.assertOnUiThread();
-        if (!isUpdatePending()) {
+        if (!isUpdatePending().get()) {
             callback.run();
             return;
         }
@@ -532,9 +534,9 @@ public class AccountManagerFacade {
      * @return true if there are no pending updates, false otherwise
      */
     @MainThread
-    public boolean isUpdatePending() {
+    public ObservableValue<Boolean> isUpdatePending() {
         ThreadUtils.assertOnUiThread();
-        return mUpdateTasksCounter > 0;
+        return mUpdatePendingState;
     }
 
     private boolean hasFeature(Account account, String feature) {
@@ -634,19 +636,28 @@ public class AccountManagerFacade {
         }
     }
 
+    private void incrementUpdateCounter() {
+        assert mUpdateTasksCounter >= 0;
+        if (mUpdateTasksCounter++ > 0) return;
+
+        mUpdatePendingState.set(true);
+    }
+
     private void decrementUpdateCounter() {
+        assert mUpdateTasksCounter > 0;
         if (--mUpdateTasksCounter > 0) return;
 
         for (Runnable callback : mCallbacksWaitingForPendingUpdates) {
             callback.run();
         }
         mCallbacksWaitingForPendingUpdates.clear();
+        mUpdatePendingState.set(false);
     }
 
     private class InitializeTask extends AsyncTask<Void> {
         @Override
         protected void onPreExecute() {
-            ++mUpdateTasksCounter;
+            incrementUpdateCounter();
         }
 
         @Override
@@ -675,7 +686,7 @@ public class AccountManagerFacade {
     private class UpdateAccountRestrictionPatternsTask extends AsyncTask<PatternMatcher[]> {
         @Override
         protected void onPreExecute() {
-            ++mUpdateTasksCounter;
+            incrementUpdateCounter();
         }
 
         @Override
@@ -693,7 +704,7 @@ public class AccountManagerFacade {
     private class UpdateAccountsTask extends AsyncTask<AccountManagerResult<List<Account>>> {
         @Override
         protected void onPreExecute() {
-            ++mUpdateTasksCounter;
+            incrementUpdateCounter();
         }
 
         @Override

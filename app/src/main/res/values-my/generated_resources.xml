@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"ဆက်လုပ်ရန်"</string>
+<string name="tos_notification_title">"မတ်လ ၃၁ ရက်နေ့တွင် Chrome ၏ \'ဝန်ဆောင်မှုစည်းမျဉ်းများ\' ပြောင်းပါတော့မည်"</string>
+<string name="tos_notification_body_text">"စည်းမျဉ်းအသစ်များကို ဖတ်ရှုပါ"</string>
+<string name="tos_notification_ack_button_text">"ရပါပြီ!"</string>
+<string name="tos_notification_review_button_text">"ပြန်ကြည့်ရန်"</string>
+<string name="search_or_type_web_address">"ဝဘ်လိပ်စာကို ရှာပါ သို့မဟုတ် ထည့်ပါ"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"ကလစ်ဘုတ်မှ အကြံပြုချက်ကို ဖယ်ရှားလိုပါသလား။"</string>
+<string name="options_homepage_title">"ပင်မ စာမျက်နှာ"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"ဤဝဘ်ဆိုက်သည် အချက်အလက်များကို ရုပ်ဖျက်မုဒ်ပြင်ပရှိ အက်ပ်တစ်ခုနှင့် မျှဝေပါတော့မည်။"</string>
+<string name="external_app_leave_incognito_warning_title">"ရုပ်ဖျက်မုဒ်မှ ထွက်လိုပါသလား။"</string>
+<string name="external_app_leave_incognito_stay">"နေပါ"</string>
+<string name="external_app_leave_incognito_leave">"ထွက်ခွာရန်"</string>
+<string name="external_app_restricted_access_error">"တောင်းဆိုထားသည့် အရင်းမြစ်ကို Chrome သည် အသုံးပြုခွင့်မရှိပါ။"</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"အနီးအနားတွင် ကိရိယာများ မရှိပါ။"</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"ခွင့်ပြုရန်"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"ပိတ်ဆို့ရန်"</string>
+<string name="blocked_ads_prompt_title">"ကြော်ငြာများကို ပိတ်လိုက်ပါပြီ"</string>
+<string name="video_call_notification_text_2">"ဗီဒီယို ထည့်သွင်းမှုကို ရယူနေ"</string>
+<string name="audio_call_notification_text_2">"အသံ ထည့်သွင်းမှုကို ရယူနေ"</string>
+<string name="video_audio_call_notification_text_2">"အသံနှင့် ဗွီဒီယို ထည့်သွင်းမှုများအား ရယူသုံးနေစဉ်"</string>
+<string name="video_call_incognito_notification_text_2">"ဝဘ်ဆိုက်တစ်ခုက ဗီဒီယိုထည့်သွင်းမှုကို ဝင်သုံးနေသည်"</string>
+<string name="audio_call_incognito_notification_text_2">"ဝဘ်ဆိုက်တစ်ခုက အသံထည့်သွင်းမှုကို ဝင်သုံးနေသည်"</string>
+<string name="video_audio_call_incognito_notification_text_2">"ဝဘ်ဆိုက်တစ်ခုက အသံနှင့် ဗီဒီယိုထည့်သွင်းမှုကို ဝင်သုံးနေသည်"</string>
+</resources>

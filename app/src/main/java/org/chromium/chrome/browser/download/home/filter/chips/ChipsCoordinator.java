@@ -17,6 +17,8 @@ import org.chromium.ui.modelutil.ListModel;
 import org.chromium.ui.modelutil.RecyclerViewAdapter;
 import org.chromium.ui.modelutil.SimpleRecyclerViewMcp;
 
+import java.util.List;
+
 /**
  * The coordinator responsible for managing a list of chips.  To get the {@link View} that
  * represents this coordinator use {@link #getView()}.
@@ -64,7 +66,8 @@ public class ChipsCoordinator implements ChipsProvider.Observer {
     // ChipsProvider.Observer implementation.
     @Override
     public void onChipsChanged() {
-        mModel.set(mProvider.getChips());
+        List<Chip> chips = mProvider.getChips();
+        mModel.set(chips);
     }
 
     private static RecyclerView createView(Context context) {
@@ -85,7 +88,6 @@ public class ChipsCoordinator implements ChipsProvider.Observer {
                     R.dimen.chip_list_inter_chip_padding);
             mSidePaddingPx = (int) context.getResources().getDimensionPixelSize(
                     R.dimen.chip_list_side_padding);
-            ;
         }
 
         @Override

@@ -18,7 +18,7 @@
         android:key="parental_settings"
         android:title="@string/account_management_parental_settings"/>
 
-    <org.chromium.chrome.browser.preferences.TextMessagePreference
+    <org.chromium.chrome.browser.settings.TextMessagePreference
         android:key="parent_accounts"
         tools:summary="@string/account_management_two_parent_names"/>
 
@@ -29,24 +29,6 @@
 
     <Preference
         android:key="child_content_divider"
-        android:layout="@layout/divider_preference"/>
-
-    <org.chromium.chrome.browser.preferences.SyncPreference
-        android:key="sync_settings"
-        android:title="@string/sign_in_sync"/>
-
-    <Preference
-        android:key="sync_settings_divider"
-        android:layout="@layout/divider_preference"/>
-
-    <Preference
-        android:key="google_activity_controls"
-        android:icon="@drawable/ic_logo_googleg_24dp"
-        android:title="@string/sign_in_google_activity_controls_legacy"
-        android:summary="@string/sign_in_google_activity_controls_message_legacy"/>
-
-    <Preference
-        android:key="google_activity_controls_divider"
         android:layout="@layout/divider_preference"/>
 
     <Preference

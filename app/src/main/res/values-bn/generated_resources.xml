@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"চালিয়ে যান"</string>
+<string name="tos_notification_title">"৩১ মার্চ থেকে Chrome-এর \'পরিষেবার শর্তাবলী\'-তে পরিবর্তন করা হবে"</string>
+<string name="tos_notification_body_text">"নতুন শর্তাবলী ভাল করে পড়ে নিন"</string>
+<string name="tos_notification_ack_button_text">"বুঝেছি"</string>
+<string name="tos_notification_review_button_text">"পর্যালোচনা করুন"</string>
+<string name="search_or_type_web_address">"ওয়েব ঠিকানা খুঁজুন বা লিখুন"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"ক্লিপবোর্ড থেকে সাজেশন সরাতে চান?"</string>
+<string name="options_homepage_title">"হোম পৃষ্ঠা"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"এই সাইটটি ছদ্মবেশী মোডের বাইরের একটি অ্যাপের সাথে তথ্য শেয়ার করতে চলেছে।"</string>
+<string name="external_app_leave_incognito_warning_title">"ছদ্মবেশী মোড ছেড়ে বেরোবেন?"</string>
+<string name="external_app_leave_incognito_stay">"থাকুন"</string>
+<string name="external_app_leave_incognito_leave">"ছেড়ে চলে যান"</string>
+<string name="external_app_restricted_access_error">"অনুরোধকৃত সম্পদে Chrome এর অ্যাক্সেস নেই।"</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"কাছাকাছি কোনও ডিভাইস পাওয়া যায়নি।"</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"অনুমতি দিন"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"ব্লক করুন"</string>
+<string name="blocked_ads_prompt_title">"বিজ্ঞাপন ব্লক করা হয়েছে"</string>
+<string name="video_call_notification_text_2">"ভিডিও ইনপুট অ্যাক্সেস করা হচ্ছে"</string>
+<string name="audio_call_notification_text_2">"অডিও ইনপুট অ্যাক্সেস করা হচ্ছে"</string>
+<string name="video_audio_call_notification_text_2">"অডিও এবং ভিডিও ইনপুটে অ্যাক্সেস করা হচ্ছে"</string>
+<string name="video_call_incognito_notification_text_2">"একটি সাইট ভিডিও ইনপুট অ্যাক্সেস করছে"</string>
+<string name="audio_call_incognito_notification_text_2">"একটি সাইট অডিও ইনপুট অ্যাক্সেস করছে"</string>
+<string name="video_audio_call_incognito_notification_text_2">"একটি সাইট অডিও ও ভিডিও ইনপুট অ্যাক্সেস করছে"</string>
+</resources>

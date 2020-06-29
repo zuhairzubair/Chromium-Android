@@ -14,22 +14,17 @@
 
 package android.support.customtabs.trusted;
 
-import android.content.ComponentName;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
+import android.graphics.Matrix;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.customtabs.CustomTabsCallback;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.customtabs.CustomTabsServiceConnection;
-import android.support.customtabs.CustomTabsSession;
 import android.support.customtabs.TrustedWebUtils;
+import android.support.customtabs.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Toast;
+import android.widget.ImageView;
 
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
@@ -52,56 +47,135 @@ import android.widget.Toast;
  * If you just want default behaviour your Trusted Web Activity client app doesn't even need any
  * Java code - you just set everything up in the Android Manifest!
  *
- * At the moment this only works with Chrome Dev, Beta and local builds (launch progress [3]).
+ * This activity also supports showing a splash screen while the Trusted Web Activity provider is
+ * warming up and is loading the page in Trusted Web Activity. This is supported in Chrome 75+.
+ *
+ * Splash screens support in Chrome is based on transferring the splash screen via FileProvider [3].
+ * To set up splash screens, you need to:
+ * 1) Set up a FileProvider in the Manifest as described in [3]. The file provider paths should be
+ * as follows: <paths><files-path path="twa_splash/" name="twa_splash"/></paths>
+ * 2) Provide splash-screen related metadata (see descriptions in {@link LauncherActivityMetadata}),
+ * including the authority of your FileProvider.
+ *
+ * Splash screen is first shown here in LauncherActivity, then seamlessly moved onto the browser.
+ * Showing splash screen in the app first is optional, but highly recommended, because on slow
+ * devices (e.g. Android Go) it can take seconds to boot up a browser.
+ *
+ * Recommended theme for this Activity is:
+ * <pre>{@code
+ * <style name="LauncherActivityTheme" parent="Theme.AppCompat.NoActionBar">
+ *     <item name="android:windowIsTranslucent">true</item>
+ *     <item name="android:windowBackground">@android:color/transparent</item>
+ *     <item name="android:statusBarColor">@android:color/transparent</item>
+ *     <item name="android:navigationBarColor">@android:color/transparent</item>
+ *     <item name="android:backgroundDimEnabled">false</item>
+ * </style>
+ * }</pre>
+ *
+ * Note that even with splash screen enabled, it is still recommended to use a transparent theme.
+ * That way the Activity can gracefully fall back to being a transparent "trampoline" activity in
+ * the following cases:
+ * - Splash screens are not supported by the picked browser.
+ * - The TWA is already running, and LauncherActivity merely needs to deliver a new Intent to it.
  *
  * [1] https://developers.google.com/digital-asset-links/v1/getting-started
  * [2] https://www.chromium.org/developers/how-tos/run-chromium-with-flags#TOC-Setting-Flags-for-Chrome-on-Android
- * [3] https://www.chromestatus.com/feature/4857483210260480
+ * [3] https://developer.android.com/reference/android/support/v4/content/FileProvider
  */
 public class LauncherActivity extends AppCompatActivity {
-    private static final String TAG = "LauncherActivity";
-    private static final String METADATA_DEFAULT_URL =
-            "android.support.customtabs.trusted.DEFAULT_URL";
+    private static final String TAG = "TWALauncherActivity";
 
-    private static final String TWA_WAS_LAUNCHED_KEY =
-            "android.support.customtabs.trusted.TWA_WAS_LAUNCHED_KEY";
+    private static final String BROWSER_WAS_LAUNCHED_KEY =
+            "android.support.customtabs.trusted.BROWSER_WAS_LAUNCHED_KEY";
 
-    private static final int SESSION_ID = 96375;
+    /** We only want to show the update prompt once per instance of this application. */
+    private static boolean sChromeVersionChecked;
 
-    @Nullable private TwaCustomTabsServiceConnection mServiceConnection;
+    private LauncherActivityMetadata mMetadata;
 
-    private boolean mTwaWasLaunched;
+    private boolean mBrowserWasLaunched;
 
-    /**
-     * Connects to the CustomTabsService.
-     */
+    @Nullable
+    private PwaWrapperSplashScreenStrategy mSplashScreenStrategy;
+
+    @Nullable
+    private TwaLauncher mTwaLauncher;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String chromePackage = CustomTabsClient.getPackageName(this,
-                TrustedWebUtils.SUPPORTED_CHROME_PACKAGES, false);
-        if (chromePackage == null) {
-            Log.d(TAG, "No valid build of Chrome found, exiting.");
-            Toast.makeText(this, "Please install Chrome Dev/Canary.", Toast.LENGTH_LONG).show();
-            finishAndRemoveTaskCompat();
-            return;
-        }
 
-        if (savedInstanceState != null && savedInstanceState.getBoolean(TWA_WAS_LAUNCHED_KEY)) {
+        if (savedInstanceState != null && savedInstanceState.getBoolean(BROWSER_WAS_LAUNCHED_KEY)) {
             // This activity died in the background after launching Trusted Web Activity, then
             // the user closed the Trusted Web Activity and ended up here.
             finish();
             return;
         }
 
-        mServiceConnection = new TwaCustomTabsServiceConnection();
-        CustomTabsClient.bindCustomTabsService(this, chromePackage, mServiceConnection);
+        mMetadata = LauncherActivityMetadata.parse(this);
+
+        if (splashScreenNeeded()) {
+            mSplashScreenStrategy = new PwaWrapperSplashScreenStrategy(this,
+                    mMetadata.splashImageDrawableId,
+                    getColorCompat(mMetadata.splashScreenBackgroundColorId),
+                    getSplashImageScaleType(),
+                    getSplashImageTransformationMatrix(),
+                    mMetadata.splashScreenFadeOutDurationMillis,
+                    mMetadata.fileProviderAuthority);
+        }
+
+        TrustedWebActivityBuilder twaBuilder =
+                new TrustedWebActivityBuilder(this, getLaunchingUrl())
+                        .setStatusBarColor(getColorCompat(mMetadata.statusBarColorId));
+
+        mTwaLauncher = new TwaLauncher(this);
+        mTwaLauncher.launch(twaBuilder, mSplashScreenStrategy, () -> mBrowserWasLaunched = true);
+
+        if (!sChromeVersionChecked) {
+            TrustedWebUtils.promptForChromeUpdateIfNeeded(this, mTwaLauncher.getProviderPackage());
+            sChromeVersionChecked = true;
+        }
+    }
+
+    private boolean splashScreenNeeded() {
+        // Splash screen was not requested.
+        if (mMetadata.splashImageDrawableId == 0) return false;
+
+        // If this activity isn't task root, then a TWA is already running in this task. This can
+        // happen if a VIEW intent (without Intent.FLAG_ACTIVITY_NEW_TASK) is being handled after
+        // launching a TWA. In that case we're only passing a new intent into existing TWA, and
+        // don't show the splash screen.
+        return isTaskRoot();
+    }
+
+    /**
+     * Override to set a custom scale type for the image displayed on a splash screen.
+     * See {@link ImageView.ScaleType}.
+     */
+    @NonNull
+    protected ImageView.ScaleType getSplashImageScaleType() {
+        return ImageView.ScaleType.CENTER;
+    }
+
+    /**
+     * Override to set a transformation matrix for the image displayed on a splash screen.
+     * See {@link ImageView#setImageMatrix}.
+     * Has any effect only if {@link #getSplashImageScaleType()} returns {@link
+     * ImageView.ScaleType#MATRIX}.
+     */
+    @Nullable
+    protected Matrix getSplashImageTransformationMatrix() {
+        return null;
+    }
+
+    private int getColorCompat(int splashScreenBackgroundColorId) {
+        return ContextCompat.getColor(this, splashScreenBackgroundColorId);
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        if (mTwaWasLaunched) {
+        if (mBrowserWasLaunched) {
             finish(); // The user closed the Trusted Web Activity and ended up here.
         }
     }
@@ -109,40 +183,26 @@ public class LauncherActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mServiceConnection != null) {
-            unbindService(mServiceConnection);
+        if (mTwaLauncher != null) {
+            mTwaLauncher.destroy();
+        }
+        if (mSplashScreenStrategy != null) {
+            mSplashScreenStrategy.destroy();
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(TWA_WAS_LAUNCHED_KEY, mTwaWasLaunched);
+        outState.putBoolean(BROWSER_WAS_LAUNCHED_KEY, mBrowserWasLaunched);
     }
 
-    /**
-     * Creates a {@link CustomTabsSession}. Default implementation returns a CustomTabsSession using
-     * a constant session id, see {@link CustomTabsClient#newSession(CustomTabsCallback, int)}, so
-     * that if an instance of Trusted Web Activity associated with this app is already running, the
-     * new Intent will be routed to it, allowing for seamless page transitions. The user will be
-     * able to navigate to the previous page with the back button.
-     *
-     * Override this if you want any special session specific behaviour. To launch separate Trusted
-     * Web Activity instances, return CustomTabsSessions either without session ids (see
-     * {@link CustomTabsClient#newSession(CustomTabsCallback)}) or with different ones on each
-     * call.
-     */
-    protected CustomTabsSession getSession(CustomTabsClient client) {
-        return client.newSession(null, SESSION_ID);
-    }
-
-    /**
-     * Creates a {@link CustomTabsIntent} to launch the Trusted Web Activity.
-     * By default, Trusted Web Activity will be launched in the same Android Task.
-     * Override this if you want any special launching behaviour.
-     */
-    protected CustomTabsIntent getCustomTabsIntent(CustomTabsSession session) {
-        return new CustomTabsIntent.Builder(session).build();
+    @Override
+    public void onEnterAnimationComplete() {
+        super.onEnterAnimationComplete();
+        if (mSplashScreenStrategy != null) {
+            mSplashScreenStrategy.onActivityEnterAnimationComplete();
+        }
     }
 
     /**
@@ -160,48 +220,12 @@ public class LauncherActivity extends AppCompatActivity {
             return uri;
         }
 
-        try {
-            ActivityInfo info = getPackageManager().getActivityInfo(
-                    new ComponentName(this, getClass()), PackageManager.GET_META_DATA);
-
-            if (info.metaData != null && info.metaData.containsKey(METADATA_DEFAULT_URL)) {
-                uri = Uri.parse(info.metaData.getString(METADATA_DEFAULT_URL));
-                Log.d(TAG, "Using URL from Manifest (" + uri + ").");
-                return uri;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            // Will only happen if the package provided (the one we are running in) is not
-            // installed - so should never happen.
+        if (mMetadata.defaultUrl != null) {
+            Log.d(TAG, "Using URL from Manifest (" + mMetadata.defaultUrl + ").");
+            return Uri.parse(mMetadata.defaultUrl);
         }
 
         return Uri.parse("https://www.example.com/");
     }
 
-    private class TwaCustomTabsServiceConnection extends CustomTabsServiceConnection {
-        @Override
-        public void onCustomTabsServiceConnected(ComponentName componentName,
-                CustomTabsClient client) {
-            // Warmup must be called for Trusted Web Activity verification to work.
-            client.warmup(0L);
-
-            CustomTabsSession session = getSession(client);
-            CustomTabsIntent intent = getCustomTabsIntent(session);
-            Uri url = getLaunchingUrl();
-
-            Log.d(TAG, "Launching Trusted Web Activity.");
-            TrustedWebUtils.launchAsTrustedWebActivity(LauncherActivity.this, session, intent, url);
-            mTwaWasLaunched = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) { }
-    }
-
-    private void finishAndRemoveTaskCompat() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            finishAndRemoveTask();
-        } else {
-            finish();
-        }
-    }
 }

@@ -10,23 +10,24 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.support.annotation.DrawableRes;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+
+import androidx.annotation.DrawableRes;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ThemeColorProvider;
 import org.chromium.chrome.browser.ThemeColorProvider.TintObserver;
-import org.chromium.chrome.browser.appmenu.AppMenuButtonHelper;
 import org.chromium.chrome.browser.omaha.UpdateMenuItemHelper;
 import org.chromium.chrome.browser.omaha.UpdateMenuItemHelper.MenuButtonState;
-import org.chromium.chrome.browser.widget.PulseDrawable;
+import org.chromium.chrome.browser.ui.appmenu.AppMenuButtonHelper;
+import org.chromium.components.browser_ui.widget.animation.Interpolators;
+import org.chromium.components.browser_ui.widget.highlight.PulseDrawable;
 import org.chromium.ui.interpolators.BakedBezierInterpolator;
 
 /**
@@ -45,7 +46,7 @@ public class MenuButton extends FrameLayout implements TintObserver {
     private boolean mHighlightingMenu;
     private PulseDrawable mHighlightDrawable;
 
-    private boolean mShowMenuBadge;
+    private boolean mSuppressAppMenuUpdateBadge;
     private AnimatorSet mMenuBadgeAnimatorSet;
     private boolean mIsMenuBadgeAnimationRunning;
 
@@ -66,7 +67,7 @@ public class MenuButton extends FrameLayout implements TintObserver {
     public void setAppMenuButtonHelper(AppMenuButtonHelper appMenuButtonHelper) {
         mAppMenuButtonHelper = appMenuButtonHelper;
         mMenuImageButton.setOnTouchListener(mAppMenuButtonHelper);
-        mMenuImageButton.setAccessibilityDelegate(mAppMenuButtonHelper);
+        mMenuImageButton.setAccessibilityDelegate(mAppMenuButtonHelper.getAccessibilityDelegate());
     }
 
     public AppMenuButtonHelper getAppMenuButtonHelper() {
@@ -82,17 +83,13 @@ public class MenuButton extends FrameLayout implements TintObserver {
     }
 
     /**
-     * Sets the update badge to visible if the update state requires it.
+     * Sets the update badge to visible.
      *
      * @param visible Whether the update badge should be visible. Always sets visibility to GONE
      *                if the update type does not require a badge.
      * TODO(crbug.com/865801): Clean this up when MenuButton and UpdateMenuItemHelper is MVCed.
      */
-    private void setUpdateBadgeVisibilityIfValidState(boolean visible) {
-        MenuButtonState buttonState = UpdateMenuItemHelper.getInstance().getUiState().buttonState;
-
-        visible &= buttonState != null;
-
+    private void setUpdateBadgeVisibility(boolean visible) {
         mUpdateBadgeView.setVisibility(visible ? View.VISIBLE : View.GONE);
         if (visible) updateImageResources();
         updateContentDescription(visible);
@@ -111,12 +108,43 @@ public class MenuButton extends FrameLayout implements TintObserver {
      * Show the update badge on the app menu button.
      * @param animate Whether to animate the showing of the update badge.
      */
-    public void showAppMenuUpdateBadge(boolean animate) {
-        if (mUpdateBadgeView == null) return;
-        mShowMenuBadge = true;
-        updateImageResources();
+    public void showAppMenuUpdateBadgeIfAvailable(boolean animate) {
+        if (mUpdateBadgeView == null || mMenuImageButton == null || mSuppressAppMenuUpdateBadge
+                || !isBadgeAvailable()) {
+            return;
+        }
 
-        setAppMenuUpdateBadgeToVisible(animate);
+        updateImageResources();
+        updateContentDescription(true);
+        if (!animate || mIsMenuBadgeAnimationRunning) {
+            setUpdateBadgeVisibility(true);
+            return;
+        }
+
+        // Set initial states.
+        mUpdateBadgeView.setAlpha(0.f);
+        mUpdateBadgeView.setVisibility(View.VISIBLE);
+
+        mMenuBadgeAnimatorSet = createShowUpdateBadgeAnimation(mMenuImageButton, mUpdateBadgeView);
+
+        mMenuBadgeAnimatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mIsMenuBadgeAnimationRunning = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mIsMenuBadgeAnimationRunning = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mIsMenuBadgeAnimationRunning = false;
+            }
+        });
+
+        mMenuBadgeAnimatorSet.start();
     }
 
     /**
@@ -124,13 +152,11 @@ public class MenuButton extends FrameLayout implements TintObserver {
      * @param animate Whether to animate the hiding of the update badge.
      */
     public void removeAppMenuUpdateBadge(boolean animate) {
-        if (mUpdateBadgeView == null) return;
-        boolean wasShowingMenuBadge = mShowMenuBadge;
-        mShowMenuBadge = false;
+        if (mUpdateBadgeView == null || !isShowingAppMenuUpdateBadge()) return;
         updateContentDescription(false);
 
-        if (!animate || !wasShowingMenuBadge) {
-            setUpdateBadgeVisibilityIfValidState(false);
+        if (!animate) {
+            setUpdateBadgeVisibility(false);
             return;
         }
 
@@ -164,48 +190,27 @@ public class MenuButton extends FrameLayout implements TintObserver {
     }
 
     /**
+     * @param suppress Whether to prevent the update badge from being show. This is currently only
+     *                 used to prevent the badge from being shown in the tablet tab switcher.
+     */
+    public void setAppMenuUpdateBadgeSuppressed(boolean suppress) {
+        mSuppressAppMenuUpdateBadge = suppress;
+        if (mSuppressAppMenuUpdateBadge) {
+            removeAppMenuUpdateBadge(false);
+        } else {
+            showAppMenuUpdateBadgeIfAvailable(false);
+        }
+    }
+
+    /**
      * @return Whether the update badge is showing.
      */
     public boolean isShowingAppMenuUpdateBadge() {
         return mUpdateBadgeView.getVisibility() == View.VISIBLE;
     }
 
-    /**
-     * Sets the update badge visibility to VISIBLE and sets the menu button image to the badged
-     * bitmap.
-     */
-    private void setAppMenuUpdateBadgeToVisible(boolean animate) {
-        if (mUpdateBadgeView == null || mMenuImageButton == null) return;
-        updateContentDescription(true);
-        if (!animate || mIsMenuBadgeAnimationRunning) {
-            setUpdateBadgeVisibilityIfValidState(true);
-            return;
-        }
-
-        // Set initial states.
-        mUpdateBadgeView.setAlpha(0.f);
-        mUpdateBadgeView.setVisibility(View.VISIBLE);
-
-        mMenuBadgeAnimatorSet = createShowUpdateBadgeAnimation(mMenuImageButton, mUpdateBadgeView);
-
-        mMenuBadgeAnimatorSet.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mIsMenuBadgeAnimationRunning = true;
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mIsMenuBadgeAnimationRunning = false;
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mIsMenuBadgeAnimationRunning = false;
-            }
-        });
-
-        mMenuBadgeAnimatorSet.start();
+    private static boolean isBadgeAvailable() {
+        return UpdateMenuItemHelper.getInstance().getUiState().buttonState != null;
     }
 
     /**
@@ -241,7 +246,8 @@ public class MenuButton extends FrameLayout implements TintObserver {
                         ViewCompat.getPaddingEnd(mMenuImageButton),
                         mMenuImageButton.getPaddingBottom());
             }
-            mHighlightDrawable.setUseLightPulseColor(mUseLightDrawables);
+            mHighlightDrawable.setUseLightPulseColor(
+                    getContext().getResources(), mUseLightDrawables);
             setBackground(mHighlightDrawable);
             mHighlightDrawable.start();
         } else {
@@ -288,14 +294,14 @@ public class MenuButton extends FrameLayout implements TintObserver {
         badgeFadeAnimator.setInterpolator(BakedBezierInterpolator.FADE_IN_CURVE);
 
         int pixelTranslation = menuBadge.getResources().getDimensionPixelSize(
-                R.dimen.menu_badge_translation_y_distance);
+                R.dimen.menu_badge_translation_y);
         ObjectAnimator badgeTranslateYAnimator =
                 ObjectAnimator.ofFloat(menuBadge, View.TRANSLATION_Y, pixelTranslation, 0.f);
         badgeTranslateYAnimator.setInterpolator(BakedBezierInterpolator.TRANSFORM_CURVE);
 
         // Create menu button ObjectAnimator.
         ObjectAnimator menuButtonFadeAnimator = ObjectAnimator.ofFloat(menuButton, View.ALPHA, 0.f);
-        menuButtonFadeAnimator.setInterpolator(new LinearInterpolator());
+        menuButtonFadeAnimator.setInterpolator(Interpolators.LINEAR_INTERPOLATOR);
 
         // Create AnimatorSet and listeners.
         AnimatorSet set = new AnimatorSet();

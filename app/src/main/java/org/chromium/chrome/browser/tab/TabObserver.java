@@ -5,21 +5,27 @@
 package org.chromium.chrome.browser.tab;
 
 import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
 import android.view.ContextMenu;
 
 import org.chromium.chrome.browser.TabLoadStatus;
-import org.chromium.chrome.browser.fullscreen.FullscreenOptions;
-import org.chromium.chrome.browser.tab.Tab.TabHidingType;
-import org.chromium.chrome.browser.tabmodel.TabSelectionType;
+import org.chromium.components.find_in_page.FindMatchRectsDetails;
+import org.chromium.components.find_in_page.FindNotificationDetails;
 import org.chromium.content_public.browser.LoadUrlParams;
+import org.chromium.content_public.browser.NavigationHandle;
 import org.chromium.content_public.browser.WebContents;
-import org.chromium.content_public.common.BrowserControlsState;
 
 /**
  * An observer that is notified of changes to a {@link Tab} object.
  */
 public interface TabObserver {
+    /**
+     * Called when a {@link Tab} finished initialization. The {@link TabState} contains,
+     * if not {@code null}, various states that a Tab should restore itself from.
+     * @param tab The notifying {@link Tab}.
+     * @param tabState {@link TabState} to restore tab's state from if not {@code null}.
+     */
+    void onInitialized(Tab tab, TabState tabState);
+
     /**
      * Called when a {@link Tab} is shown.
      * @param tab The notifying {@link Tab}.
@@ -147,7 +153,9 @@ public interface TabObserver {
     /**
      * Called when a context menu is shown for a {@link WebContents} owned by a {@link Tab}.
      * @param tab  The notifying {@link Tab}.
-     * @param menu The {@link ContextMenu} that is being shown.
+     * @param menu The {@link ContextMenu} that is being shown. Deprecated: The menu param is only
+     *             used for some tests and new context menu implementations don't extend
+     *             ContextMenu.
      */
     void onContextMenuShown(Tab tab, ContextMenu menu);
 
@@ -160,6 +168,12 @@ public interface TabObserver {
     void onContextualActionBarVisibilityChanged(Tab tab, boolean visible);
 
     // WebContentsDelegateAndroid methods ---------------------------------------------------------
+
+    /**
+     * Called when the WebContents is closed.
+     * @param tab The notifying {@link Tab}.
+     */
+    void onCloseContents(Tab tab);
 
     /**
      * Called when the WebContents starts loading. Different from
@@ -181,9 +195,9 @@ public interface TabObserver {
     /**
      * Called when the load progress of a {@link Tab} changes.
      * @param tab      The notifying {@link Tab}.
-     * @param progress The new progress from [0,100].
+     * @param progress The new progress from [0,1].
      */
-    void onLoadProgressChanged(Tab tab, int progress);
+    void onLoadProgressChanged(Tab tab, float progress);
 
     /**
      * Called when the URL of a {@link Tab} changes.
@@ -191,19 +205,6 @@ public interface TabObserver {
      * @param url The new URL.
      */
     void onUpdateUrl(Tab tab, String url);
-
-    /**
-     * Called when the {@link Tab} should enter fullscreen mode.
-     * @param tab    The notifying {@link Tab}.
-     * @param options Options to adjust fullscreen mode.
-     */
-    void onEnterFullscreenMode(Tab tab, FullscreenOptions options);
-
-    /**
-     * Called when the {@link Tab} should exit fullscreen mode.
-     * @param tab    The notifying {@link Tab}.
-     */
-    void onExitFullscreenMode(Tab tab);
 
     // WebContentsObserver methods ---------------------------------------------------------
 
@@ -213,93 +214,65 @@ public interface TabObserver {
      * @param isProvisionalLoad Whether the failed load occurred during the provisional load.
      * @param isMainFrame       Whether failed load happened for the main frame.
      * @param errorCode         Code for the occurring error.
-     * @param description       The description for the error.
      * @param failingUrl        The url that was loading when the error occurred.
      */
-    void onDidFailLoad(
-            Tab tab, boolean isMainFrame, int errorCode, String description, String failingUrl);
+    void onDidFailLoad(Tab tab, boolean isMainFrame, int errorCode, String failingUrl);
 
     /**
      * Called when a navigation is started in the WebContents.
      * @param tab The notifying {@link Tab}.
-     * @param url The validated URL for the loading page.
-     * @param isInMainFrame Whether the navigation is for the main frame.
-     * @param isSameDocument Whether the main frame navigation did not cause changes to the
-     *                   document (for example scrolling to a named anchor or PopState).
-     * @param navigationHandleProxy Pointer to a NavigationHandleProxy representing the navigation.
-     *                              Its lifetime is bound to this function. Do not store it. It can
-     *                              be used to modify headers.
+     * @param navigationHandle Pointer to a NavigationHandle representing the navigation.
+     *                         Its lifetime end at the end of onDidFinishNavigation().
      */
-    public void onDidStartNavigation(Tab tab, String url, boolean isInMainFrame,
-            boolean isSameDocument, long navigationHandleProxy);
+    void onDidStartNavigation(Tab tab, NavigationHandle navigationHandle);
 
     /**
      * Called when a navigation is redirected in the WebContents.
      * @param tab The notifying {@link Tab}.
-     * @param url The validated URL for the loading page.
-     * @param isInMainFrame Whether the navigation is for the main frame.
-     * @param navigationHandleProxy Pointer to a NavigationHandleProxy representing the navigation.
-     *                              Its lifetime is bound to this function. Do not store it. It can
-     *                              be used to modify headers.
+     * @param navigationHandle Pointer to a NavigationHandle representing the navigation.
+     *                         Its lifetime end at the end of onDidFinishNavigation().
      */
-    public void onDidRedirectNavigation(
-            Tab tab, String url, boolean isInMainFrame, long navigationHandleProxy);
+    void onDidRedirectNavigation(Tab tab, NavigationHandle navigationHandle);
 
     /**
      * Called when a navigation is finished i.e. committed, aborted or replaced by a new one.
      * @param tab The notifying {@link Tab}.
-     * @param url The validated URL for the loading page.
-     * @param isInMainFrame Whether the navigation is for the main frame.
-     * @param isErrorPage Whether the navigation shows an error page.
-     * @param hasCommitted Whether the navigation has committed. This returns true for either
-     *                     successful commits or error pages that replace the previous page
-     *                     (distinguished by |isErrorPage|), and false for errors that leave the
-     *                     user on the previous page.
-     * @param isSameDocument Whether the main frame navigation did not cause changes to the
-     *                   document (for example scrolling to a named anchor or PopState).
-     * @param isFragmentNavigation Whether the main frame navigation did not cause changes
-     *                             to the document (for example scrolling to a named anchor
-     *                             or PopState).
-     * @param pageTransition The page transition type associated with this navigation.
-     * @param errorCode The net error code if an error occurred prior to commit, otherwise net::OK.
-     * @param httpStatusCode The HTTP status code of the navigation.
+     * @param navigationHandle Pointer to a NavigationHandle representing the navigation.
+     *                         Its lifetime end at the end of this function.
      */
-    public void onDidFinishNavigation(Tab tab, String url, boolean isInMainFrame,
-            boolean isErrorPage, boolean hasCommitted, boolean isSameDocument,
-            boolean isFragmentNavigation, @Nullable Integer pageTransition, int errorCode,
-            int httpStatusCode);
+    void onDidFinishNavigation(Tab tab, NavigationHandle navigation);
 
     /**
      * Called when the page has painted something non-empty.
      * @param tab The notifying {@link Tab}.
      */
-    public void didFirstVisuallyNonEmptyPaint(Tab tab);
+    void didFirstVisuallyNonEmptyPaint(Tab tab);
 
     /**
      * Called when the theme color is changed
      * @param tab   The notifying {@link Tab}.
      * @param color the new color in ARGB format.
      */
-    public void onDidChangeThemeColor(Tab tab, int color);
+    void onDidChangeThemeColor(Tab tab, int color);
 
     /**
      * Called when an interstitial page gets attached to the tab content.
      * @param tab The notifying {@link Tab}.
      */
-    public void onDidAttachInterstitialPage(Tab tab);
+    void onDidAttachInterstitialPage(Tab tab);
 
     /**
      * Called when an interstitial page gets detached from the tab content.
      * @param tab The notifying {@link Tab}.
      */
-    public void onDidDetachInterstitialPage(Tab tab);
+    void onDidDetachInterstitialPage(Tab tab);
 
     /**
      * Called when the background color for the tab has changed.
      * @param tab The notifying {@link Tab}.
      * @param color The current background color.
      */
-    public void onBackgroundColorChanged(Tab tab, int color);
+    void onBackgroundColorChanged(Tab tab, int color);
 
     /**
      * Called when a {@link WebContents} object has been created.
@@ -311,45 +284,65 @@ public interface TabObserver {
      * @param targetUrl              The target url.
      * @param newWebContents         The newly created {@link WebContents}.
      */
-    public void webContentsCreated(Tab tab, WebContents sourceWebContents,
-            long openerRenderProcessId, long openerRenderFrameId, String frameName,
-            String targetUrl, WebContents newWebContents);
+    void webContentsCreated(Tab tab, WebContents sourceWebContents, long openerRenderProcessId,
+            long openerRenderFrameId, String frameName, String targetUrl,
+            WebContents newWebContents);
 
     /**
      * Called when the Tab is attached or detached from an {@code Activity}.
      * @param tab The notifying {@link Tab}.
      * @param isAttached Whether the Tab is being attached or detached.
      */
-    public void onActivityAttachmentChanged(Tab tab, boolean isAttached);
+    void onActivityAttachmentChanged(Tab tab, boolean isAttached);
 
     /**
      * A notification when tab changes whether or not it is interactable and is accepting input.
+     * @param tab The notifying {@link Tab}.
      * @param isInteractable Whether or not the tab is interactable.
      */
-    public void onInteractabilityChanged(boolean isInteractable);
+    void onInteractabilityChanged(Tab tab, boolean isInteractable);
 
     /**
      * Called when renderer changes its state about being responsive to requests.
      * @param tab The notifying {@link Tab}.
      * @param {@code true} if the renderer becomes responsive, otherwise {@code false}.
      */
-    public void onRendererResponsiveStateChanged(Tab tab, boolean isResponsive);
+    void onRendererResponsiveStateChanged(Tab tab, boolean isResponsive);
 
     /**
      * Called when navigation entries of a tab have been deleted.
      * @param tab The notifying {@link Tab}.
      */
-    public void onNavigationEntriesDeleted(Tab tab);
+    void onNavigationEntriesDeleted(Tab tab);
 
     /**
-     * Called when the tab's browser controls constraints has been updated.
-     * @param tab The notifying {@link Tab}.
-     * @param constraints The updated browser controls constraints.
+     * Called when a find result is received.
+     * @param result Detail information on the find result.
      */
-    public void onBrowserControlsConstraintsUpdated(Tab tab, @BrowserControlsState int constraints);
+    void onFindResultAvailable(FindNotificationDetails result);
 
     /**
-     * This method is invoked when the WebContents reloads the LoFi images on the page.
+     * Called when the rects corresponding to the find matches are received.
+     * @param result Detail information on the matched rects.
      */
-    public void didReloadLoFiImages(Tab tab);
+    void onFindMatchRectsAvailable(FindMatchRectsDetails result);
+
+    /**
+     * Called when the root Id of tab is changed.
+     * @param newRootId New root ID to be set.
+     */
+    void onRootIdChanged(Tab tab, int newRootId);
+
+    /**
+     * Called when offset values related with the browser controls have been changed by the
+     * renderer.
+     * @param topControlsOffsetY The Y offset of the top controls in physical pixels.
+     * @param bottomControlsOffsetY The Y offset of the bottom controls in physical pixels.
+     * @param contentOffsetY The Y offset of the content in physical pixels.
+     * @param topControlsMinHeightOffsetY The Y offset of the current top controls min-height.
+     * @param bottomControlsMinHeightOffsetY The Y offset of the current bottom controls min-height.
+     */
+    void onBrowserControlsOffsetChanged(Tab tab, int topControlsOffsetY, int bottomControlsOffsetY,
+            int contentOffsetY, int topControlsMinHeightOffsetY,
+            int bottomControlsMinHeightOffsetY);
 }

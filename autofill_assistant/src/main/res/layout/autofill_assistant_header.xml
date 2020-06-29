@@ -1,60 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2018 The Chromium Authors. All rights reserved.
-     Use of this source code is governed by a BSD-style license that can be
-     found in the LICENSE file. -->
-<merge
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:id="@+id/header"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:minHeight="56dp"
+      android:orientation="horizontal"
+      android:paddingStart="@dimen/autofill_assistant_header_horizontal_spacing"
+      android:paddingEnd="@dimen/autofill_assistant_header_horizontal_spacing">
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:id="@+id/poodle_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"/>
+    <!-- 16dp on start which are 8dp from the TextView + 8dp from the poodle. -->
+    <!-- 24dp on end which are 16dp from the TextView + 8dp from the ChromeImageView. -->
+    <!-- 14dp on top (as margin, to prevent overlap with toolbar) visual alignment. -->
+    <TextView
+        android:id="@+id/status_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp">
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            app:srcCompat="@drawable/ic_autofill_assistant_24dp"
-            tools:ignore="ContentDescription" />
+        android:paddingStart="8dp"
+        android:paddingEnd="16dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="@dimen/autofill_assistant_header_text_vertical_spacing"
+        android:maxLines="4"
+        android:ellipsize="end"
+        android:textAppearance="@style/TextAppearance.AssistantBlackTitle"/>
 
-        <TextView
-            android:id="@+id/status_message"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.0"
-            android:gravity="center_vertical"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:maxLines="4"
-            android:ellipsize="end"
-            android:textAppearance="@style/TextAppearance.AssistantBlackTitle"/>
+    <org.chromium.ui.widget.ChromeImageView
+        android:id="@+id/profile_image"
+        android:layout_width="@dimen/autofill_assistant_minimum_touch_target_size"
+        android:layout_height="@dimen/autofill_assistant_minimum_touch_target_size"
+        android:padding="@dimen/autofill_assistant_profile_icon_padding"
+        android:contentDescription="@string/settings"
+        app:srcCompat="@drawable/logo_avatar_anonymous"/>
+  </LinearLayout>
 
-        <org.chromium.ui.widget.ChromeImageButton
-            android:id="@+id/feedback_button"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="12dp"
-            android:background="?attr/selectableItemBackground"
-            android:contentDescription="@string/menu_send_feedback"
-            app:srcCompat="@drawable/ic_feedback_black_24dp"
-            android:tint="@color/light_icon_color"/>
-
-        <org.chromium.ui.widget.ChromeImageButton
-            android:id="@+id/close_button"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="?attr/selectableItemBackground"
-            android:contentDescription="@string/close"
-            android:src="@drawable/btn_delete_24dp"
-            android:tint="@color/light_icon_color"/>
-    </LinearLayout>
-
-    <org.chromium.chrome.browser.widget.MaterialProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="match_parent"
-        android:layout_height="6dp"
-        app:colorBackground="@color/modern_grey_100"
-        app:colorProgress="@color/modern_blue_600"/>
-</merge>
+  <org.chromium.components.browser_ui.widget.MaterialProgressBar
+      android:id="@+id/progress_bar"
+      android:layout_width="match_parent"
+      android:layout_height="2dp"
+      android:layout_marginStart="@dimen/autofill_assistant_bottombar_horizontal_spacing"
+      android:layout_marginEnd="@dimen/autofill_assistant_bottombar_horizontal_spacing"/>
+</LinearLayout>

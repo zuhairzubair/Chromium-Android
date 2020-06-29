@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.tasks;
 import org.chromium.base.Log;
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.chrome.browser.tab.Tab;
-import org.chromium.chrome.browser.tabmodel.TabLaunchType;
+import org.chromium.chrome.browser.tab.TabLaunchType;
 import org.chromium.chrome.browser.tabmodel.TabModel;
 
 import java.util.ArrayList;
@@ -72,12 +72,14 @@ public class TasksUma {
                 continue;
             }
             if (tabLaunchType == TabLaunchType.FROM_CHROME_UI
+                    || tabLaunchType == TabLaunchType.FROM_START_SURFACE
                     || tabLaunchType == TabLaunchType.FROM_LONGPRESS_BACKGROUND
                     || tabLaunchType == TabLaunchType.FROM_LAUNCHER_SHORTCUT) {
                 manuallyCreatedCount++;
             } else if (tabLaunchType == TabLaunchType.FROM_LONGPRESS_FOREGROUND) {
                 targetBlankCreatedCount++;
-            } else if (tabLaunchType == TabLaunchType.FROM_EXTERNAL_APP) {
+            } else if (tabLaunchType == TabLaunchType.FROM_EXTERNAL_APP
+                    || tabLaunchType == TabLaunchType.FROM_LAUNCH_NEW_INCOGNITO_TAB) {
                 externalAppCreatedCount++;
             } else {
                 othersCreatedCount++;

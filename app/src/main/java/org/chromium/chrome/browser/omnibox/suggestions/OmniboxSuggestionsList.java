@@ -5,23 +5,26 @@
 package org.chromium.chrome.browser.omnibox.suggestions;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
-import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
+import android.view.InputDevice;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ListView;
 
-import org.chromium.base.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
+
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.WindowDelegate;
 import org.chromium.chrome.browser.util.KeyNavigationUtil;
-import org.chromium.chrome.browser.util.ViewUtils;
+import org.chromium.components.browser_ui.styles.ChromeColors;
+import org.chromium.ui.base.ViewUtils;
 
 import java.util.ArrayList;
 
@@ -30,39 +33,16 @@ import java.util.ArrayList;
  */
 @VisibleForTesting
 public class OmniboxSuggestionsList extends ListView {
-    private static final int LIGHT_BG_COLOR = 0xFFFFFFFF;
-    private static final int DARK_BG_COLOR = 0xFF3C4043;
-
     private final int[] mTempPosition = new int[2];
     private final Rect mTempRect = new Rect();
+    private final int mStandardBgColor;
+    private final int mIncognitoBgColor;
 
     private OmniboxSuggestionListEmbedder mEmbedder;
     private View mAnchorView;
     private View mAlignmentView;
     private OnGlobalLayoutListener mAnchorViewLayoutListener;
     private OnLayoutChangeListener mAlignmentViewLayoutListener;
-
-    /**
-     * Provides the capabilities required to embed the omnibox suggestion list into the UI.
-     */
-    public interface OmniboxSuggestionListEmbedder {
-        /** Return the anchor view the suggestion list should be drawn below. */
-        View getAnchorView();
-
-        /**
-         * Return the view that the omnibox suggestions should be aligned horizontally to.  The
-         * view must be a descendant of {@link #getAnchorView()}.  If null, the suggestions will
-         * be aligned to the start of {@link #getAnchorView()}.
-         */
-        @Nullable
-        View getAlignmentView();
-
-        /** Return the delegate used to interact with the Window. */
-        WindowDelegate getWindowDelegate();
-
-        /** Return whether the suggestions are being rendered in the tablet UI. */
-        boolean isTablet();
-    }
 
     /**
      * Constructs a new list designed for containing omnibox suggestions.
@@ -74,8 +54,11 @@ public class OmniboxSuggestionsList extends ListView {
         setFocusable(true);
         setFocusableInTouchMode(true);
 
-        int paddingBottom = context.getResources().getDimensionPixelOffset(
-                R.dimen.omnibox_suggestion_list_padding_bottom);
+        final Resources resources = context.getResources();
+        mStandardBgColor = ChromeColors.getDefaultThemeColor(resources, false);
+        mIncognitoBgColor = ChromeColors.getDefaultThemeColor(resources, true);
+        int paddingBottom =
+                resources.getDimensionPixelOffset(R.dimen.omnibox_suggestion_list_padding_bottom);
         ViewCompat.setPaddingRelative(this, 0, 0, 0, paddingBottom);
     }
 
@@ -143,8 +126,8 @@ public class OmniboxSuggestionsList extends ListView {
     /**
      * Update the suggestion popup background to reflect the current state.
      */
-    void refreshPopupBackground(boolean useDarkBackground) {
-        int color = useDarkBackground ? DARK_BG_COLOR : LIGHT_BG_COLOR;
+    void refreshPopupBackground(boolean isIncognito) {
+        int color = isIncognito ? mIncognitoBgColor : mStandardBgColor;
         if (!isHardwareAccelerated()) {
             // When HW acceleration is disabled, changing mSuggestionList' items somehow erases
             // mOmniboxResultsContainer' background from the area not covered by mSuggestionList.
@@ -244,5 +227,20 @@ public class OmniboxSuggestionsList extends ListView {
         if (mAlignmentView != null) {
             mAlignmentView.removeOnLayoutChangeListener(mAlignmentViewLayoutListener);
         }
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        // Consume mouse events to ensure clicks do not bleed through to sibling views that
+        // are obscured by the list.  crbug.com/968414
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
+                && event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE) {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_BUTTON_PRESS
+                    || action == MotionEvent.ACTION_BUTTON_RELEASE) {
+                return true;
+            }
+        }
+        return super.onGenericMotionEvent(event);
     }
 }

@@ -4,28 +4,29 @@
 
 package org.chromium.chrome.browser.feed;
 
-import android.support.annotation.Nullable;
-
-import com.google.android.libraries.feed.api.common.ThreadUtils;
-import com.google.android.libraries.feed.api.scope.FeedProcessScope;
-import com.google.android.libraries.feed.feedapplifecyclelistener.FeedAppLifecycleListener;
-import com.google.android.libraries.feed.host.config.ApplicationInfo;
-import com.google.android.libraries.feed.host.config.Configuration;
-import com.google.android.libraries.feed.host.config.DebugBehavior;
-import com.google.android.libraries.feed.host.network.NetworkClient;
-import com.google.android.libraries.feed.hostimpl.logging.LoggingApiImpl;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;
-import org.chromium.base.VisibleForTesting;
+import org.chromium.base.task.PostTask;
+import org.chromium.base.task.SequencedTaskRunner;
+import org.chromium.base.task.TaskTraits;
+import org.chromium.chrome.browser.feed.library.api.client.scope.ProcessScope;
+import org.chromium.chrome.browser.feed.library.api.client.scope.ProcessScopeBuilder;
+import org.chromium.chrome.browser.feed.library.api.host.config.ApplicationInfo;
+import org.chromium.chrome.browser.feed.library.api.host.config.Configuration;
+import org.chromium.chrome.browser.feed.library.api.host.config.DebugBehavior;
+import org.chromium.chrome.browser.feed.library.api.host.network.NetworkClient;
+import org.chromium.chrome.browser.feed.library.api.host.storage.ContentStorageDirect;
+import org.chromium.chrome.browser.feed.library.api.host.storage.JournalStorageDirect;
+import org.chromium.chrome.browser.feed.tooltip.BasicTooltipSupportedApi;
 import org.chromium.chrome.browser.preferences.Pref;
 import org.chromium.chrome.browser.preferences.PrefChangeRegistrar;
 import org.chromium.chrome.browser.preferences.PrefServiceBridge;
 import org.chromium.chrome.browser.profiles.Profile;
 
-import java.util.concurrent.Executors;
-
-/** Holds singleton {@link FeedProcessScope} and some of the scope's host implementations. */
+/** Holds singleton {@link ProcessScope} and some of the scope's host implementations. */
 public class FeedProcessScopeFactory {
     private static final String TAG = "FeedProcessScopeFtry";
 
@@ -45,22 +46,26 @@ public class FeedProcessScopeFactory {
 
     private static PrefChangeRegistrar sPrefChangeRegistrar;
     private static FeedAppLifecycle sFeedAppLifecycle;
-    private static FeedProcessScope sFeedProcessScope;
+    private static ProcessScope sProcessScope;
     private static FeedScheduler sFeedScheduler;
     private static FeedOfflineIndicator sFeedOfflineIndicator;
     private static NetworkClient sTestNetworkClient;
+    private static ContentStorageDirect sTestContentStorageDirect;
+    private static JournalStorageDirect sTestJournalStorageDirect;
     private static FeedLoggingBridge sFeedLoggingBridge;
 
-    /** @return The shared {@link FeedProcessScope} instance. Null if the Feed is disabled. */
-    public static @Nullable FeedProcessScope getFeedProcessScope() {
-        if (sFeedProcessScope == null) {
+    /** @return The shared {@link ProcessScope} instance. Null if the Feed is disabled. */
+    public static @Nullable ProcessScope getFeedProcessScope() {
+        if (sProcessScope == null) {
             initialize();
         }
-        return sFeedProcessScope;
+        return sProcessScope;
     }
 
-    /** @return The {@link FeedScheduler} that was given to the {@link FeedProcessScope}. Null if
-     * the Feed is disabled. */
+    /**
+     * @return The {@link FeedScheduler} that was given to the {@link ProcessScope}. Null if
+     * the Feed is disabled.
+     */
     public static @Nullable FeedScheduler getFeedScheduler() {
         if (sFeedScheduler == null) {
             initialize();
@@ -68,8 +73,23 @@ public class FeedProcessScopeFactory {
         return sFeedScheduler;
     }
 
-    /** @return The {@link FeedOfflineIndicator} that was given to the {@link FeedProcessScope}.
-     * Null if the Feed is disabled. */
+    /**
+     * @return The {@link Runnable} to notify feed has been consumed.
+     */
+    public static Runnable getFeedConsumptionObserver() {
+        Runnable consumptionObserver = () -> {
+            FeedScheduler scheduler = getFeedScheduler();
+            if (scheduler != null) {
+                scheduler.onSuggestionConsumed();
+            }
+        };
+        return consumptionObserver;
+    }
+
+    /**
+     * @return The {@link FeedOfflineIndicator} that was given to the {@link ProcessScope}.
+     * Null if the Feed is disabled.
+     */
     public static @Nullable FeedOfflineIndicator getFeedOfflineIndicator() {
         if (sFeedOfflineIndicator == null) {
             initialize();
@@ -116,7 +136,7 @@ public class FeedProcessScopeFactory {
     }
 
     private static void initialize() {
-        assert sFeedProcessScope == null && sFeedScheduler == null && sFeedOfflineIndicator == null
+        assert sProcessScope == null && sFeedScheduler == null && sFeedOfflineIndicator == null
                 && sFeedAppLifecycle == null && sFeedLoggingBridge == null;
         if (!isFeedProcessEnabled()) return;
 
@@ -132,59 +152,69 @@ public class FeedProcessScopeFactory {
 
         FeedSchedulerBridge schedulerBridge = new FeedSchedulerBridge(profile);
         sFeedScheduler = schedulerBridge;
-        FeedAppLifecycleListener lifecycleListener =
-                new FeedAppLifecycleListener(new ThreadUtils());
-        FeedContentStorage contentStorage = new FeedContentStorage(profile);
-        FeedJournalStorage journalStorage = new FeedJournalStorage(profile);
-        NetworkClient networkClient = sTestNetworkClient == null ?
-            new FeedNetworkBridge(profile) : sTestNetworkClient;
+        ContentStorageDirect contentStorageDirect = sTestContentStorageDirect == null
+                ? new FeedContentStorageDirect(new FeedContentStorage(profile))
+                : sTestContentStorageDirect;
+        JournalStorageDirect journalStorageDirect = sTestJournalStorageDirect == null
+                ? new FeedJournalStorageDirect(new FeedJournalStorage(profile))
+                : sTestJournalStorageDirect;
+        NetworkClient networkClient =
+                sTestNetworkClient == null ? new FeedNetworkBridge(profile) : sTestNetworkClient;
+
         sFeedLoggingBridge = new FeedLoggingBridge(profile);
-        sFeedProcessScope = new FeedProcessScope
-                                    .Builder(configHostApi, Executors.newSingleThreadExecutor(),
-                                            new LoggingApiImpl(), networkClient, schedulerBridge,
-                                            lifecycleListener, DebugBehavior.SILENT,
-                                            ContextUtils.getApplicationContext(), applicationInfo)
-                                    .setContentStorage(contentStorage)
-                                    .setJournalStorage(journalStorage)
-                                    .build();
-        schedulerBridge.initializeFeedDependencies(
-                sFeedProcessScope.getRequestManager(), sFeedProcessScope.getSessionManager());
 
-        sFeedOfflineIndicator =
-                new FeedOfflineBridge(profile, sFeedProcessScope.getKnownContentApi());
+        SequencedTaskRunner sequencedTaskRunner =
+                PostTask.createSequencedTaskRunner(TaskTraits.USER_VISIBLE_MAY_BLOCK);
 
-        sFeedAppLifecycle = new FeedAppLifecycle(sFeedProcessScope.getAppLifecycleListener(),
+        sProcessScope = new ProcessScopeBuilder(configHostApi, sequencedTaskRunner::postTask,
+                sFeedLoggingBridge, networkClient, schedulerBridge, DebugBehavior.SILENT,
+                ContextUtils.getApplicationContext(), applicationInfo,
+                new BasicTooltipSupportedApi())
+                                .setContentStorageDirect(contentStorageDirect)
+                                .setJournalStorageDirect(journalStorageDirect)
+                                .build();
+        schedulerBridge.initializeFeedDependencies(sProcessScope.getRequestManager());
+
+        sFeedOfflineIndicator = new FeedOfflineBridge(profile, sProcessScope.getKnownContent());
+
+        sFeedAppLifecycle = new FeedAppLifecycle(sProcessScope.getAppLifecycleListener(),
                 new FeedLifecycleBridge(profile), sFeedScheduler);
     }
 
     /**
-     * Creates a {@link FeedProcessScope} using the provided host implementations. Call {@link
-     * #clearFeedProcessScopeForTesting()} to reset the FeedProcessScope after testing is complete.
+     * Creates a {@link ProcessScope} using the provided host implementations. Call {@link
+     * #clearFeedProcessScopeForTesting()} to reset the ProcessScope after testing is complete.
      *
      * @param feedScheduler A {@link FeedScheduler} to use for testing.
      * @param networkClient A {@link NetworkClient} to use for testing.
      * @param feedOfflineIndicator A {@link FeedOfflineIndicator} to use for testing.
+     * @param feedAppLifecycle A {@link FeedAppLifecycle} to use for testing.
+     * @param loggingBridge A {@link FeedLoggingBridge} to use for testing.
      */
     @VisibleForTesting
     static void createFeedProcessScopeForTesting(FeedScheduler feedScheduler,
             NetworkClient networkClient, FeedOfflineIndicator feedOfflineIndicator,
-            FeedAppLifecycle feedAppLifecycle, FeedAppLifecycleListener lifecycleListener,
-            FeedLoggingBridge loggingBridge) {
+            FeedAppLifecycle feedAppLifecycle, FeedLoggingBridge loggingBridge,
+            ContentStorageDirect contentStorage, JournalStorageDirect journalStorage) {
         Configuration configHostApi = FeedConfiguration.createConfiguration();
 
         sFeedScheduler = feedScheduler;
+        sFeedLoggingBridge = loggingBridge;
+        sFeedOfflineIndicator = feedOfflineIndicator;
+        sFeedAppLifecycle = feedAppLifecycle;
         ApplicationInfo applicationInfo =
                 new ApplicationInfo.Builder(ContextUtils.getApplicationContext()).build();
 
-        sFeedProcessScope = new FeedProcessScope
-                                    .Builder(configHostApi, Executors.newSingleThreadExecutor(),
-                                            new LoggingApiImpl(), networkClient, sFeedScheduler,
-                                            lifecycleListener, DebugBehavior.SILENT,
-                                            ContextUtils.getApplicationContext(), applicationInfo)
-                                    .build();
-        sFeedOfflineIndicator = feedOfflineIndicator;
-        sFeedAppLifecycle = feedAppLifecycle;
-        sFeedLoggingBridge = loggingBridge;
+        SequencedTaskRunner sequencedTaskRunner =
+                PostTask.createSequencedTaskRunner(TaskTraits.USER_VISIBLE_MAY_BLOCK);
+
+        sProcessScope = new ProcessScopeBuilder(configHostApi, sequencedTaskRunner::postTask,
+                sFeedLoggingBridge, networkClient, sFeedScheduler, DebugBehavior.SILENT,
+                ContextUtils.getApplicationContext(), applicationInfo,
+                new BasicTooltipSupportedApi())
+                                .setContentStorageDirect(contentStorage)
+                                .setJournalStorageDirect(journalStorage)
+                                .build();
     }
 
     /** Use supplied NetworkClient instead of real one, for tests. */
@@ -192,15 +222,41 @@ public class FeedProcessScopeFactory {
     public static void setTestNetworkClient(NetworkClient client) {
         if (client == null) {
             sTestNetworkClient = null;
-        } else if (sFeedProcessScope == null) {
+        } else if (sProcessScope == null) {
             sTestNetworkClient = client;
         } else {
             throw(new IllegalStateException(
-                    "TestNetworkClient can not be set after FeedProcessScope has initialized."));
+                    "TestNetworkClient can not be set after ProcessScope has initialized."));
         }
     }
 
-    /** Resets the FeedProcessScope after testing is complete. */
+    /** Use supplied ContentStorageDirect instead of real one, for tests. */
+    @VisibleForTesting
+    public static void setTestContentStorageDirect(ContentStorageDirect storage) {
+        if (storage == null) {
+            sTestContentStorageDirect = null;
+        } else if (sProcessScope == null) {
+            sTestContentStorageDirect = storage;
+        } else {
+            throw new IllegalStateException(
+                    "TestContentStorageDirect can not be set after ProcessScope has initialized.");
+        }
+    }
+
+    /** Use supplied JournalStorageDirect instead of real one, for tests. */
+    @VisibleForTesting
+    public static void setTestJournalStorageDirect(JournalStorageDirect storage) {
+        if (storage == null) {
+            sTestJournalStorageDirect = null;
+        } else if (sProcessScope == null) {
+            sTestJournalStorageDirect = storage;
+        } else {
+            throw new IllegalStateException(
+                    "TestJournalStorageDirect can not be set after ProcessScope has initialized.");
+        }
+    }
+
+    /** Resets the ProcessScope after testing is complete. */
     @VisibleForTesting
     static void clearFeedProcessScopeForTesting() {
         destroy();
@@ -222,15 +278,16 @@ public class FeedProcessScopeFactory {
     }
 
     private static void articlesEnabledPrefChange() {
-        // Should only be subscribed while it was enabled. A change should mean articles are now
-        // disabled.
-        assert !PrefServiceBridge.getInstance().getBoolean(Pref.NTP_ARTICLES_SECTION_ENABLED);
-        // There have been quite a few crashes/bugs that happen when code does not correctly handle
-        // the scenario where Feed suddenly becomes disabled and the above getters start returning
-        // nulls. Having this log a warning helps diagnose this pattern from the logcat.
-        Log.w(TAG, "Disabling Feed because of policy.");
-        sEverDisabledForPolicy = true;
-        destroy();
+        // Cannot assume this is called because of an actual change. May be going from true to true.
+        if (!PrefServiceBridge.getInstance().getBoolean(Pref.NTP_ARTICLES_SECTION_ENABLED)) {
+            // There have been quite a few crashes/bugs that happen when code does not correctly
+            // handle the scenario where Feed suddenly becomes disabled and the above getters start
+            // returning nulls. Having this log a warning helps diagnose this pattern from the
+            // logcat.
+            Log.w(TAG, "Disabling Feed because of policy.");
+            sEverDisabledForPolicy = true;
+            destroy();
+        }
     }
 
     /** Clears out all static state. */
@@ -240,9 +297,9 @@ public class FeedProcessScopeFactory {
             sPrefChangeRegistrar.destroy();
             sPrefChangeRegistrar = null;
         }
-        if (sFeedProcessScope != null) {
-            sFeedProcessScope.onDestroy();
-            sFeedProcessScope = null;
+        if (sProcessScope != null) {
+            sProcessScope.onDestroy();
+            sProcessScope = null;
         }
         if (sFeedScheduler != null) {
             sFeedScheduler.destroy();

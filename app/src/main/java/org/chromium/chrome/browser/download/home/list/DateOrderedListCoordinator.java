@@ -4,28 +4,35 @@
 
 package org.chromium.chrome.browser.download.home.list;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import org.chromium.base.Callback;
+import org.chromium.base.DiscardableReferencePool;
+import org.chromium.base.Log;
+import org.chromium.base.supplier.ObservableSupplier;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.download.home.DownloadManagerUiConfig;
+import org.chromium.chrome.browser.download.home.FaviconProvider;
+import org.chromium.chrome.browser.download.home.LegacyDownloadProvider;
 import org.chromium.chrome.browser.download.home.StableIds;
 import org.chromium.chrome.browser.download.home.empty.EmptyCoordinator;
 import org.chromium.chrome.browser.download.home.filter.FilterCoordinator;
 import org.chromium.chrome.browser.download.home.filter.Filters.FilterType;
 import org.chromium.chrome.browser.download.home.list.ListItem.ViewListItem;
 import org.chromium.chrome.browser.download.home.metrics.FilterChangeLogger;
+import org.chromium.chrome.browser.download.home.rename.RenameDialogManager;
 import org.chromium.chrome.browser.download.home.storage.StorageCoordinator;
 import org.chromium.chrome.browser.download.home.toolbar.ToolbarCoordinator;
-import org.chromium.chrome.browser.widget.selection.SelectionDelegate;
+import org.chromium.components.browser_ui.widget.selectable_list.SelectionDelegate;
 import org.chromium.components.offline_items_collection.OfflineContentProvider;
 import org.chromium.components.offline_items_collection.OfflineItem;
+import org.chromium.ui.modaldialog.ModalDialogManager;
 
 import java.util.List;
 
@@ -72,45 +79,60 @@ public class DateOrderedListCoordinator implements ToolbarCoordinator.ToolbarLis
         void onEmptyStateChanged(boolean isEmpty);
     }
 
+    private static final String TAG = "DownloadHome";
     private final Context mContext;
     private final StorageCoordinator mStorageCoordinator;
     private final FilterCoordinator mFilterCoordinator;
     private final EmptyCoordinator mEmptyCoordinator;
     private final DateOrderedListMediator mMediator;
     private final DateOrderedListView mListView;
+    private final RenameDialogManager mRenameDialogManager;
     private ViewGroup mMainView;
 
     /**
      * Creates an instance of a DateOrderedListCoordinator, which will visually represent
      * {@code provider} as a list of items.
-     * @param context The {@link Context} to use to build the views.
-     * @param config The {@link DownloadManagerUiConfig} to provide UI configuration params.
-     * @param provider The {@link OfflineContentProvider} to visually represent.
-     * @param deleteController A class to manage whether or not items can be deleted.
-     * @param filterObserver A {@link FilterCoordinator.Observer} that should be notified of
-     *                       filter changes.  This is meant to be used for external components that
-     *                       need to take action based on the visual state of the list.
-     * @param dateOrderedListObserver A {@link DateOrderedListObserver}.
+     * @param context                   The {@link Context} to use to build the views.
+     * @param config                    The {@link DownloadManagerUiConfig} to provide UI
+     *                                  configuration params.
+     * @param isPrefetchEnabledSupplier A supplier that indicates whether or not prefetch is
+     *                                  enabled.
+     * @param provider                  The {@link OfflineContentProvider} to visually represent.
+     * @param legacyProvider            A legacy version of a provider for downloads.
+     * @param deleteController          A class to manage whether or not items can be deleted.
+     * @param filterObserver            A {@link FilterCoordinator.Observer} that should be notified
+     *                                  of filter changes.  This is meant to be used for external
+     *                                  components that need to take action based on the visual
+     *                                  state of the list.
+     * @param dateOrderedListObserver   A {@link DateOrderedListObserver}.
+     * @param discardableReferencePool  A {@linK DiscardableReferencePool} reference to use for
+     *                                  large objects (e.g. bitmaps) in the UI.
      */
     public DateOrderedListCoordinator(Context context, DownloadManagerUiConfig config,
-            OfflineContentProvider provider, DeleteController deleteController,
+            ObservableSupplier<Boolean> isPrefetchEnabledSupplier, OfflineContentProvider provider,
+            LegacyDownloadProvider legacyProvider, DeleteController deleteController,
             SelectionDelegate<ListItem> selectionDelegate,
             FilterCoordinator.Observer filterObserver,
-            DateOrderedListObserver dateOrderedListObserver) {
+            DateOrderedListObserver dateOrderedListObserver, ModalDialogManager modalDialogManager,
+            FaviconProvider faviconProvider, DiscardableReferencePool discardableReferencePool) {
         mContext = context;
 
         ListItemModel model = new ListItemModel();
         DecoratedListItemModel decoratedModel = new DecoratedListItemModel(model);
         mListView =
                 new DateOrderedListView(context, config, decoratedModel, dateOrderedListObserver);
-        mMediator = new DateOrderedListMediator(provider, this ::startShareIntent, deleteController,
-                selectionDelegate, config, dateOrderedListObserver, model);
+        mRenameDialogManager = new RenameDialogManager(context, modalDialogManager);
+
+        mMediator = new DateOrderedListMediator(provider, legacyProvider, faviconProvider,
+                this::startShareIntent, deleteController, this::startRename, selectionDelegate,
+                config, dateOrderedListObserver, model, discardableReferencePool);
 
         mEmptyCoordinator = new EmptyCoordinator(context, mMediator.getEmptySource());
 
         mStorageCoordinator = new StorageCoordinator(context, mMediator.getFilterSource());
 
-        mFilterCoordinator = new FilterCoordinator(context, mMediator.getFilterSource());
+        mFilterCoordinator = new FilterCoordinator(
+                context, mMediator.getFilterSource(), isPrefetchEnabledSupplier);
         mFilterCoordinator.addObserver(mMediator::onFilterTypeSelected);
         mFilterCoordinator.addObserver(filterObserver);
         mFilterCoordinator.addObserver(mEmptyCoordinator);
@@ -143,7 +165,9 @@ public class DateOrderedListCoordinator implements ToolbarCoordinator.ToolbarLis
 
     /** Tears down this coordinator. */
     public void destroy() {
+        mFilterCoordinator.destroy();
         mMediator.destroy();
+        mRenameDialogManager.destroy();
     }
 
     /** @return The {@link View} representing downloads home. */
@@ -169,7 +193,6 @@ public class DateOrderedListCoordinator implements ToolbarCoordinator.ToolbarLis
 
     @Override
     public void setSearchQuery(String query) {
-        mEmptyCoordinator.setInSearchMode(!TextUtils.isEmpty(query));
         mMediator.onFilterStringChanged(query);
     }
 
@@ -179,7 +202,17 @@ public class DateOrderedListCoordinator implements ToolbarCoordinator.ToolbarLis
     }
 
     private void startShareIntent(Intent intent) {
-        mContext.startActivity(Intent.createChooser(
-                intent, mContext.getString(R.string.share_link_chooser_title)));
+        try {
+            mContext.startActivity(Intent.createChooser(
+                    intent, mContext.getString(R.string.share_link_chooser_title)));
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, "Cannot find activity for sharing");
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot start activity for sharing, exception: " + e);
+        }
+    }
+
+    private void startRename(String name, DateOrderedListMediator.RenameCallback callback) {
+        mRenameDialogManager.startRename(name, callback::tryToRename);
     }
 }

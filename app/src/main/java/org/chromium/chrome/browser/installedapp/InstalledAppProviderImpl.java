@@ -4,30 +4,35 @@
 
 package org.chromium.chrome.browser.installedapp;
 
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.util.Pair;
 
+import androidx.annotation.VisibleForTesting;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;
 import org.chromium.base.ThreadUtils;
-import org.chromium.base.VisibleForTesting;
 import org.chromium.base.task.AsyncTask;
+import org.chromium.base.task.PostTask;
 import org.chromium.chrome.browser.instantapps.InstantAppsHandler;
+import org.chromium.content_public.browser.UiThreadTaskTraits;
 import org.chromium.installedapp.mojom.InstalledAppProvider;
 import org.chromium.installedapp.mojom.RelatedApplication;
 import org.chromium.mojo.system.MojoException;
+import org.chromium.url.mojom.Url;
+import org.chromium.webapk.lib.client.WebApkValidator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-
 /**
  * Android implementation of the InstalledAppProvider service defined in
  * installed_app_provider.mojom
@@ -43,14 +48,21 @@ public class InstalledAppProviderImpl implements InstalledAppProvider {
     @VisibleForTesting
     public static final String RELATED_APP_PLATFORM_ANDROID = "play";
     @VisibleForTesting
+    public static final String RELATED_APP_PLATFORM_WEBAPP = "webapp";
+    @VisibleForTesting
     public static final String INSTANT_APP_ID_STRING = "instantapp";
     @VisibleForTesting
     public static final String INSTANT_APP_HOLDBACK_ID_STRING = "instantapp:holdback";
 
+    // The maximum number of related apps declared in the Web Manifest taken into account when
+    // determining whether the related app is installed and mutually related.
+    @VisibleForTesting
+    static final int MAX_ALLOWED_RELATED_APPS = 3;
+
     private static final String TAG = "InstalledAppProvider";
 
     private final FrameUrlDelegate mFrameUrlDelegate;
-    private final Context mContext;
+    private final PackageManagerDelegate mPackageManagerDelegate;
     private final InstantAppsHandler mInstantAppsHandler;
 
     /**
@@ -70,30 +82,24 @@ public class InstalledAppProviderImpl implements InstalledAppProvider {
         public boolean isIncognito();
     }
 
-    public InstalledAppProviderImpl(FrameUrlDelegate frameUrlDelegate, Context context,
-            InstantAppsHandler instantAppsHandler) {
+    public InstalledAppProviderImpl(FrameUrlDelegate frameUrlDelegate,
+            PackageManagerDelegate packageManagerDelegate, InstantAppsHandler instantAppsHandler) {
         assert instantAppsHandler != null;
         mFrameUrlDelegate = frameUrlDelegate;
-        mContext = context;
+        mPackageManagerDelegate = packageManagerDelegate;
         mInstantAppsHandler = instantAppsHandler;
     }
 
     @Override
-    public void filterInstalledApps(
-            final RelatedApplication[] relatedApps, final FilterInstalledAppsResponse callback) {
-        if (mFrameUrlDelegate.isIncognito()) {
-            callback.call(new RelatedApplication[0]);
-            return;
-        }
-
+    public void filterInstalledApps(final RelatedApplication[] relatedApps, final Url manifestUrl,
+            final FilterInstalledAppsResponse callback) {
         final URI frameUrl = mFrameUrlDelegate.getUrl();
-
         // Use an AsyncTask to execute the installed/related checks on a background thread (so as
         // not to block the UI thread).
         new AsyncTask<Pair<RelatedApplication[], Integer>>() {
             @Override
             protected Pair<RelatedApplication[], Integer> doInBackground() {
-                return filterInstalledAppsOnBackgroundThread(relatedApps, frameUrl);
+                return filterInstalledAppsOnBackgroundThread(relatedApps, manifestUrl, frameUrl);
             }
 
             @Override
@@ -123,19 +129,20 @@ public class InstalledAppProviderImpl implements InstalledAppProvider {
      * Filters a list of apps, returning those that are both installed and match the origin.
      *
      * @param relatedApps A list of applications to be filtered.
+     * @param manifestUrl The URL of the Web App Manifest.
      * @param frameUrl The URL of the frame this operation was called from.
      * @return Pair of: A subsequence of applications that meet the criteria, and, the total amount
      *         of time in ms that should be delayed before returning to the user, to mask the
      *         installed state of the requested apps.
      */
     private Pair<RelatedApplication[], Integer> filterInstalledAppsOnBackgroundThread(
-            RelatedApplication[] relatedApps, URI frameUrl) {
+            RelatedApplication[] relatedApps, Url manifestUrl, URI frameUrl) {
         ThreadUtils.assertOnBackgroundThread();
 
         ArrayList<RelatedApplication> installedApps = new ArrayList<RelatedApplication>();
         int delayMillis = 0;
-        PackageManager pm = mContext.getPackageManager();
-        for (RelatedApplication app : relatedApps) {
+        for (int i = 0; i < Math.min(relatedApps.length, MAX_ALLOWED_RELATED_APPS); i++) {
+            RelatedApplication app = relatedApps[i];
             // If the package is of type "play", it is installed, and the origin is associated with
             // package, add the package to the list of valid packages.
             // NOTE: For security, it must not be possible to distinguish (from the response)
@@ -153,15 +160,53 @@ public class InstalledAppProviderImpl implements InstalledAppProvider {
                 }
 
                 delayMillis += calculateDelayForPackageMs(app.id);
-                if (isAppInstalledAndAssociatedWithOrigin(app.id, frameUrl, pm)) {
+                if (isAppInstalledAndAssociatedWithOrigin(
+                            app.id, frameUrl, mPackageManagerDelegate)) {
+                    installedApps.add(app);
+                }
+            }
+            // The website wants to check whether its own WebAPK is installed.
+            else if (app.platform.equals(RELATED_APP_PLATFORM_WEBAPP) && app.url != null
+                    && app.url.equals(manifestUrl.url)) {
+                // Use the WebAPK's manifestURL as the package ID.
+                delayMillis += calculateDelayForPackageMs(manifestUrl.url);
+                if (isWebApkInstalled(manifestUrl.url)) {
+                    // TODO(crbug.com/1043970): Should we expose the package
+                    // name and the version?
                     installedApps.add(app);
                 }
             }
         }
 
+        for (RelatedApplication installedApp : installedApps) {
+            if (installedApp.id != null) {
+                setVersionInfo(installedApp);
+            }
+        }
+
+        // Don't expose the related apps if in incognito mode. This is done at
+        // the last stage to prevent using this API as an incognito detector by
+        // timing how long it takes the Promise to resolve.
+        if (mFrameUrlDelegate.isIncognito()) {
+            return Pair.create(new RelatedApplication[0], delayMillis);
+        }
+
         RelatedApplication[] installedAppsArray = new RelatedApplication[installedApps.size()];
         installedApps.toArray(installedAppsArray);
         return Pair.create(installedAppsArray, delayMillis);
+    }
+
+    /**
+     * Sets the version information, if available, to |installedApp|.
+     * @param installedApp
+     */
+    private void setVersionInfo(RelatedApplication installedApp) {
+        assert installedApp.id != null;
+        try {
+            PackageInfo info = mPackageManagerDelegate.getPackageInfo(installedApp.id, 0);
+            installedApp.version = info.versionName;
+        } catch (NameNotFoundException e) {
+        }
     }
 
     /**
@@ -172,6 +217,16 @@ public class InstalledAppProviderImpl implements InstalledAppProvider {
     }
 
     /**
+     * Return whether the WebAPK identified by |manifestUurl| is installed.
+     */
+    @VisibleForTesting
+    public boolean isWebApkInstalled(String manifestUrl) {
+        return WebApkValidator.queryBoundWebApkForManifestUrl(
+                       ContextUtils.getApplicationContext(), manifestUrl)
+                != null;
+    }
+
+    /**
      * Determines how long to artifically delay for, for a particular package name.
      */
     private int calculateDelayForPackageMs(String packageName) {
@@ -179,9 +234,7 @@ public class InstalledAppProviderImpl implements InstalledAppProvider {
         // add significant noise to the time taken to check whether this app is installed and
         // related. Otherwise, it would be possible to tell whether a non-related app is installed,
         // based on the time this operation takes.
-        //
-        // Generate a 16-bit hash based on a unique device ID + the package name.
-        short hash = PackageHash.hashForPackage(packageName);
+        short hash = PackageHash.hashForPackage(packageName, mFrameUrlDelegate.isIncognito());
 
         // The time delay is the low 10 bits of the hash in 100ths of a ms (between 0 and 10ms).
         int delayHundredthsOfMs = hash & 0x3ff;
@@ -197,7 +250,7 @@ public class InstalledAppProviderImpl implements InstalledAppProvider {
      *                origin of this URL. Can be null.
      */
     public static boolean isAppInstalledAndAssociatedWithOrigin(
-            String packageName, URI frameUrl, PackageManager pm) {
+            String packageName, URI frameUrl, PackageManagerDelegate pm) {
         // TODO(yusufo): Move this to a better/shared location before crbug.com/749876 is closed.
 
         ThreadUtils.assertOnBackgroundThread();
@@ -246,7 +299,7 @@ public class InstalledAppProviderImpl implements InstalledAppProvider {
      * @return The list of asset statements, parsed from JSON.
      * @throws NameNotFoundException if the application is not installed.
      */
-    private static JSONArray getAssetStatements(String packageName, PackageManager pm)
+    private static JSONArray getAssetStatements(String packageName, PackageManagerDelegate pm)
             throws NameNotFoundException {
         // Get the <meta-data> from this app's manifest.
         // Throws NameNotFoundException if the application is not installed.
@@ -353,6 +406,6 @@ public class InstalledAppProviderImpl implements InstalledAppProvider {
      * @return True if the Runnable was successfully placed into the message queue.
      */
     protected void delayThenRun(Runnable r, long delayMillis) {
-        ThreadUtils.postOnUiThreadDelayed(r, delayMillis);
+        PostTask.postDelayedTask(UiThreadTaskTraits.DEFAULT, r, delayMillis);
     }
 }

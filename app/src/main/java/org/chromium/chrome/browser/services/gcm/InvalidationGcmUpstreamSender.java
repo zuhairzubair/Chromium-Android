@@ -9,20 +9,24 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.support.annotation.MainThread;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.MainThread;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.ipc.invalidation.ticl.android2.channel.GcmUpstreamSenderService;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.ThreadUtils;
-import org.chromium.base.task.AsyncTask;
+import org.chromium.base.task.PostTask;
+import org.chromium.base.task.TaskTraits;
 import org.chromium.chrome.browser.init.ProcessInitializationHandler;
+import org.chromium.components.signin.AccountManagerFacade;
 import org.chromium.components.signin.ChromeSigninController;
-import org.chromium.components.signin.OAuth2TokenService;
+import org.chromium.components.signin.identitymanager.IdentityManager;
 import org.chromium.components.sync.SyncConstants;
+import org.chromium.content_public.browser.UiThreadTaskTraits;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -40,7 +44,7 @@ public class InvalidationGcmUpstreamSender extends GcmUpstreamSenderService {
     public void deliverMessage(final String to, final Bundle data) {
         final Bundle dataToSend = createDeepCopy(data);
 
-        ThreadUtils.postOnUiThread(new Runnable() {
+        PostTask.postTask(UiThreadTaskTraits.DEFAULT, new Runnable() {
             @Override
             public void run() {
                 doDeliverMessage(ContextUtils.getApplicationContext(), to, dataToSend);
@@ -48,9 +52,6 @@ public class InvalidationGcmUpstreamSender extends GcmUpstreamSenderService {
         });
     }
 
-    // Incorrectly infers that this is called on a worker thread because of AsyncTask doInBackground
-    // overriding.
-    @SuppressWarnings("WrongThread")
     @MainThread
     private void doDeliverMessage(
             final Context applicationContext, final String to, final Bundle data) {
@@ -67,18 +68,16 @@ public class InvalidationGcmUpstreamSender extends GcmUpstreamSenderService {
         }
 
         // Attempt to retrieve a token for the user.
-        OAuth2TokenService.getAccessToken(account, SyncConstants.CHROME_SYNC_OAUTH2_SCOPE,
-                new OAuth2TokenService.GetAccessTokenCallback() {
+        // crbug.com/1014098: Do not use IdentityServicesProvider because the profile may not be
+        // initialized yet.
+        IdentityManager.getAccessTokenWithFacade(AccountManagerFacade.get(), account,
+                SyncConstants.CHROME_SYNC_OAUTH2_SCOPE,
+                new IdentityManager.GetAccessTokenCallback() {
                     @Override
                     public void onGetTokenSuccess(final String token) {
-                        new AsyncTask<Void>() {
-                            @Override
-                            protected Void doInBackground() {
-                                sendUpstreamMessage(to, data, token, applicationContext);
-                                return null;
-                            }
-                        }
-                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        PostTask.postTask(TaskTraits.BEST_EFFORT_MAY_BLOCK, () -> {
+                            sendUpstreamMessage(to, data, token, applicationContext);
+                        });
                     }
 
                     @Override
@@ -90,7 +89,7 @@ public class InvalidationGcmUpstreamSender extends GcmUpstreamSenderService {
     }
 
     /*
-     * This function runs on a thread from the AsyncTask.THREAD_POOL_EXECUTOR.
+     * This function runs on a thread pool executor thread.
      */
     private void sendUpstreamMessage(String to, Bundle data, String token, Context context) {
         // Add the OAuth2 token to the bundle. The token should have the prefix Bearer added to it.

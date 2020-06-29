@@ -13,9 +13,6 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -26,6 +23,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+
 import org.chromium.base.Log;
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.base.metrics.RecordUserAction;
@@ -33,7 +34,9 @@ import org.chromium.base.task.AsyncTask;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.consent_auditor.ConsentAuditorFeature;
 import org.chromium.chrome.browser.externalauth.UserRecoverableErrorHandler;
+import org.chromium.chrome.browser.preferences.Pref;
 import org.chromium.chrome.browser.preferences.PrefServiceBridge;
+import org.chromium.chrome.browser.sync.SyncUserDataWiper;
 import org.chromium.components.signin.AccountIdProvider;
 import org.chromium.components.signin.AccountManagerDelegateException;
 import org.chromium.components.signin.AccountManagerFacade;
@@ -50,7 +53,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This fragment implements sign-in screen with account picker and descriptions of signin-related
@@ -73,16 +75,16 @@ public abstract class SigninFragmentBase
             "SigninFragmentBase.AccountPickerDialogFragment";
 
     private static final int ADD_ACCOUNT_REQUEST_CODE = 1;
+    private static final int ACCOUNT_PICKER_DIALOG_REQUEST_CODE = 2;
 
     @IntDef({SigninFlowType.DEFAULT, SigninFlowType.FORCED, SigninFlowType.CHOOSE_ACCOUNT,
-            SigninFlowType.ADD_ACCOUNT, SigninFlowType.CONSENT_BUMP})
+            SigninFlowType.ADD_ACCOUNT})
     @Retention(RetentionPolicy.SOURCE)
     @interface SigninFlowType {
         int DEFAULT = 0;
         int FORCED = 1;
         int CHOOSE_ACCOUNT = 2;
         int ADD_ACCOUNT = 3;
-        int CONSENT_BUMP = 4;
     }
 
     private @SigninFlowType int mSigninFlowType;
@@ -104,6 +106,7 @@ public abstract class SigninFragmentBase
     private boolean mDestroyed;
     private boolean mIsSigninInProgress;
     private boolean mHasGmsError;
+    private boolean mRecordUndoSignin;
 
     private UserRecoverableErrorHandler.ModalDialog mGooglePlayServicesUpdateErrorHandler;
     private AlertDialog mGmsIsUpdatingDialog;
@@ -158,17 +161,6 @@ public abstract class SigninFragmentBase
         return result;
     }
 
-    /**
-     * Creates an argument bundle for the consent bump screen.
-     * @param accountName The name of the signed in account.
-     */
-    protected static Bundle createArgumentsForConsentBumpFlow(String accountName) {
-        Bundle result = new Bundle();
-        result.putInt(ARGUMENT_SIGNIN_FLOW_TYPE, SigninFlowType.CONSENT_BUMP);
-        result.putString(ARGUMENT_ACCOUNT_NAME, accountName);
-        return result;
-    }
-
     protected SigninFragmentBase() {
         mAccountsChangedObserver = this::triggerUpdateAccounts;
         mProfileDataCacheObserver = (String accountId) -> updateProfileData();
@@ -203,11 +195,6 @@ public abstract class SigninFragmentBase
     /** Returns whether this fragment is in "force sign-in" mode. */
     protected boolean isForcedSignin() {
         return mSigninFlowType == SigninFlowType.FORCED;
-    }
-
-    /** Returns whether this fragment is in Consent bump mode. */
-    protected boolean isConsentBump() {
-        return mSigninFlowType == SigninFlowType.CONSENT_BUMP;
     }
 
     @Override
@@ -247,6 +234,9 @@ public abstract class SigninFragmentBase
         }
         mProfileDataCache = new ProfileDataCache(getActivity(),
                 getResources().getDimensionPixelSize(R.dimen.user_picture_size), badgeConfig);
+        // By default this is set to true so that when system back button is pressed user action
+        // is recorded in onDestroy().
+        mRecordUndoSignin = true;
     }
 
     @Override
@@ -258,6 +248,7 @@ public abstract class SigninFragmentBase
             mConfirmSyncDataStateMachine.cancel(/* isBeingDestroyed = */ true);
             mConfirmSyncDataStateMachine = null;
         }
+        if (mRecordUndoSignin) RecordUserAction.record("Signin_Undo_Signin");
         mDestroyed = true;
     }
 
@@ -284,8 +275,6 @@ public abstract class SigninFragmentBase
             endImageViewDrawable = SigninView.getCheckmarkDrawable(getContext());
             mView.getRefuseButton().setVisibility(View.GONE);
             mView.getAcceptButtonEndPadding().setVisibility(View.INVISIBLE);
-        } else if (mSigninFlowType == SigninFlowType.CONSENT_BUMP) {
-            endImageViewDrawable = SigninView.getCheckmarkDrawable(getContext());
         } else {
             endImageViewDrawable = SigninView.getExpandArrowDrawable(getContext());
         }
@@ -321,14 +310,13 @@ public abstract class SigninFragmentBase
     }
 
     private void updateSigninDetailsDescription(boolean addSettingsLink) {
-        final @StringRes int description = mChildAccountStatus == ChildAccountStatus.REGULAR_CHILD
-                ? R.string.signin_details_description_child_account
-                : R.string.signin_details_description;
-        final @Nullable Object settingsLinkSpan =
-                addSettingsLink ? new NoUnderlineClickableSpan(this::onSettingsLinkClicked) : null;
+        final @Nullable Object settingsLinkSpan = addSettingsLink
+                ? new NoUnderlineClickableSpan(getResources(), this::onSettingsLinkClicked)
+                : null;
         final SpanApplier.SpanInfo spanInfo =
                 new SpanApplier.SpanInfo(SETTINGS_LINK_OPEN, SETTINGS_LINK_CLOSE, settingsLinkSpan);
-        mConsentTextTracker.setText(mView.getDetailsDescriptionView(), description,
+        mConsentTextTracker.setText(mView.getDetailsDescriptionView(),
+                R.string.signin_details_description,
                 input -> SpanApplier.applySpans(input.toString(), spanInfo));
     }
 
@@ -342,16 +330,6 @@ public abstract class SigninFragmentBase
                 ? R.string.signin_sync_description_child_account
                 : R.string.signin_sync_description;
         mConsentTextTracker.setText(mView.getSyncDescriptionView(), syncDescription);
-
-        mConsentTextTracker.setText(
-                mView.getTapToSearchTitleView(), R.string.signin_tap_to_search_title);
-        mConsentTextTracker.setText(
-                mView.getTapToSearchDescriptionView(), R.string.signin_tap_to_search_description);
-
-        mConsentTextTracker.setText(
-                mView.getSafeBrowsingTitleView(), R.string.signin_safe_browsing_title);
-        mConsentTextTracker.setText(
-                mView.getSafeBrowsingDescriptionView(), R.string.signin_safe_browsing_description);
 
         mConsentTextTracker.setText(mView.getRefuseButton(), getNegativeButtonTextId());
         mConsentTextTracker.setText(mView.getMoreButton(), R.string.more);
@@ -384,17 +362,20 @@ public abstract class SigninFragmentBase
     }
 
     private void onAccountPickerClicked() {
-        if (isForcedSignin() || isConsentBump() || !areControlsEnabled()) return;
+        if (isForcedSignin() || !areControlsEnabled()) return;
         showAccountPicker();
     }
 
     private void onRefuseButtonClicked(View button) {
+        RecordUserAction.record("Signin_Undo_Signin");
+        mRecordUndoSignin = false;
         onSigninRefused();
     }
 
     private void onAcceptButtonClicked(View button) {
         if (!areControlsEnabled()) return;
         mIsSigninInProgress = true;
+        mRecordUndoSignin = false;
         RecordUserAction.record("Signin_Signin_WithDefaultSyncSettings");
 
         // Record the fact that the user consented to the consent text by clicking on a button
@@ -422,6 +403,8 @@ public abstract class SigninFragmentBase
      * visual appearance of these controls. Refuse button is always enabled.
      */
     private boolean areControlsEnabled() {
+        // Ignore clicks if the fragment is being removed or the app is being backgrounded.
+        if (!isResumed() || isStateSaved()) return false;
         return !mAccountSelectionPending && !mIsSigninInProgress && !mHasGmsError;
     }
 
@@ -430,7 +413,7 @@ public abstract class SigninFragmentBase
         // as this is needed for the previous account check.
         final long seedingStartTime = SystemClock.elapsedRealtime();
         final AccountTrackerService accountTrackerService =
-                IdentityServicesProvider.getAccountTrackerService();
+                IdentityServicesProvider.get().getAccountTrackerService();
         if (accountTrackerService.checkAndSeedSystemAccounts()) {
             recordAccountTrackerServiceSeedingTime(seedingStartTime);
             runStateMachineAndSignin(settingsClicked);
@@ -448,26 +431,22 @@ public abstract class SigninFragmentBase
                         if (mDestroyed) return;
                         runStateMachineAndSignin(settingsClicked);
                     }
-
-                    @Override
-                    public void onSystemAccountsChanged() {}
                 };
         accountTrackerService.addSystemAccountsSeededListener(listener);
     }
 
     private void runStateMachineAndSignin(boolean settingsClicked) {
-        mConfirmSyncDataStateMachine = new ConfirmSyncDataStateMachine(getContext(),
-                getChildFragmentManager(),
-                ConfirmImportSyncDataDialog.ImportSyncType.PREVIOUS_DATA_FOUND,
-                PrefServiceBridge.getInstance().getSyncLastAccountName(), mSelectedAccountName,
-                new ConfirmImportSyncDataDialog.Listener() {
+        mConfirmSyncDataStateMachine = new ConfirmSyncDataStateMachine(
+                new ConfirmSyncDataStateMachineDelegate(getChildFragmentManager()),
+                PrefServiceBridge.getInstance().getString(Pref.SYNC_LAST_ACCOUNT_NAME),
+                mSelectedAccountName, new ConfirmSyncDataStateMachine.Listener() {
                     @Override
                     public void onConfirm(boolean wipeData) {
                         mConfirmSyncDataStateMachine = null;
 
                         // Don't start sign-in if this fragment has been destroyed.
                         if (mDestroyed) return;
-                        SigninManager.wipeSyncUserDataIfRequired(wipeData).then((Void v) -> {
+                        SyncUserDataWiper.wipeSyncUserDataIfRequired(wipeData).then((Void v) -> {
                             onSigninAccepted(mSelectedAccountName, mIsDefaultAccountSelected,
                                     settingsClicked, () -> mIsSigninInProgress = false);
                         });
@@ -483,7 +462,7 @@ public abstract class SigninFragmentBase
 
     private static void recordAccountTrackerServiceSeedingTime(long seedingStartTime) {
         RecordHistogram.recordTimesHistogram("Signin.AndroidAccountSigninViewSeedingTime",
-                SystemClock.elapsedRealtime() - seedingStartTime, TimeUnit.MILLISECONDS);
+                SystemClock.elapsedRealtime() - seedingStartTime);
     }
 
     /**
@@ -514,13 +493,14 @@ public abstract class SigninFragmentBase
 
         AccountPickerDialogFragment dialog =
                 AccountPickerDialogFragment.create(mSelectedAccountName);
-        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        dialog.setTargetFragment(this, ACCOUNT_PICKER_DIALOG_REQUEST_CODE);
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.add(dialog, ACCOUNT_PICKER_DIALOG_TAG);
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
     }
 
     private AccountPickerDialogFragment getAccountPickerDialogFragment() {
-        return (AccountPickerDialogFragment) getChildFragmentManager().findFragmentByTag(
+        return (AccountPickerDialogFragment) getFragmentManager().findFragmentByTag(
                 ACCOUNT_PICKER_DIALOG_TAG);
     }
 
@@ -539,8 +519,9 @@ public abstract class SigninFragmentBase
                 return;
             }
 
-            // AccountManagerFacade couldn't create intent, use AccountAdder as fallback.
-            AccountAdder.getInstance().addAccount(this, ADD_ACCOUNT_REQUEST_CODE);
+            // AccountManagerFacade couldn't create intent, use SigninUtils to open settings
+            // instead.
+            SigninUtils.openSettingsForAllAccounts(getContext());
         });
     }
 
@@ -554,7 +535,7 @@ public abstract class SigninFragmentBase
             // Found the account name, dismiss the account picker dialog if it is shown.
             AccountPickerDialogFragment accountPickerFragment = getAccountPickerDialogFragment();
             if (accountPickerFragment != null) {
-                accountPickerFragment.dismiss();
+                accountPickerFragment.dismissAllowingStateLoss();
             }
 
             // Wait for the account cache to be updated and select newly-added account.
@@ -608,7 +589,8 @@ public abstract class SigninFragmentBase
 
         mAccountNames = getAccountNames(maybeAccountNames);
         mHasGmsError = mAccountNames == null;
-        if (mAccountNames == null) return;
+        mView.getAcceptButton().setEnabled(!mHasGmsError);
+        if (mHasGmsError) return;
 
         if (mAccountNames.isEmpty()) {
             mSelectedAccountName = null;
@@ -679,7 +661,8 @@ public abstract class SigninFragmentBase
                 && mGooglePlayServicesUpdateErrorHandler.isShowing()) {
             return;
         }
-        boolean cancelable = !SigninManager.get().isForceSigninEnabled();
+        boolean cancelable =
+                !IdentityServicesProvider.get().getSigninManager().isForceSigninEnabled();
         mGooglePlayServicesUpdateErrorHandler =
                 new UserRecoverableErrorHandler.ModalDialog(getActivity(), cancelable);
         mGooglePlayServicesUpdateErrorHandler.handleError(getActivity(), gmsErrorCode);
@@ -713,7 +696,6 @@ public abstract class SigninFragmentBase
         mGmsIsUpdatingDialog.dismiss();
         mGmsIsUpdatingDialog = null;
         RecordHistogram.recordTimesHistogram("Signin.AndroidGmsUpdatingDialogShownTime",
-                SystemClock.elapsedRealtime() - mGmsIsUpdatingDialogShowTime,
-                TimeUnit.MILLISECONDS);
+                SystemClock.elapsedRealtime() - mGmsIsUpdatingDialogShowTime);
     }
 }

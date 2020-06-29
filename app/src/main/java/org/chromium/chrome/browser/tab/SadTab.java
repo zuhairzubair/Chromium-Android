@@ -17,11 +17,11 @@ import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 
+import androidx.annotation.VisibleForTesting;
+
 import org.chromium.base.UserData;
-import org.chromium.base.VisibleForTesting;
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.ChromeFeatureList;
 import org.chromium.chrome.browser.help.HelpAndFeedback;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.components.ui_metrics.SadTabEvent;
@@ -38,7 +38,7 @@ import org.chromium.ui.widget.ChromeBulletSpan;
 public class SadTab extends EmptyTabObserver implements UserData {
     private static final Class<SadTab> USER_DATA_KEY = SadTab.class;
 
-    private final Tab mTab;
+    private final TabImpl mTab;
 
     private View mView;
 
@@ -68,7 +68,7 @@ public class SadTab extends EmptyTabObserver implements UserData {
 
     @VisibleForTesting
     public SadTab(Tab tab) {
-        mTab = tab;
+        mTab = (TabImpl) tab;
         mTab.addObserver(this);
     }
 
@@ -90,7 +90,7 @@ public class SadTab extends EmptyTabObserver implements UserData {
             public void run() {
                 Activity activity = mTab.getWindowAndroid().getActivity().get();
                 assert activity != null;
-                HelpAndFeedback.getInstance(activity).show(activity,
+                HelpAndFeedback.getInstance().show(activity,
                         activity.getString(R.string.help_context_sad_tab),
                         Profile.getLastUsedProfile(), null);
             }
@@ -218,10 +218,11 @@ public class SadTab extends EmptyTabObserver implements UserData {
      */
     private static CharSequence getHelpMessage(
             Context context, final Runnable suggestionAction, final boolean showSendFeedback) {
-        NoUnderlineClickableSpan linkSpan = new NoUnderlineClickableSpan((view) -> {
-            recordEvent(showSendFeedback, SadTabEvent.HELP_LINK_CLICKED);
-            suggestionAction.run();
-        });
+        NoUnderlineClickableSpan linkSpan =
+                new NoUnderlineClickableSpan(context.getResources(), (view) -> {
+                    recordEvent(showSendFeedback, SadTabEvent.HELP_LINK_CLICKED);
+                    suggestionAction.run();
+                });
 
         if (showSendFeedback) {
             SpannableString learnMoreLink =
@@ -254,10 +255,7 @@ public class SadTab extends EmptyTabObserver implements UserData {
         SpannableStringBuilder spannableString = new SpannableStringBuilder();
         if (!isIncognito) {
             spannableString
-                    .append(generateBulletedString(context,
-                            ChromeFeatureList.isEnabled(ChromeFeatureList.INCOGNITO_STRINGS)
-                                    ? R.string.sad_tab_reload_private
-                                    : R.string.sad_tab_reload_incognito))
+                    .append(generateBulletedString(context, R.string.sad_tab_reload_incognito))
                     .append("\n");
         }
         spannableString

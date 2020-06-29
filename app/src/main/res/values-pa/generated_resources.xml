@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"ਜਾਰੀ ਰੱਖੋ"</string>
+<string name="tos_notification_title">"Chrome ਦੇ ਸੇਵਾ ਦੇ ਨਿਯਮ 31 ਮਾਰਚ ਨੂੰ ਬਦਲ ਰਹੇ ਹਨ"</string>
+<string name="tos_notification_body_text">"ਕਿਰਪਾ ਕਰਕੇ ਨਵੇਂ ਨਿਯਮਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰੋ"</string>
+<string name="tos_notification_ack_button_text">"ਸਮਝ ਲਿਆ"</string>
+<string name="tos_notification_review_button_text">"ਸਮੀਖਿਆ ਕਰੋ"</string>
+<string name="search_or_type_web_address">"ਖੋਜੋ ਜਾਂ ਵੈੱਬਸਾਈਟ ਪਤਾ ਟਾਈਪ ਕਰੋ"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"ਕੀ ਕਲਿੱਪਬੋਰਡ ਤੋਂ ਸੁਝਾਅ ਨੂੰ ਹਟਾਉਣਾ ਹੈ?"</string>
+<string name="options_homepage_title">"ਮੁੱਖ ਪੰਨਾ"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"ਇਹ ਸਾਈਟ ਇਨਕੋਗਨਿਟੋ ਮੋਡ ਤੋਂ ਬਾਹਰ ਕਿਸੇ ਐਪ ਦੇ ਨਾਲ ਜਾਣਕਾਰੀ ਸਾਂਝੀ ਕਰਨ ਲੱਗੀ ਹੈ।"</string>
+<string name="external_app_leave_incognito_warning_title">"ਇਨਕੋਗਨਿਟੋ ਮੋਡ ਛੱਡੀਏ?"</string>
+<string name="external_app_leave_incognito_stay">"ਇੱਥੇ ਰੁਕੋ"</string>
+<string name="external_app_leave_incognito_leave">"ਛੱਡੋ"</string>
+<string name="external_app_restricted_access_error">"Chrome ਦੀ ਬੇਨਤੀ ਕੀਤੇ ਸਰੋਤ \'ਤੇ ਪਹੁੰਚ ਨਹੀਂ ਹੈ।"</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"ਕੋਈ ਨਜ਼ਦੀਕੀ ਡੀਵਾਈਸ ਨਹੀਂ ਮਿਲੇ।"</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"ਆਗਿਆ ਦਿਓ"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"ਬਲੌਕ ਕਰੋ"</string>
+<string name="blocked_ads_prompt_title">"ਵਿਗਿਆਪਨ ਬਲੌਕ ਕੀਤੇ ਗਏ"</string>
+<string name="video_call_notification_text_2">"ਵੀਡੀਓ ਇਨਪੁਟ ਤੱਕ ਪਹੁੰਚ ਰਿਹਾ ਹੈ"</string>
+<string name="audio_call_notification_text_2">"ਆਡੀਓ ਇਨਪੁਟ ਤੱਕ ਪਹੁੰਚ ਰਿਹਾ ਹੈ"</string>
+<string name="video_audio_call_notification_text_2">"ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਇਨਪੁਟ ਤੱਕ ਪਹੁੰਚ ਰਿਹਾ ਹੈ"</string>
+<string name="video_call_incognito_notification_text_2">"ਕੋਈ ਸਾਈਟ ਵੀਡੀਓ ਇਨਪੁੱਟ ਤੱਕ ਪਹੁੰਚ ਕਰ ਰਹੀ ਹੈ"</string>
+<string name="audio_call_incognito_notification_text_2">"ਕੋਈ ਸਾਈਟ ਆਡੀਓ ਇਨਪੁੱਟ ਤੱਕ ਪਹੁੰਚ ਕਰ ਰਹੀ ਹੈ"</string>
+<string name="video_audio_call_incognito_notification_text_2">"ਕੋਈ ਸਾਈਟ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਇਨਪੁੱਟ ਤੱਕ ਪਹੁੰਚ ਕਰ ਰਹੀ ਹੈ"</string>
+</resources>

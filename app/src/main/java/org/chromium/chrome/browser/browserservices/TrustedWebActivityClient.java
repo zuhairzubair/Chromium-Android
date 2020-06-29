@@ -11,44 +11,73 @@ import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.support.annotation.Nullable;
-import android.support.customtabs.trusted.TrustedWebActivityService;
-import android.support.customtabs.trusted.TrustedWebActivityServiceConnectionManager;
-import android.support.customtabs.trusted.TrustedWebActivityServiceWrapper;
 
-import org.chromium.base.ApiCompatibilityUtils;
+import androidx.annotation.NonNull;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import org.chromium.base.ContextUtils;
+import org.chromium.base.Log;
+import org.chromium.base.task.AsyncTask;
+import org.chromium.base.task.PostTask;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.ChromeFeatureList;
-import org.chromium.chrome.browser.UrlConstants;
+import org.chromium.chrome.browser.ChromeApplication;
 import org.chromium.chrome.browser.browserservices.TrustedWebActivityUmaRecorder.DelegatedNotificationSmallIconFallback;
+import org.chromium.chrome.browser.browserservices.permissiondelegation.TrustedWebActivityPermissionManager;
 import org.chromium.chrome.browser.notifications.NotificationBuilderBase;
+import org.chromium.chrome.browser.notifications.NotificationMetadata;
 import org.chromium.chrome.browser.notifications.NotificationUmaTracker;
+import org.chromium.chrome.browser.util.UrlConstants;
+import org.chromium.content_public.browser.UiThreadTaskTraits;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import androidx.annotation.Nullable;
+import androidx.browser.trusted.Token;
+import androidx.browser.trusted.TrustedWebActivityService;
+import androidx.browser.trusted.TrustedWebActivityServiceConnection;
+import androidx.browser.trusted.TrustedWebActivityServiceConnectionPool;
 
 /**
  * Uses a Trusted Web Activity client to display notifications.
  */
+@Singleton
 public class TrustedWebActivityClient {
-    private final TrustedWebActivityServiceConnectionManager mConnection;
+    private static final String TAG = "TWAClient";
+    private static final Executor UI_THREAD_EXECUTOR =
+            (Runnable r) -> PostTask.postTask(UiThreadTaskTraits.USER_VISIBLE, r);
+
+    private final TrustedWebActivityServiceConnectionPool mConnection;
+    private final TrustedWebActivityPermissionManager mDelegatesManager;
     private final TrustedWebActivityUmaRecorder mRecorder;
-    private final NotificationUmaTracker mNotificationUmaTracker;
+
+    /** Interface for callbacks to {@link #checkNotificationPermission}. */
+    public interface NotificationPermissionCheckCallback {
+        /** May be called as a result of {@link #checkNotificationPermission}. */
+        void onPermissionCheck(ComponentName answeringApp, boolean enabled);
+    }
 
     /**
      * Creates a TrustedWebActivityService.
      */
-    public TrustedWebActivityClient(TrustedWebActivityServiceConnectionManager connection,
-            TrustedWebActivityUmaRecorder recorder, NotificationUmaTracker notificationUmaTracker) {
+    @Inject
+    public TrustedWebActivityClient(TrustedWebActivityServiceConnectionPool connection,
+            TrustedWebActivityPermissionManager delegatesManager,
+            TrustedWebActivityUmaRecorder recorder) {
         mConnection = connection;
+        mDelegatesManager = delegatesManager;
         mRecorder = recorder;
-        mNotificationUmaTracker = notificationUmaTracker;
     }
 
     /**
@@ -58,7 +87,28 @@ public class TrustedWebActivityClient {
      * @return Whether a Trusted Web Activity client was found to show the notification.
      */
     public boolean twaExistsForScope(Uri scope) {
-        return mConnection.serviceExistsForScope(scope, new Origin(scope).toString());
+        Origin origin = Origin.create(scope);
+        if (origin == null) return false;
+        Set<Token> possiblePackages = mDelegatesManager.getAllDelegateApps(origin);
+        if (possiblePackages == null) return false;
+        return mConnection.serviceExistsForScope(scope, possiblePackages);
+    }
+
+    /**
+     * Checks whether the TWA of the given origin has the notification permission granted.
+     * @param callback Will be called on a background thread with whether the permission is granted.
+     * @return {@code false} if no such TWA exists (in which case the callback will not be called).
+     *         Ensure that the app has been added to the {@link TrustedWebActivityPermissionManager}
+     *         before calling this.
+     */
+    public boolean checkNotificationPermission(Origin origin,
+            NotificationPermissionCheckCallback callback) {
+        Resources res = ContextUtils.getApplicationContext().getResources();
+        String channelDisplayName = res.getString(R.string.notification_category_group_general);
+
+        return connectAndExecute(origin.uri(), service ->
+                callback.onPermissionCheck(service.getComponentName(),
+                        service.areNotificationsEnabled(channelDisplayName)));
     }
 
     /**
@@ -68,34 +118,48 @@ public class TrustedWebActivityClient {
      * @param platformId A notification id.
      * @param builder A builder for the notification to display.
      *                The Trusted Web Activity client may override the small icon.
+     * @param notificationUmaTracker To log Notification UMA.
      */
     public void notifyNotification(Uri scope, String platformTag, int platformId,
-            NotificationBuilderBase builder) {
+            NotificationBuilderBase builder, NotificationUmaTracker notificationUmaTracker) {
         Resources res = ContextUtils.getApplicationContext().getResources();
         String channelDisplayName = res.getString(R.string.notification_category_group_general);
+        Origin origin = Origin.createOrThrow(scope);
 
-        mConnection.execute(scope, new Origin(scope).toString(), service -> {
+        connectAndExecute(scope, service -> {
+            if (!service.areNotificationsEnabled(channelDisplayName)) {
+                mDelegatesManager.updatePermission(origin,
+                        service.getComponentName().getPackageName(), false);
+
+                // Attempting to notify when notifications are disabled won't have any effect, but
+                // returning here just saves us from doing unnecessary work.
+                return;
+            }
+
             fallbackToIconFromServiceIfNecessary(builder, service);
 
-            Notification notification = builder.build();
+            NotificationMetadata metadata = new NotificationMetadata(
+                    NotificationUmaTracker.SystemNotificationType.TRUSTED_WEB_ACTIVITY_SITES,
+                    platformTag, platformId);
+            Notification notification = builder.build(metadata).getNotification();
 
             service.notify(platformTag, platformId, notification, channelDisplayName);
 
-            mNotificationUmaTracker.onNotificationShown(
+            notificationUmaTracker.onNotificationShown(
                     NotificationUmaTracker.SystemNotificationType.TRUSTED_WEB_ACTIVITY_SITES,
                     notification);
         });
     }
 
     private void fallbackToIconFromServiceIfNecessary(NotificationBuilderBase builder,
-            TrustedWebActivityServiceWrapper service) throws RemoteException {
+            TrustedWebActivityServiceConnection service) throws RemoteException {
         if (builder.hasSmallIconForContent() && builder.hasStatusBarIconBitmap()) {
             recordFallback(NO_FALLBACK);
             return;
         }
 
         int id = service.getSmallIconId();
-        if (id == TrustedWebActivityService.NO_ID) {
+        if (id == TrustedWebActivityService.SMALL_ICON_NOT_SET) {
             recordFallback(FALLBACK_ICON_NOT_PROVIDED);
             return;
         }
@@ -125,21 +189,29 @@ public class TrustedWebActivityClient {
      * @param platformId The id of the notification to cancel.
      */
     public void cancelNotification(Uri scope, String platformTag, int platformId) {
-        mConnection.execute(scope, new Origin(scope).toString(),
-                service -> service.cancel(platformTag, platformId));
+        connectAndExecute(scope, service -> service.cancel(platformTag, platformId));
     }
 
-    /**
-     * Registers the package of a Trusted Web Activity client app to be used to deal with
-     * notifications from the given origin. This can be called on any thread, but may hit the disk
-     * so should be called on a background thread if possible.
-     * @param context A context used to access shared preferences.
-     * @param origin The origin to use the client app for.
-     * @param clientPackage The package of the client app.
-     */
-    public static void registerClient(Context context, Origin origin, String clientPackage) {
-        TrustedWebActivityServiceConnectionManager
-                .registerClient(context, origin.toString(), clientPackage);
+    private interface ExecutionCallback {
+        void onConnected(TrustedWebActivityServiceConnection service) throws RemoteException;
+    }
+
+    private boolean connectAndExecute(Uri scope, ExecutionCallback callback) {
+        Origin origin = Origin.createOrThrow(scope);
+        Set<Token> possiblePackages = mDelegatesManager.getAllDelegateApps(origin);
+        if (possiblePackages == null || possiblePackages.isEmpty()) return false;
+
+        ListenableFuture<TrustedWebActivityServiceConnection> connection =
+                mConnection.connect(scope, possiblePackages, AsyncTask.THREAD_POOL_EXECUTOR);
+        connection.addListener(() -> {
+            try {
+                callback.onConnected(connection.get());
+            } catch (RemoteException | ExecutionException | InterruptedException e) {
+                Log.w(TAG, "Failed to execute TWA command.");
+            }
+        }, UI_THREAD_EXECUTOR);
+
+        return true;
     }
 
     /**
@@ -151,38 +223,48 @@ public class TrustedWebActivityClient {
      */
     public static @Nullable Intent createLaunchIntentForTwa(Context appContext, String url,
             List<ResolveInfo> resolveInfosForUrl) {
-        if (!ChromeFeatureList.isEnabled(ChromeFeatureList.TRUSTED_WEB_ACTIVITY)) return null;
+        // This is ugly, but the call site for this is static and called by native.
+        TrustedWebActivityClient client =
+                ChromeApplication.getComponent().resolveTrustedWebActivityClient();
+        return client.createLaunchIntentForTwaInternal(appContext, url, resolveInfosForUrl);
+    }
 
-        Origin origin = new Origin(url);
+    private @Nullable Intent createLaunchIntentForTwaInternal(Context appContext, String url,
+            List<ResolveInfo> resolveInfosForUrl) {
+        Origin origin = Origin.createOrThrow(url);
 
         // Trusted Web Activities only work with https so we can shortcut here.
-        if (!origin.uri().getScheme().equals(UrlConstants.HTTPS_SCHEME)) return null;
+        if (!UrlConstants.HTTPS_SCHEME.equals(origin.uri().getScheme())) return null;
 
-        Set<String> verifiedPackages = TrustedWebActivityServiceConnectionManager
-                .getVerifiedPackages(appContext, origin.toString());
-        if (verifiedPackages == null || verifiedPackages.size() == 0) return null;
+        ComponentName componentName = searchVerifiedApps(appContext.getPackageManager(),
+                mDelegatesManager.getAllDelegateApps(origin), resolveInfosForUrl);
 
-        String twaPackageName = null;
-        String twaActivityName = null;
-        for (ResolveInfo info : resolveInfosForUrl) {
-            if (info.activityInfo == null) continue;
-
-            if (verifiedPackages.contains(info.activityInfo.packageName)) {
-                twaPackageName = info.activityInfo.packageName;
-                twaActivityName = info.activityInfo.name;
-                break;
-            }
-        }
-
-        if (twaPackageName == null) return null;
+        if (componentName == null) return null;
 
         Intent intent = new Intent();
         intent.setData(Uri.parse(url));
         intent.setAction(Intent.ACTION_VIEW);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | ApiCompatibilityUtils.getActivityNewDocumentFlag()
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.setComponent(new ComponentName(twaPackageName, twaActivityName));
+        intent.setComponent(componentName);
         return intent;
+    }
+
+    @Nullable
+    private static ComponentName searchVerifiedApps(@NonNull PackageManager pm,
+            @Nullable Set<Token> verifiedPackages, @NonNull List<ResolveInfo> resolveInfosForUrl) {
+        if (verifiedPackages == null || verifiedPackages.isEmpty()) return null;
+
+        for (ResolveInfo info : resolveInfosForUrl) {
+            if (info.activityInfo == null) continue;
+
+            for (Token v : verifiedPackages) {
+                if (!v.matches(info.activityInfo.packageName, pm)) continue;
+
+                return new ComponentName(info.activityInfo.packageName, info.activityInfo.name);
+            }
+        }
+
+        return null;
     }
 }

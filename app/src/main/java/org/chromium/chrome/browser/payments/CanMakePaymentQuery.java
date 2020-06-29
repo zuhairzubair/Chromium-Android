@@ -6,6 +6,7 @@ package org.chromium.chrome.browser.payments;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.JNINamespace;
+import org.chromium.base.annotations.NativeMethods;
 import org.chromium.content_public.browser.WebContents;
 import org.chromium.payments.mojom.PaymentMethodData;
 
@@ -21,12 +22,14 @@ public class CanMakePaymentQuery {
      * @param topLevelOrigin The top level origin using the Payment Request API.
      * @param frameOrigin    The frame origin using the Payment Request API.
      * @param query          The payment method identifiers and payment method specific data.
+     * @param perMethodQuota Whether each payment method has its own query quota.
      *
      * @return True if the given query for canMakePayment() is allowed.
      */
     public static boolean canQuery(WebContents webContents, String topLevelOrigin,
-            String frameOrigin, Map<String, PaymentMethodData> query) {
-        return nativeCanQuery(webContents, topLevelOrigin, frameOrigin, query);
+            String frameOrigin, Map<String, PaymentMethodData> query, boolean perMethodQuota) {
+        return CanMakePaymentQueryJni.get().canQuery(
+                webContents, topLevelOrigin, frameOrigin, query, perMethodQuota);
     }
 
     @CalledByNative
@@ -43,6 +46,9 @@ public class CanMakePaymentQuery {
 
     private CanMakePaymentQuery() {} // Do not instantiate.
 
-    private static native boolean nativeCanQuery(WebContents webContents, String topLevelOrigin,
-            String frameOrigin, Map<String, PaymentMethodData> query);
+    @NativeMethods
+    interface Natives {
+        boolean canQuery(WebContents webContents, String topLevelOrigin, String frameOrigin,
+                Map<String, PaymentMethodData> query, boolean perMethodQuota);
+    }
 }

@@ -5,19 +5,20 @@
 package org.chromium.chrome.browser.contextmenu;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.support.annotation.IntDef;
-import android.support.annotation.StringRes;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.StringRes;
+
 import org.chromium.base.ApiCompatibilityUtils;
-import org.chromium.base.Callback;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.ChromeFeatureList;
 import org.chromium.chrome.browser.DefaultBrowserInfo;
-import org.chromium.chrome.browser.search_engines.TemplateUrlService;
+import org.chromium.chrome.browser.flags.FeatureUtilities;
+import org.chromium.chrome.browser.preferences.ChromePreferenceKeys;
+import org.chromium.chrome.browser.preferences.SharedPreferencesManager;
+import org.chromium.chrome.browser.search_engines.TemplateUrlServiceFactory;
 import org.chromium.ui.text.SpanApplier;
 import org.chromium.ui.text.SpanApplier.SpanInfo;
 
@@ -33,10 +34,9 @@ public class ChromeContextMenuItem implements ContextMenuItem {
             Item.OPEN_IN_OTHER_WINDOW, Item.OPEN_IN_EPHEMERAL_TAB, Item.COPY_LINK_ADDRESS,
             Item.COPY_LINK_TEXT, Item.SAVE_LINK_AS, Item.LOAD_ORIGINAL_IMAGE, Item.SAVE_IMAGE,
             Item.OPEN_IMAGE, Item.OPEN_IMAGE_IN_NEW_TAB, Item.OPEN_IMAGE_IN_EPHEMERAL_TAB,
-            Item.SEARCH_BY_IMAGE, Item.CALL, Item.SEND_MESSAGE, Item.ADD_TO_CONTACTS, Item.COPY,
-            Item.SAVE_VIDEO, Item.OPEN_IN_CHROME, Item.BROWSER_ACTIONS_OPEN_IN_BACKGROUND,
-            Item.BROWSER_ACTIONS_OPEN_IN_INCOGNITO_TAB, Item.BROWSER_ACTION_SAVE_LINK_AS,
-            Item.BROWSER_ACTIONS_COPY_ADDRESS})
+            Item.COPY_IMAGE, Item.SEARCH_BY_IMAGE, Item.SEARCH_WITH_GOOGLE_LENS, Item.CALL,
+            Item.SEND_MESSAGE, Item.ADD_TO_CONTACTS, Item.COPY, Item.SAVE_VIDEO,
+            Item.OPEN_IN_CHROME})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Item {
         // Values are numerated from 0 and can't have gaps.
@@ -59,29 +59,26 @@ public class ChromeContextMenuItem implements ContextMenuItem {
         int OPEN_IMAGE = 12;
         int OPEN_IMAGE_IN_NEW_TAB = 13;
         int OPEN_IMAGE_IN_EPHEMERAL_TAB = 14;
-        int SEARCH_BY_IMAGE = 15;
+        int COPY_IMAGE = 15;
+        int SEARCH_BY_IMAGE = 16;
+        int SEARCH_WITH_GOOGLE_LENS = 17;
         // Message Group
-        int CALL = 16;
-        int SEND_MESSAGE = 17;
-        int ADD_TO_CONTACTS = 18;
-        int COPY = 19;
+        int CALL = 18;
+        int SEND_MESSAGE = 19;
+        int ADD_TO_CONTACTS = 20;
+        int COPY = 21;
         // Video Group
-        int SAVE_VIDEO = 20;
+        int SAVE_VIDEO = 22;
         // Other
-        int OPEN_IN_CHROME = 21;
-        // Browser Action Items
-        int BROWSER_ACTIONS_OPEN_IN_BACKGROUND = 22;
-        int BROWSER_ACTIONS_OPEN_IN_INCOGNITO_TAB = 23;
-        int BROWSER_ACTION_SAVE_LINK_AS = 24;
-        int BROWSER_ACTIONS_COPY_ADDRESS = 25;
+        int OPEN_IN_CHROME = 23;
         // ALWAYS UPDATE!
-        int NUM_ENTRIES = 26;
+        int NUM_ENTRIES = 24;
     }
 
     /**
      * Mapping from {@link Item} to the ID found in the ids.xml.
      */
-    private final static int[] MENU_IDS = {
+    private static final int[] MENU_IDS = {
             R.id.contextmenu_open_in_new_chrome_tab, // Item.OPEN_IN_NEW_CHROME_TAB
             R.id.contextmenu_open_in_chrome_incognito_tab, // Item.OPEN_IN_CHROME_INCOGNITO_TAB
             R.id.contextmenu_open_in_browser_id, // Item.OPEN_IN_BROWSER_ID
@@ -97,23 +94,21 @@ public class ChromeContextMenuItem implements ContextMenuItem {
             R.id.contextmenu_open_image, // Item.OPEN_IMAGE
             R.id.contextmenu_open_image_in_new_tab, // Item.OPEN_IMAGE_IN_NEW_TAB
             R.id.contextmenu_open_image_in_ephemeral_tab, // Item.OPEN_IMAGE_IN_EPHEMERAL_TAB
+            R.id.contextmenu_copy_image, // Item.COPY_IMAGE
             R.id.contextmenu_search_by_image, // Item.SEARCH_BY_IMAGE
+            R.id.contextmenu_search_with_google_lens, // Item.SEARCH_WITH_GOOGLE_LENS
             R.id.contextmenu_call, // Item.CALL
             R.id.contextmenu_send_message, // Item.SEND_MESSAGE
             R.id.contextmenu_add_to_contacts, // Item.ADD_TO_CONTACTS
             R.id.contextmenu_copy, // Item.COPY
             R.id.contextmenu_save_video, // Item.SAVE_VIDEO
             R.id.contextmenu_open_in_chrome, // Item.OPEN_IN_CHROME
-            R.id.browser_actions_open_in_background, // Item.BROWSER_ACTIONS_OPEN_IN_BACKGROUND
-            R.id.browser_actions_open_in_incognito_tab, // Item.BROWSER_ACTIONS_OPEN_IN_INCOGNITO_TAB
-            R.id.browser_actions_save_link_as, // Item.BROWSER_ACTION_SAVE_LINK_AS
-            R.id.browser_actions_copy_address, // Item.BROWSER_ACTIONS_COPY_ADDRESS
     };
 
     /**
      * Mapping from {@link Item} to the ID of the string that describes the action of the item.
      */
-    private final static int[] STRING_IDS = {
+    private static final int[] STRING_IDS = {
             R.string.contextmenu_open_in_new_chrome_tab, // Item.OPEN_IN_NEW_CHROME_TAB:
             R.string.contextmenu_open_in_chrome_incognito_tab, // Item.OPEN_IN_CHROME_INCOGNITO_TAB:
             0, // Item.OPEN_IN_BROWSER_ID is not handled by this mapping.
@@ -129,20 +124,21 @@ public class ChromeContextMenuItem implements ContextMenuItem {
             R.string.contextmenu_open_image, // Item.OPEN_IMAGE:
             R.string.contextmenu_open_image_in_new_tab, // Item.OPEN_IMAGE_IN_NEW_TAB:
             R.string.contextmenu_open_image_in_ephemeral_tab, // Item.OPEN_IMAGE_IN_EPHEMERAL_TAB:
+            R.string.contextmenu_copy_image, // Item.COPY_IMAGE:
             R.string.contextmenu_search_web_for_image, // Item.SEARCH_BY_IMAGE:
+            R.string.contextmenu_search_with_google_lens, // Item.SEARCH_WITH_GOOGLE_LENS:
             R.string.contextmenu_call, // Item.CALL:
             R.string.contextmenu_send_message, // Item.SEND_MESSAGE:
             R.string.contextmenu_add_to_contacts, // Item.ADD_TO_CONTACTS:
             R.string.contextmenu_copy, // Item.COPY:
             R.string.contextmenu_save_video, // Item.SAVE_VIDEO:
             R.string.menu_open_in_chrome, // Item.OPEN_IN_CHROME:
-            R.string.browser_actions_open_in_background, // Item.BROWSER_ACTIONS_OPEN_IN_BACKGROUND:
-            R.string.browser_actions_open_in_incognito_tab, // Item.BROWSER_ACTIONS_OPEN_IN_INCOGNITO_TAB:
-            R.string.browser_actions_save_link_as, // Item.BROWSER_ACTION_SAVE_LINK_AS:
-            R.string.browser_actions_copy_address, // Item.BROWSER_ACTIONS_COPY_ADDRESS:
     };
 
     private final @Item int mItem;
+
+    // If set to true, adds a "New" superscript label to the menu string.
+    private boolean mShowNewLabel;
 
     public ChromeContextMenuItem(@Item int item) {
         mItem = item;
@@ -154,24 +150,21 @@ public class ChromeContextMenuItem implements ContextMenuItem {
         return MENU_IDS[mItem];
     }
 
+    @Override
+    public void setShowInProductHelp() {
+        mShowNewLabel = true;
+    }
+
     /**
      * Get string ID from the ID of the item.
      * @param item #Item Item ID.
      * @return Returns the string that describes the action of the item.
      */
-    private static @StringRes int getStringID(@Item int item) {
+    private static @StringRes int getStringId(@Item int item) {
         assert STRING_IDS.length == Item.NUM_ENTRIES;
 
-        if (ChromeFeatureList.isInitialized()
-                && ChromeFeatureList.isEnabled(ChromeFeatureList.INCOGNITO_STRINGS)) {
-            switch (item) {
-                case Item.OPEN_IN_CHROME_INCOGNITO_TAB:
-                    return R.string.contextmenu_open_in_chrome_private_tab;
-                case Item.OPEN_IN_INCOGNITO_TAB:
-                    return R.string.contextmenu_open_in_private_tab;
-                case Item.BROWSER_ACTIONS_OPEN_IN_INCOGNITO_TAB:
-                    return R.string.browser_actions_open_in_private_tab;
-            }
+        if (FeatureUtilities.isTabGroupsAndroidEnabled() && item == Item.OPEN_IN_NEW_TAB) {
+            return R.string.contextmenu_open_in_new_tab_group;
         }
 
         return STRING_IDS[item];
@@ -189,24 +182,36 @@ public class ChromeContextMenuItem implements ContextMenuItem {
             case Item.OPEN_IN_BROWSER_ID:
                 return DefaultBrowserInfo.getTitleOpenInDefaultBrowser(false);
             case Item.SEARCH_BY_IMAGE:
-                return context.getString(getStringID(mItem),
-                        TemplateUrlService.getInstance()
+                return context.getString(getStringId(mItem),
+                        TemplateUrlServiceFactory.get()
                                 .getDefaultSearchEngineTemplateUrl()
                                 .getShortName());
             case Item.OPEN_IN_EPHEMERAL_TAB:
+                return addOrRemoveNewLabel(
+                        context, ChromePreferenceKeys.CONTEXT_MENU_OPEN_IN_EPHEMERAL_TAB_CLICKED);
             case Item.OPEN_IMAGE_IN_EPHEMERAL_TAB:
-                return SpanApplier.applySpans(context.getString(getStringID(mItem)),
-                        new SpanInfo("<new>", "</new>", new SuperscriptSpan(),
-                                new RelativeSizeSpan(0.75f),
-                                new ForegroundColorSpan(ApiCompatibilityUtils.getColor(
-                                        context.getResources(), R.color.default_text_color_blue))));
+                return addOrRemoveNewLabel(context,
+                        ChromePreferenceKeys.CONTEXT_MENU_OPEN_IMAGE_IN_EPHEMERAL_TAB_CLICKED);
+            case Item.SEARCH_WITH_GOOGLE_LENS:
+                return addOrRemoveNewLabel(
+                        context, ChromePreferenceKeys.CONTEXT_MENU_SEARCH_WITH_GOOGLE_LENS_CLICKED);
             default:
-                return context.getString(getStringID(mItem));
+                return context.getString(getStringId(mItem));
         }
     }
 
-    @Override
-    public void getDrawableAsync(Context context, Callback<Drawable> callback) {
-        callback.onResult(null);
+    /**
+     * Modify the menu title by applying span attributes or removing the 'New' label if the menu
+     * has already been selected before.
+     */
+    private CharSequence addOrRemoveNewLabel(Context context, String prefKey) {
+        String menuTitle = context.getString(getStringId(mItem));
+        if (!mShowNewLabel || SharedPreferencesManager.getInstance().readBoolean(prefKey, false)) {
+            return SpanApplier.removeSpanText(menuTitle, new SpanInfo("<new>", "</new>"));
+        }
+        return SpanApplier.applySpans(menuTitle,
+                new SpanInfo("<new>", "</new>", new SuperscriptSpan(), new RelativeSizeSpan(0.75f),
+                        new ForegroundColorSpan(ApiCompatibilityUtils.getColor(
+                                context.getResources(), R.color.default_text_color_blue))));
     }
 }

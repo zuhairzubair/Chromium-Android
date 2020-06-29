@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Davam edin"</string>
+<string name="tos_notification_title">"Chrome’un Xidmət Şərtləri 31 martda dəyişəcək"</string>
+<string name="tos_notification_body_text">"Yeni şərtləri nəzərdən keçirin"</string>
+<string name="tos_notification_ack_button_text">"Anladım"</string>
+<string name="tos_notification_review_button_text">"Nəzərdən keçirin"</string>
+<string name="search_or_type_web_address">"Veb ünvanı axtarın və yazın"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Təklif mübadilə buferindən silinsin?"</string>
+<string name="options_homepage_title">"Əsas səhifə"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"Bu sayt gizli rejimdə olmayan tətbiqlə məlumat paylaşmaq üzrədir."</string>
+<string name="external_app_leave_incognito_warning_title">"Gizli rejimdən çıxılsın?"</string>
+<string name="external_app_leave_incognito_stay">"Qalın"</string>
+<string name="external_app_leave_incognito_leave">"Tərk edin"</string>
+<string name="external_app_restricted_access_error">"Chrome\'un sorğulanan mənbəyə girişi yoxdur."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Yaxınlıqda heç bir cihaz tapılmadı."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"İcazə verin"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Bloklayın"</string>
+<string name="blocked_ads_prompt_title">"Reklamlar blok edildi"</string>
+<string name="video_call_notification_text_2">"Video daxiletmə əldə olunur"</string>
+<string name="audio_call_notification_text_2">"Audio daxiletmə əldə olunur"</string>
+<string name="video_audio_call_notification_text_2">"Audio və video daxiletmə əldə olunur"</string>
+<string name="video_call_incognito_notification_text_2">"Bir sayt video girişinə daxil olur"</string>
+<string name="audio_call_incognito_notification_text_2">"Bir sayt audio girişinə daxil olur"</string>
+<string name="video_audio_call_incognito_notification_text_2">"Sayt audio və video girişinə daxil olur"</string>
+</resources>

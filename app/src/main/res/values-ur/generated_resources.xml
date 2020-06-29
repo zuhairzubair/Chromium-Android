@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"جاری رکھیں"</string>
+<string name="tos_notification_title">"‏Chrome کی سروس کی شرائط 31 مارچ کو بدل رہی ہیں"</string>
+<string name="tos_notification_body_text">"براہ کرم نئی شرائط کا جائزہ لیں"</string>
+<string name="tos_notification_ack_button_text">"سمجھ آ گئی"</string>
+<string name="tos_notification_review_button_text">"جائزہ لیں"</string>
+<string name="search_or_type_web_address">"ویب پتہ تلاش کریں یا ٹائپ کریں"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"کلپ بورڈ سے تجویز ہٹائیں؟"</string>
+<string name="options_homepage_title">"ہوم صفحہ"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"یہ سائٹ پوشیدگی وضع سے باہر ایک ایپ کے ساتھ معلومات کا اشتراک کرنے والی ہے۔"</string>
+<string name="external_app_leave_incognito_warning_title">"پوشیدگی وضع ترک کریں؟"</string>
+<string name="external_app_leave_incognito_stay">"رکیں"</string>
+<string name="external_app_leave_incognito_leave">"چھوڑیں"</string>
+<string name="external_app_restricted_access_error">"‏Chrome کو درخواست کردہ وسیلہ تک رسائی حاصل نہیں ہے۔"</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"کوئی قریبی آلہ نہیں ملا۔"</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"اجازت دیں"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"مسدود کریں"</string>
+<string name="blocked_ads_prompt_title">"اشتہارات مسدود ہیں"</string>
+<string name="video_call_notification_text_2">"ویڈیو ان پٹ تک رسائی ہو رہی ہے"</string>
+<string name="audio_call_notification_text_2">"آڈیو ان پٹ تک رسائی ہو رہی ہے"</string>
+<string name="video_audio_call_notification_text_2">"آڈیو اور ویڈیو ان پٹ تک رسائی ہو رہی ہے"</string>
+<string name="video_call_incognito_notification_text_2">"ایک سائٹ ویڈیو ان پٹ تک رسائی حاصل کر رہی ہے"</string>
+<string name="audio_call_incognito_notification_text_2">"ایک سائٹ آڈیو ان پٹ تک رسائی حاصل کر رہی ہے"</string>
+<string name="video_audio_call_incognito_notification_text_2">"ایک سائٹ آڈیو اور ویڈیو ان پٹ تک رسائی حاصل کر رہی ہے"</string>
+</resources>

@@ -6,24 +6,26 @@ package org.chromium.chrome.browser.ntp;
 
 import android.app.Activity;
 import android.graphics.Canvas;
+import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.VisibleForTesting;
+
 import org.chromium.base.ApiCompatibilityUtils;
-import org.chromium.base.VisibleForTesting;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.ChromeActivity;
-import org.chromium.chrome.browser.ChromeFeatureList;
-import org.chromium.chrome.browser.UrlConstants;
 import org.chromium.chrome.browser.compositor.layouts.content.InvalidationAwareThumbnailProvider;
 import org.chromium.chrome.browser.help.HelpAndFeedback;
-import org.chromium.chrome.browser.native_page.BasicNativePage;
-import org.chromium.chrome.browser.native_page.NativePageHost;
 import org.chromium.chrome.browser.ntp.IncognitoNewTabPageView.IncognitoNewTabPageManager;
+import org.chromium.chrome.browser.preferences.Pref;
+import org.chromium.chrome.browser.preferences.PrefServiceBridge;
 import org.chromium.chrome.browser.profiles.Profile;
+import org.chromium.chrome.browser.ui.native_page.BasicNativePage;
+import org.chromium.chrome.browser.ui.native_page.NativePageHost;
+import org.chromium.chrome.browser.util.UrlConstants;
 import org.chromium.chrome.browser.vr.VrModuleProvider;
+import org.chromium.components.content_settings.CookieControlsMode;
 
 /**
  * Provides functionality when the user interacts with the Incognito NTP.
@@ -42,7 +44,7 @@ public class IncognitoNewTabPage
     private final int mIncognitoNTPBackgroundColor;
 
     private void showIncognitoLearnMore() {
-        HelpAndFeedback.getInstance(mActivity).show(mActivity,
+        HelpAndFeedback.getInstance().show(mActivity,
                 mActivity.getString(R.string.help_context_incognito_learn_more),
                 Profile.getLastUsedProfile(), null);
     }
@@ -51,16 +53,13 @@ public class IncognitoNewTabPage
      * Constructs an Incognito NewTabPage.
      * @param activity The activity used to create the new tab page's View.
      */
-    public IncognitoNewTabPage(ChromeActivity activity, NativePageHost host) {
-        super(activity, host);
+    public IncognitoNewTabPage(Activity activity, NativePageHost host) {
+        super(host);
 
-        mIncognitoNTPBackgroundColor =
-                ApiCompatibilityUtils.getColor(activity.getResources(), R.color.ntp_bg_incognito);
-    }
-
-    @Override
-    protected void initialize(ChromeActivity activity, final NativePageHost host) {
         mActivity = activity;
+
+        mIncognitoNTPBackgroundColor = ApiCompatibilityUtils.getColor(
+                host.getContext().getResources(), R.color.ntp_bg_incognito);
 
         mIncognitoNewTabPageManager = new IncognitoNewTabPageManager() {
             @Override
@@ -77,47 +76,45 @@ public class IncognitoNewTabPage
             }
 
             @Override
+            public void setThirdPartyCookieBlocking(boolean enable) {
+                @CookieControlsMode
+                int new_mode = enable ? CookieControlsMode.INCOGNITO_ONLY : CookieControlsMode.OFF;
+                PrefServiceBridge.getInstance().setInteger(Pref.COOKIE_CONTROLS_MODE, new_mode);
+            }
+
+            @Override
+            public boolean shouldBlockThirdPartyCookies() {
+                // TODO(eokoyomon): add methods to CookieControlsBridge to implement this in order
+                // to be consistent with desktop cookie settings.
+                return PrefServiceBridge.getInstance().getBoolean(Pref.BLOCK_THIRD_PARTY_COOKIES)
+                        || (PrefServiceBridge.getInstance().getInteger(Pref.COOKIE_CONTROLS_MODE)
+                                != CookieControlsMode.OFF);
+            }
+
+            @Override
             public void onLoadingComplete() {
                 mIsLoaded = true;
             }
         };
 
-        mTitle = activity.getResources().getString(R.string.button_new_tab);
+        mTitle = host.getContext().getResources().getString(R.string.button_new_tab);
 
-        LayoutInflater inflater = LayoutInflater.from(activity);
+        LayoutInflater inflater = LayoutInflater.from(host.getContext());
         mIncognitoNewTabPageView =
-                (IncognitoNewTabPageView) inflater.inflate(getLayoutResource(), null);
+                (IncognitoNewTabPageView) inflater.inflate(R.layout.new_tab_page_incognito, null);
         mIncognitoNewTabPageView.initialize(mIncognitoNewTabPageManager);
 
-        boolean useAlternateIncognitoStrings =
-                ChromeFeatureList.isEnabled(ChromeFeatureList.INCOGNITO_STRINGS);
-        if (useMDIncognitoNTP()) {
-            TextView newTabIncognitoHeader =
-                    (TextView) mIncognitoNewTabPageView.findViewById(R.id.new_tab_incognito_title);
-            newTabIncognitoHeader.setText(useAlternateIncognitoStrings
-                            ? R.string.new_tab_private_title
-                            : R.string.new_tab_otr_title);
-        } else {
-            TextView newTabIncognitoHeader =
-                    (TextView) mIncognitoNewTabPageView.findViewById(R.id.ntp_incognito_header);
-            newTabIncognitoHeader.setText(useAlternateIncognitoStrings
-                            ? R.string.new_tab_private_header
-                            : R.string.new_tab_incognito_header);
-            TextView newTabIncognitoMessage = (TextView) mIncognitoNewTabPageView.findViewById(
-                    R.id.new_tab_incognito_message);
-            newTabIncognitoMessage.setText(useAlternateIncognitoStrings
-                            ? R.string.new_tab_private_message
-                            : R.string.new_tab_incognito_message);
+        TextView newTabIncognitoHeader =
+                mIncognitoNewTabPageView.findViewById(R.id.new_tab_incognito_title);
+        newTabIncognitoHeader.setText(R.string.new_tab_otr_title);
+
+        // Work around https://crbug.com/943873 and https://crbug.com/963385 where default focus
+        // highlight shows up after toggling dark mode.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mIncognitoNewTabPageView.setDefaultFocusHighlightEnabled(false);
         }
-    }
 
-    protected int getLayoutResource() {
-        return useMDIncognitoNTP() ? R.layout.new_tab_page_incognito_md
-                                   : R.layout.new_tab_page_incognito;
-    }
-
-    protected static boolean useMDIncognitoNTP() {
-        return ChromeFeatureList.isEnabled(ChromeFeatureList.MATERIAL_DESIGN_INCOGNITO_NTP);
+        initWithView(mIncognitoNewTabPageView);
     }
 
     /**
@@ -134,6 +131,7 @@ public class IncognitoNewTabPage
     public void destroy() {
         assert !ViewCompat
                 .isAttachedToWindow(getView()) : "Destroy called before removed from window";
+        super.destroy();
     }
 
     @Override
@@ -154,11 +152,6 @@ public class IncognitoNewTabPage
     @Override
     public boolean needsToolbarShadow() {
         return true;
-    }
-
-    @Override
-    public View getView() {
-        return mIncognitoNewTabPageView;
     }
 
     @Override

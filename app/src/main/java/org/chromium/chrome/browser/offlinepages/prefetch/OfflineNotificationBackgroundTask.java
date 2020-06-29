@@ -5,14 +5,17 @@
 package org.chromium.chrome.browser.offlinepages.prefetch;
 
 import android.content.Context;
+import android.os.Build;
+import android.text.format.DateUtils;
+
+import androidx.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
-import org.chromium.base.VisibleForTesting;
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.JNINamespace;
+import org.chromium.chrome.browser.DeviceConditions;
 import org.chromium.chrome.browser.background_task_scheduler.NativeBackgroundTask;
 import org.chromium.chrome.browser.background_task_scheduler.NativeBackgroundTask.StartBeforeNativeResult;
-import org.chromium.chrome.browser.offlinepages.DeviceConditions;
 import org.chromium.chrome.browser.offlinepages.OfflinePageBridge;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.components.background_task_scheduler.BackgroundTask.TaskFinishedCallback;
@@ -23,7 +26,6 @@ import org.chromium.components.background_task_scheduler.TaskParameters;
 import org.chromium.net.ConnectionType;
 
 import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Detects when the user has been offline and notifies them if they have offline content.
@@ -137,9 +139,7 @@ public class OfflineNotificationBackgroundTask extends NativeBackgroundTask {
             return StartBeforeNativeResult.DONE;
         }
 
-        int offlineCounter = PrefetchPrefs.getOfflineCounter();
-        offlineCounter++;
-        PrefetchPrefs.setOfflineCounter(offlineCounter);
+        int offlineCounter = PrefetchPrefs.incrementOfflineCounter();
         if (offlineCounter < OFFLINE_POLLING_ATTEMPTS) {
             scheduleTask(DETECTION_MODE_OFFLINE);
             return StartBeforeNativeResult.DONE;
@@ -186,9 +186,9 @@ public class OfflineNotificationBackgroundTask extends NativeBackgroundTask {
     private static long delayForDetectionMode(int detectionMode) {
         switch (detectionMode) {
             case DETECTION_MODE_ONLINE:
-                return TimeUnit.MINUTES.toMillis(DEFAULT_START_DELAY_MINUTES);
+                return DateUtils.MINUTE_IN_MILLIS * DEFAULT_START_DELAY_MINUTES;
             case DETECTION_MODE_OFFLINE:
-                return TimeUnit.MINUTES.toMillis(OFFLINE_POLL_DELAY_MINUTES);
+                return DateUtils.MINUTE_IN_MILLIS * OFFLINE_POLL_DELAY_MINUTES;
             default:
                 return -1;
         }
@@ -240,7 +240,12 @@ public class OfflineNotificationBackgroundTask extends NativeBackgroundTask {
         boolean tooManyIgnoredNotifications =
                 PrefetchPrefs.getIgnoredNotificationCounter() >= IGNORED_NOTIFICATION_MAX;
 
-        return noNewPages || tooManyIgnoredNotifications;
+        // Always enable on O+ devices because notification settings are handled at the system
+        // level, so the value of this pref can be ignored.
+        boolean disabledByPref = Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+                && !PrefetchPrefs.getNotificationEnabled();
+
+        return noNewPages || tooManyIgnoredNotifications || disabledByPref;
     }
 
     private void resetPrefs() {

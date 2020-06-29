@@ -7,12 +7,12 @@ package org.chromium.chrome.browser.tab;
 import android.graphics.Bitmap;
 import android.view.ContextMenu;
 
-import org.chromium.chrome.browser.fullscreen.FullscreenOptions;
-import org.chromium.chrome.browser.tab.Tab.TabHidingType;
-import org.chromium.chrome.browser.tabmodel.TabSelectionType;
+import org.chromium.components.find_in_page.FindMatchRectsDetails;
+import org.chromium.components.find_in_page.FindNotificationDetails;
 import org.chromium.content_public.browser.LoadUrlParams;
+import org.chromium.content_public.browser.NavigationHandle;
 import org.chromium.content_public.browser.WebContents;
-import org.chromium.content_public.common.BrowserControlsState;
+import org.chromium.net.NetError;
 
 /**
  * An implementation of the {@link TabObserver} which has empty implementations of all methods.
@@ -21,6 +21,9 @@ import org.chromium.content_public.common.BrowserControlsState;
  * bloats the number of methods. See https://crbug.com/781359.
  */
 public class EmptyTabObserver implements TabObserver {
+    @Override
+    public void onInitialized(Tab tab, TabState tabState) {}
+
     @Override
     public void onShown(Tab tab, @TabSelectionType int type) {}
 
@@ -46,7 +49,7 @@ public class EmptyTabObserver implements TabObserver {
     public void onPageLoadFinished(Tab tab, String url) {}
 
     @Override
-    public void onPageLoadFailed(Tab tab, int errorCode) { }
+    public void onPageLoadFailed(Tab tab, @NetError int errorCode) {}
 
     @Override
     public void onRestoreStarted(Tab tab) {}
@@ -76,40 +79,31 @@ public class EmptyTabObserver implements TabObserver {
     public void onContextualActionBarVisibilityChanged(Tab tab, boolean visible) { }
 
     @Override
+    public void onCloseContents(Tab tab) {}
+
+    @Override
     public void onLoadStarted(Tab tab, boolean toDifferentDocument) { }
 
     @Override
     public void onLoadStopped(Tab tab, boolean toDifferentDocument) { }
 
     @Override
-    public void onLoadProgressChanged(Tab tab, int progress) { }
+    public void onLoadProgressChanged(Tab tab, float progress) {}
 
     @Override
     public void onUpdateUrl(Tab tab, String url) { }
 
     @Override
-    public void onEnterFullscreenMode(Tab tab, FullscreenOptions options) {}
+    public void onDidFailLoad(Tab tab, boolean isMainFrame, int errorCode, String failingUrl) {}
 
     @Override
-    public void onExitFullscreenMode(Tab tab) {}
+    public void onDidStartNavigation(Tab tab, NavigationHandle navigationHandle) {}
 
     @Override
-    public void onDidFailLoad(
-            Tab tab, boolean isMainFrame, int errorCode, String description, String failingUrl) {}
+    public void onDidRedirectNavigation(Tab tab, NavigationHandle navigationHandle) {}
 
     @Override
-    public void onDidStartNavigation(Tab tab, String url, boolean isInMainFrame,
-            boolean isSameDocument, long navigationHandleProxy) {}
-
-    @Override
-    public void onDidRedirectNavigation(
-            Tab tab, String url, boolean isInMainFrame, long navigationHandleProxy) {}
-
-    @Override
-    public void onDidFinishNavigation(Tab tab, String url, boolean isInMainFrame,
-            boolean isErrorPage, boolean hasCommitted, boolean isSameDocument,
-            boolean isFragmentNavigation, Integer pageTransition, int errorCode,
-            int httpStatusCode) {}
+    public void onDidFinishNavigation(Tab tab, NavigationHandle navigationHandle) {}
 
     @Override
     public void didFirstVisuallyNonEmptyPaint(Tab tab) {}
@@ -135,7 +129,7 @@ public class EmptyTabObserver implements TabObserver {
     public void onActivityAttachmentChanged(Tab tab, boolean isAttached) {}
 
     @Override
-    public void onInteractabilityChanged(boolean isInteractable) {}
+    public void onInteractabilityChanged(Tab tab, boolean isInteractable) {}
 
     @Override
     public void onRendererResponsiveStateChanged(Tab tab, boolean isResponsive) {}
@@ -144,9 +138,16 @@ public class EmptyTabObserver implements TabObserver {
     public void onNavigationEntriesDeleted(Tab tab) {}
 
     @Override
-    public void onBrowserControlsConstraintsUpdated(
-            Tab tab, @BrowserControlsState int constraints) {}
+    public void onFindResultAvailable(FindNotificationDetails result) {}
 
     @Override
-    public void didReloadLoFiImages(Tab tab) {}
+    public void onFindMatchRectsAvailable(FindMatchRectsDetails result) {}
+
+    @Override
+    public void onRootIdChanged(Tab tab, int newRootId) {}
+
+    @Override
+    public void onBrowserControlsOffsetChanged(Tab tab, int topControlsOffsetY,
+            int bottomControlsOffsetY, int contentOffsetY, int topControlsMinHeightOffsetY,
+            int bottomControlsMinHeightOffsetY) {}
 }

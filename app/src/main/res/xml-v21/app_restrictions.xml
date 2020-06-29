@@ -8,6 +8,12 @@
 <restrictions xmlns:android="http://schemas.android.com/apk/res/android">
 
     <restriction
+        android:key="HomepageLocation"
+        android:title="@string/HomepageLocationTitle"
+        android:description="@string/HomepageLocationDesc"
+        android:restrictionType="string"/>
+
+    <restriction
         android:key="AlternateErrorPagesEnabled"
         android:title="@string/AlternateErrorPagesEnabledTitle"
         android:description="@string/AlternateErrorPagesEnabledDesc"
@@ -74,6 +80,12 @@
         android:restrictionType="bool"/>
 
     <restriction
+        android:key="PasswordLeakDetectionEnabled"
+        android:title="@string/PasswordLeakDetectionEnabledTitle"
+        android:description="@string/PasswordLeakDetectionEnabledDesc"
+        android:restrictionType="bool"/>
+
+    <restriction
         android:key="AutofillAddressEnabled"
         android:title="@string/AutofillAddressEnabledTitle"
         android:description="@string/AutofillAddressEnabledDesc"
@@ -84,6 +96,12 @@
         android:title="@string/AutofillCreditCardEnabledTitle"
         android:description="@string/AutofillCreditCardEnabledDesc"
         android:restrictionType="bool"/>
+
+    <restriction
+        android:key="SyncTypesListDisabled"
+        android:title="@string/SyncTypesListDisabledTitle"
+        android:description="@string/SyncTypesListDisabledDesc"
+        android:restrictionType="string"/>
 
     <restriction
         android:key="ProxyMode"
@@ -109,6 +127,12 @@
         android:key="ProxyBypassList"
         android:title="@string/ProxyBypassListTitle"
         android:description="@string/ProxyBypassListDesc"
+        android:restrictionType="string"/>
+
+    <restriction
+        android:key="ProxySettings"
+        android:title="@string/ProxySettingsTitle"
+        android:description="@string/ProxySettingsDesc"
         android:restrictionType="string"/>
 
     <restriction
@@ -274,6 +298,12 @@
         android:restrictionType="choice"/>
 
     <restriction
+        android:key="WebUsbAllowDevicesForUrls"
+        android:title="@string/WebUsbAllowDevicesForUrlsTitle"
+        android:description="@string/WebUsbAllowDevicesForUrlsDesc"
+        android:restrictionType="string"/>
+
+    <restriction
         android:key="WebUsbAskForUrls"
         android:title="@string/WebUsbAskForUrlsTitle"
         android:description="@string/WebUsbAskForUrlsDesc"
@@ -316,6 +346,20 @@
         android:restrictionType="string"/>
 
     <restriction
+        android:key="LegacySameSiteCookieBehaviorEnabled"
+        android:title="@string/LegacySameSiteCookieBehaviorEnabledTitle"
+        android:description="@string/LegacySameSiteCookieBehaviorEnabledDesc"
+        android:entries="@array/LegacySameSiteCookieBehaviorEnabledEntries"
+        android:entryValues="@array/LegacySameSiteCookieBehaviorEnabledValues"
+        android:restrictionType="choice"/>
+
+    <restriction
+        android:key="LegacySameSiteCookieBehaviorEnabledForDomainList"
+        android:title="@string/LegacySameSiteCookieBehaviorEnabledForDomainListTitle"
+        android:description="@string/LegacySameSiteCookieBehaviorEnabledForDomainListDesc"
+        android:restrictionType="string"/>
+
+    <restriction
         android:key="PopupsAllowedForUrls"
         android:title="@string/PopupsAllowedForUrlsTitle"
         android:description="@string/PopupsAllowedForUrlsDesc"
@@ -352,15 +396,15 @@
         android:restrictionType="string"/>
 
     <restriction
-        android:key="EnableSymantecLegacyInfrastructure"
-        android:title="@string/EnableSymantecLegacyInfrastructureTitle"
-        android:description="@string/EnableSymantecLegacyInfrastructureDesc"
-        android:restrictionType="bool"/>
-
-    <restriction
         android:key="DisableSafeBrowsingProceedAnyway"
         android:title="@string/DisableSafeBrowsingProceedAnywayTitle"
         android:description="@string/DisableSafeBrowsingProceedAnywayDesc"
+        android:restrictionType="bool"/>
+
+    <restriction
+        android:key="SharedClipboardEnabled"
+        android:title="@string/SharedClipboardEnabledTitle"
+        android:description="@string/SharedClipboardEnabledDesc"
         android:restrictionType="bool"/>
 
     <restriction
@@ -397,14 +441,6 @@
         android:description="@string/SSLVersionMinDesc"
         android:entries="@array/SSLVersionMinEntries"
         android:entryValues="@array/SSLVersionMinValues"
-        android:restrictionType="choice"/>
-
-    <restriction
-        android:key="SSLVersionMax"
-        android:title="@string/SSLVersionMaxTitle"
-        android:description="@string/SSLVersionMaxDesc"
-        android:entries="@array/SSLVersionMaxEntries"
-        android:entryValues="@array/SSLVersionMaxValues"
         android:restrictionType="choice"/>
 
     <restriction
@@ -480,12 +516,6 @@
         android:restrictionType="string"/>
 
     <restriction
-        android:key="ContextualSuggestionsEnabled"
-        android:title="@string/ContextualSuggestionsEnabledTitle"
-        android:description="@string/ContextualSuggestionsEnabledDesc"
-        android:restrictionType="bool"/>
-
-    <restriction
         android:key="OverrideSecurityRestrictionsOnInsecureOrigin"
         android:title="@string/OverrideSecurityRestrictionsOnInsecureOriginTitle"
         android:description="@string/OverrideSecurityRestrictionsOnInsecureOriginDesc"
@@ -501,6 +531,42 @@
         android:key="EnterpriseHardwarePlatformAPIEnabled"
         android:title="@string/EnterpriseHardwarePlatformAPIEnabledTitle"
         android:description="@string/EnterpriseHardwarePlatformAPIEnabledDesc"
+        android:restrictionType="bool"/>
+
+    <restriction
+        android:key="AllowPopupsDuringPageUnload"
+        android:title="@string/AllowPopupsDuringPageUnloadTitle"
+        android:description="@string/AllowPopupsDuringPageUnloadDesc"
+        android:restrictionType="bool"/>
+
+    <restriction
+        android:key="HSTSPolicyBypassList"
+        android:title="@string/HSTSPolicyBypassListTitle"
+        android:description="@string/HSTSPolicyBypassListDesc"
+        android:restrictionType="string"/>
+
+    <restriction
+        android:key="AllowSyncXHRInPageDismissal"
+        android:title="@string/AllowSyncXHRInPageDismissalTitle"
+        android:description="@string/AllowSyncXHRInPageDismissalDesc"
+        android:restrictionType="bool"/>
+
+    <restriction
+        android:key="TLS13HardeningForLocalAnchorsEnabled"
+        android:title="@string/TLS13HardeningForLocalAnchorsEnabledTitle"
+        android:description="@string/TLS13HardeningForLocalAnchorsEnabledDesc"
+        android:restrictionType="bool"/>
+
+    <restriction
+        android:key="WebComponentsV0Enabled"
+        android:title="@string/WebComponentsV0EnabledTitle"
+        android:description="@string/WebComponentsV0EnabledDesc"
+        android:restrictionType="bool"/>
+
+    <restriction
+        android:key="PaymentMethodQueryEnabled"
+        android:title="@string/PaymentMethodQueryEnabledTitle"
+        android:description="@string/PaymentMethodQueryEnabledDesc"
         android:restrictionType="bool"/>
 
 </restrictions>

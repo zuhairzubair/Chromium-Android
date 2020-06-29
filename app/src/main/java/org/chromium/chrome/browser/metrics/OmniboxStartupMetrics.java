@@ -5,7 +5,8 @@
 package org.chromium.chrome.browser.metrics;
 
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
+
+import androidx.annotation.IntDef;
 
 import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.metrics.RecordHistogram;
@@ -17,7 +18,6 @@ import org.chromium.content_public.browser.WebContents;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tracks the startup state of chrome at the time of first url bar focus.
@@ -146,8 +146,7 @@ public class OmniboxStartupMetrics {
             RecordHistogram.recordCustomTimesHistogram(
                     "MobileStartup.ToolbarFirstFocusTime2." + activityName,
                     mUrlBarFirstFocusedTime - mActivity.getOnCreateTimestampMs(),
-                    MIN_FOCUS_TIME_FOR_UMA_HISTOGRAM_MS, MAX_FOCUS_TIME_FOR_UMA_HISTOGRAM_MS,
-                    TimeUnit.MILLISECONDS, 50);
+                    MIN_FOCUS_TIME_FOR_UMA_HISTOGRAM_MS, MAX_FOCUS_TIME_FOR_UMA_HISTOGRAM_MS, 50);
         }
         destroy();
     }

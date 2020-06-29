@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"කරගෙන යන්න"</string>
+<string name="tos_notification_title">"මාර්තු 31 වෙනිදා Chrome හි සේවා නියම වෙනස් වේ"</string>
+<string name="tos_notification_body_text">"නව නියම සමාලෝචන කරන්න"</string>
+<string name="tos_notification_ack_button_text">"එය ලැබුණා"</string>
+<string name="tos_notification_review_button_text">"සමාලෝචන කරන්න"</string>
+<string name="search_or_type_web_address">"වෙබ් ලිපිනය සොයන්න හෝ ටයිප් කරන්න"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"පසුරු පුවරුවෙන් යෝජනාව ඉවත් කරන්නේද?"</string>
+<string name="options_homepage_title">"මුල් පිටුව"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"මෙම අඩවිය අප්‍රසිද්ධ ප්‍රකාරෙයන් පිටත යෙදුමක් සමග තොරතුරු බෙදා ගැනීමට සූදානම්ය."</string>
+<string name="external_app_leave_incognito_warning_title">"අප්‍රසිද්ධ ප්‍රකාරය හැර යන්නද?"</string>
+<string name="external_app_leave_incognito_stay">"සිටින්න"</string>
+<string name="external_app_leave_incognito_leave">"හැර යන්න"</string>
+<string name="external_app_restricted_access_error">"Chrome හට ඉල්ලන ලද සම්පත් වෙත ප්‍රවේශය නැත."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"කිසිඳු උපාංගයක් අවටින් හමු නොවිය."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"ඉඩදෙන්න"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"අවහිර කරන්න"</string>
+<string name="blocked_ads_prompt_title">"වෙළඳ දැන්වීම් අවහිරයි"</string>
+<string name="video_call_notification_text_2">"වීඩියෝ ආදානයට ප්‍රවේශ වෙමින්"</string>
+<string name="audio_call_notification_text_2">"ශ්‍රව්‍ය ආදානයට ප්‍රවේශ වෙමින්"</string>
+<string name="video_audio_call_notification_text_2">"ශ්‍රව්‍ය සහ වීඩියෝ ආදානයට ප්‍රවේශ වෙමින්"</string>
+<string name="video_call_incognito_notification_text_2">"වෙබ් අඩවියක් වීඩියෝ ආදාන වෙත ප්‍රවේශ වෙයි"</string>
+<string name="audio_call_incognito_notification_text_2">"වෙබ් අඩවියක් ශ්‍රව්‍ය ආදාන වෙත ප්‍රවේශ වෙයි"</string>
+<string name="video_audio_call_incognito_notification_text_2">"වෙබ් අඩවියක් ශ්‍රව්‍ය සහ වීඩියෝ ආදාන වෙත ප්‍රවේශ වෙයි"</string>
+</resources>

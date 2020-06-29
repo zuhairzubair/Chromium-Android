@@ -4,15 +4,20 @@
 
 package org.chromium.chrome.browser.omnibox.status;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.DrawableRes;
 import android.view.View;
 
-import org.chromium.base.VisibleForTesting;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.VisibleForTesting;
+
 import org.chromium.chrome.R;
+import org.chromium.chrome.browser.offlinepages.OfflinePageUtils;
+import org.chromium.chrome.browser.omnibox.SearchEngineLogoUtils;
+import org.chromium.chrome.browser.omnibox.UrlBar.UrlTextChangeListener;
+import org.chromium.chrome.browser.omnibox.UrlBarEditingTextStateProvider;
 import org.chromium.chrome.browser.page_info.PageInfoController;
+import org.chromium.chrome.browser.tab.Tab;
+import org.chromium.chrome.browser.tab.TabImpl;
 import org.chromium.chrome.browser.toolbar.ToolbarDataProvider;
 import org.chromium.ui.modelutil.PropertyModel;
 import org.chromium.ui.modelutil.PropertyModelChangeProcessor;
@@ -21,12 +26,11 @@ import org.chromium.ui.modelutil.PropertyModelChangeProcessor;
  * A component for displaying a status icon (e.g. security icon or navigation icon) and optional
  * verbose status text.
  */
-public class StatusViewCoordinator implements View.OnClickListener {
+public class StatusViewCoordinator implements View.OnClickListener, UrlTextChangeListener {
     private final StatusView mStatusView;
     private final StatusMediator mMediator;
     private final PropertyModel mModel;
     private final boolean mIsTablet;
-
     private ToolbarDataProvider mToolbarDataProvider;
     private boolean mUrlHasFocus;
 
@@ -34,18 +38,18 @@ public class StatusViewCoordinator implements View.OnClickListener {
      * Creates a new StatusViewCoordinator.
      * @param isTablet Whether the UI is shown on a tablet.
      * @param statusView The status view, used to supply and manipulate child views.
+     * @param urlBarEditingTextStateProvider The url coordinator.
      */
-    public StatusViewCoordinator(boolean isTablet, StatusView statusView) {
+    public StatusViewCoordinator(boolean isTablet, StatusView statusView,
+            UrlBarEditingTextStateProvider urlBarEditingTextStateProvider) {
         mIsTablet = isTablet;
         mStatusView = statusView;
 
-        mModel = new PropertyModel.Builder(StatusProperties.ALL_KEYS)
-                         .with(StatusProperties.STATUS_ICON_TINT_RES,
-                                 R.color.locationbar_status_separator_color)
-                         .build();
+        mModel = new PropertyModel(StatusProperties.ALL_KEYS);
 
         PropertyModelChangeProcessor.create(mModel, mStatusView, new StatusViewBinder());
-        mMediator = new StatusMediator(mModel);
+        mMediator = new StatusMediator(mModel, mStatusView.getResources(), mStatusView.getContext(),
+                urlBarEditingTextStateProvider);
 
         Resources res = mStatusView.getResources();
         mMediator.setUrlMinWidth(res.getDimensionPixelSize(R.dimen.location_bar_min_url_width)
@@ -66,6 +70,12 @@ public class StatusViewCoordinator implements View.OnClickListener {
      */
     public void setToolbarDataProvider(ToolbarDataProvider toolbarDataProvider) {
         mToolbarDataProvider = toolbarDataProvider;
+        mMediator.setToolbarCommonPropertiesModel(mToolbarDataProvider);
+        mStatusView.setToolbarCommonPropertiesModel(mToolbarDataProvider);
+        // Update status immediately after receiving the data provider to avoid initial presence
+        // glitch on tablet devices. This glitch would be typically seen upon launch of app, right
+        // before the landing page is presented to the user.
+        updateStatusIcon();
     }
 
     /**
@@ -84,6 +94,24 @@ public class StatusViewCoordinator implements View.OnClickListener {
         updateVerboseStatusVisibility();
     }
 
+    /** @param urlHasFocus Whether the url currently has focus. */
+    public void onUrlAnimationFinished(boolean urlHasFocus) {
+        mMediator.setUrlAnimationFinished(urlHasFocus);
+    }
+
+    /** @param show Whether the status icon should be VISIBLE, otherwise GONE. */
+    public void setStatusIconShown(boolean show) {
+        mMediator.setStatusIconShown(show);
+    }
+
+    /**
+     * Set the url focus change percent.
+     * @param percent The current focus percent.
+     */
+    public void setUrlFocusChangePercent(float percent) {
+        mMediator.setUrlFocusChangePercent(percent);
+    }
+
     /**
      * @param useDarkColors Whether dark colors should be for the status icon and text.
      */
@@ -93,6 +121,13 @@ public class StatusViewCoordinator implements View.OnClickListener {
         // TODO(ender): remove this once icon selection has complete set of
         // corresponding properties (for tinting etc).
         updateStatusIcon();
+    }
+
+    /**
+     * @param incognitoBadgeVisible Whether or not the incognito badge is visible.
+     */
+    public void setIncognitoBadgeVisibility(boolean incognitoBadgeVisible) {
+        mMediator.setIncognitoBadgeVisibility(incognitoBadgeVisible);
     }
 
     /**
@@ -123,13 +158,19 @@ public class StatusViewCoordinator implements View.OnClickListener {
         return mMediator.isSecurityButtonShown();
     }
 
-    /**
-     * @return The ID of the drawable currently shown in the security icon.
-     */
-    @VisibleForTesting
+    /** @return The ID of the drawable currently shown in the security icon. */
     @DrawableRes
-    public int getSecurityIconResourceId() {
-        return mModel.get(StatusProperties.STATUS_ICON_RES);
+    public int getSecurityIconResourceIdForTesting() {
+        return mModel.get(StatusProperties.STATUS_ICON_RESOURCE) == null
+                ? 0
+                : mModel.get(StatusProperties.STATUS_ICON_RESOURCE).getIconResForTesting();
+    }
+
+    /** @return The icon identifier used for custom resources. */
+    public String getSecurityIconIdentifierForTesting() {
+        return mModel.get(StatusProperties.STATUS_ICON_RESOURCE) == null
+                ? null
+                : mModel.get(StatusProperties.STATUS_ICON_RESOURCE).getIconIdentifierForTesting();
     }
 
     /**
@@ -148,18 +189,16 @@ public class StatusViewCoordinator implements View.OnClickListener {
     public void onClick(View view) {
         if (mUrlHasFocus) return;
 
-        // Get Activity from our managed view.
-        // TODO(ender): turn this into a property accessible via shared model.
-        Context context = view.getContext();
-        if (context == null || !(context instanceof Activity)) return;
-
         if (!mToolbarDataProvider.hasTab()
                 || mToolbarDataProvider.getTab().getWebContents() == null) {
             return;
         }
 
-        PageInfoController.show((Activity) context, mToolbarDataProvider.getTab(), null,
-                PageInfoController.OpenedFromSource.TOOLBAR);
+        Tab tab = mToolbarDataProvider.getTab();
+        PageInfoController.show(((TabImpl) tab).getActivity(), tab.getWebContents(), null,
+                PageInfoController.OpenedFromSource.TOOLBAR,
+                /*offlinePageLoadUrlDelegate=*/
+                new OfflinePageUtils.TabOfflinePageLoadUrlDelegate(tab));
     }
 
     /**
@@ -183,6 +222,7 @@ public class StatusViewCoordinator implements View.OnClickListener {
      */
     public void setShowIconsWhenUrlFocused(boolean showIconsWithUrlFocused) {
         mMediator.setShowIconsWhenUrlFocused(showIconsWithUrlFocused);
+        reconcileVisualState(showIconsWithUrlFocused);
     }
 
     /**
@@ -190,5 +230,57 @@ public class StatusViewCoordinator implements View.OnClickListener {
      */
     public void setFirstSuggestionIsSearchType(boolean firstSuggestionIsSearchQuery) {
         mMediator.setFirstSuggestionIsSearchType(firstSuggestionIsSearchQuery);
+    }
+
+    /**
+     * Update information required to display the search engine icon.
+     */
+    public void updateSearchEngineStatusIcon(boolean shouldShowSearchEngineLogo,
+            boolean isSearchEngineGoogle, String searchEngineUrl) {
+        mMediator.updateSearchEngineStatusIcon(
+                shouldShowSearchEngineLogo, isSearchEngineGoogle, searchEngineUrl);
+    }
+
+    /**
+     * Temporary workaround for the divergent logic for status icon visibility changes for the dse
+     * icon experiment. Should be removed when the dse icon launches (crbug.com/1019488).
+     *
+     * When transitioning to incognito, the first visible view when focused will be assigned to
+     * UrlBar. When the UrlBar is the first visible view when focused, the StatusView's alpha
+     * will be set to 0 in LocationBarPhone#populateFadeAnimations. When transitioning back from
+     * incognito, StatusView's state needs to be reset to match the current state of the status view
+     * {@link org.chromium.chrome.browser.omnibox.LocationBarPhone#updateVisualsForState}.
+     * property model.
+     **/
+    private void reconcileVisualState(boolean showStatusIconWhenFocused) {
+        // State requirements:
+        // - The ToolbarDataProvider and views are not null.
+        // - The status icon will be shown when focused.
+        // - Incognito isn't active.
+        // - The search engine logo should be shown.
+        if (mToolbarDataProvider == null || mStatusView == null || getSecurityIconView() == null
+                || !showStatusIconWhenFocused || mToolbarDataProvider.isIncognito()
+                || !SearchEngineLogoUtils.shouldShowSearchEngineLogo(
+                        mToolbarDataProvider.isIncognito())) {
+            return;
+        }
+        View securityIconView = getSecurityIconView();
+
+        mStatusView.setAlpha(1f);
+        securityIconView.setAlpha(mModel.get(StatusProperties.STATUS_ICON_ALPHA));
+        securityIconView.setVisibility(
+                mModel.get(StatusProperties.SHOW_STATUS_ICON) ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * @return Width of the status icon including start/end margins.
+     */
+    public int getStatusIconWidth() {
+        return mStatusView.getStatusIconWidth();
+    }
+
+    @Override
+    public void onTextChanged(String textWithoutAutocomplete, String textWithAutocomplete) {
+        mMediator.onTextChanged(textWithoutAutocomplete);
     }
 }

@@ -4,6 +4,9 @@
 
 package org.chromium.chrome.browser.ssl;
 
+import androidx.annotation.VisibleForTesting;
+
+import org.chromium.base.annotations.NativeMethods;
 import org.chromium.components.security_state.ConnectionSecurityLevel;
 import org.chromium.content_public.browser.WebContents;
 
@@ -21,10 +24,30 @@ public class SecurityStateModel {
      */
     public static int getSecurityLevelForWebContents(WebContents webContents) {
         if (webContents == null) return ConnectionSecurityLevel.NONE;
-        return nativeGetSecurityLevelForWebContents(webContents);
+        return SecurityStateModelJni.get().getSecurityLevelForWebContents(webContents);
+    }
+
+    public static boolean isContentDangerous(WebContents webContents) {
+        return getSecurityLevelForWebContents(webContents) == ConnectionSecurityLevel.DANGEROUS;
+    }
+
+    /**
+     * Returns whether to use a danger icon instead of an info icon in the URL bar for the WARNING
+     * security level.
+     *
+     * @return Whether to downgrade the info icon to a danger triangle for the WARNING security
+     *         level.
+     */
+    public static boolean shouldShowDangerTriangleForWarningLevel() {
+        return SecurityStateModelJni.get().shouldShowDangerTriangleForWarningLevel();
     }
 
     private SecurityStateModel() {}
 
-    private static native int nativeGetSecurityLevelForWebContents(WebContents webContents);
+    @NativeMethods
+    @VisibleForTesting
+    public interface Natives {
+        int getSecurityLevelForWebContents(WebContents webContents);
+        boolean shouldShowDangerTriangleForWarningLevel();
+    }
 }

@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.sync.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
@@ -58,12 +58,13 @@ public class PassphraseCreationDialogFragment extends DialogFragment {
         instructionsView.setMovementMethod(LinkMovementMethod.getInstance());
         instructionsView.setText(getInstructionsText());
 
-        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogTheme)
-                .setView(view)
-                .setTitle(R.string.sync_passphrase_type_custom_dialog_title)
-                .setPositiveButton(R.string.save, null)
-                .setNegativeButton(R.string.cancel, null)
-                .create();
+        AlertDialog dialog =
+                new AlertDialog.Builder(getActivity(), R.style.Theme_Chromium_AlertDialog)
+                        .setView(view)
+                        .setTitle(R.string.sync_passphrase_type_custom_dialog_title)
+                        .setPositiveButton(R.string.save, null)
+                        .setNegativeButton(R.string.cancel, null)
+                        .create();
         dialog.getDelegate().setHandleNativeActionModesEnabled(false);
         return dialog;
     }
@@ -75,7 +76,7 @@ public class PassphraseCreationDialogFragment extends DialogFragment {
                 new SpanInfo("<learnmore>", "</learnmore>", new ClickableSpan() {
                     @Override
                     public void onClick(View view) {
-                        HelpAndFeedback.getInstance(activity).show(activity,
+                        HelpAndFeedback.getInstance().show(activity,
                                 activity.getString(R.string.help_context_change_sync_passphrase),
                                 Profile.getLastUsedProfile(), null);
                     }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Halda áfram"</string>
+<string name="tos_notification_title">"Þjónustuskilmálar Chrome breytast 31. mars"</string>
+<string name="tos_notification_body_text">"Kynntu þér nýju skilmálana"</string>
+<string name="tos_notification_ack_button_text">"Ég skil"</string>
+<string name="tos_notification_review_button_text">"Yfirfara"</string>
+<string name="search_or_type_web_address">"Leitaðu eða sláðu inn veffang"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Fjarlægja tillögu af klippiborði?"</string>
+<string name="options_homepage_title">"Heimasíða"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"Vefsvæðið er við það að deila upplýsingum með forriti fyrir utan huliðsstillingu."</string>
+<string name="external_app_leave_incognito_warning_title">"Slökkva á huliðsstillingu?"</string>
+<string name="external_app_leave_incognito_stay">"Vera áfram"</string>
+<string name="external_app_leave_incognito_leave">"Yfirgefa"</string>
+<string name="external_app_restricted_access_error">"Chrome hefur ekki aðgang að umbeðnu tilfangi."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Engin nálæg tæki fundust."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"Leyfa"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Setja á bannlista"</string>
+<string name="blocked_ads_prompt_title">"Lokað á auglýsingar"</string>
+<string name="video_call_notification_text_2">"Fær aðgang að myndinntaki"</string>
+<string name="audio_call_notification_text_2">"Fær aðgang að hljóðinntaki"</string>
+<string name="video_audio_call_notification_text_2">"Fær aðgang að hljóð- og myndinntaki"</string>
+<string name="video_call_incognito_notification_text_2">"Vefsvæði er að nota myndinntak"</string>
+<string name="audio_call_incognito_notification_text_2">"Vefsvæði er að nota hljóðinntak"</string>
+<string name="video_audio_call_incognito_notification_text_2">"Síða hefur aðgang að hljóð- og myndinntaki"</string>
+</resources>

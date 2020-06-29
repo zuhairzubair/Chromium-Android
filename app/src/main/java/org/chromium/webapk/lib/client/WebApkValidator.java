@@ -7,6 +7,7 @@ package org.chromium.webapk.lib.client;
 import static org.chromium.webapk.lib.common.WebApkConstants.WEBAPK_PACKAGE_PREFIX;
 import static org.chromium.webapk.lib.common.WebApkMetaDataKeys.SCOPE;
 import static org.chromium.webapk.lib.common.WebApkMetaDataKeys.START_URL;
+import static org.chromium.webapk.lib.common.WebApkMetaDataKeys.WEB_MANIFEST_URL;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,9 +16,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.os.StrictMode;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -45,6 +47,7 @@ public class WebApkValidator {
     private static byte[] sExpectedSignature;
     private static byte[] sCommentSignedPublicKeyBytes;
     private static PublicKey sCommentSignedPublicKey;
+    private static boolean sDisableValidation;
     private static boolean sOverrideValidationForTesting;
 
     /**
@@ -129,24 +132,8 @@ public class WebApkValidator {
      */
     private static List<ResolveInfo> resolveInfosForUrlAndOptionalPackage(
             Context context, String url, @Nullable String applicationPackage) {
-        Intent intent;
-        try {
-            intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
-        } catch (Exception e) {
-            return new LinkedList<>();
-        }
-
-        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-        if (applicationPackage != null) {
-            intent.setPackage(applicationPackage);
-        } else {
-            intent.setComponent(null);
-        }
-        Intent selector = intent.getSelector();
-        if (selector != null) {
-            selector.addCategory(Intent.CATEGORY_BROWSABLE);
-            selector.setComponent(null);
-        }
+        Intent intent = createWebApkIntentForUrlAndOptionalPackage(url, applicationPackage);
+        if (intent == null) return new LinkedList<>();
 
         // StrictMode is relaxed due to https://crbug.com/843092.
         StrictMode.ThreadPolicy policy = StrictMode.allowThreadDiskReads();
@@ -188,7 +175,8 @@ public class WebApkValidator {
      * @return true iff the WebAPK is installed and passes security checks
      */
     public static boolean isValidWebApk(Context context, String webappPackageName) {
-        if (sExpectedSignature == null || sCommentSignedPublicKeyBytes == null) {
+        if ((sExpectedSignature == null || sCommentSignedPublicKeyBytes == null)
+                && !sDisableValidation) {
             Log.wtf(TAG,
                     "WebApk validation failure - expected signature not set."
                             + "missing call to WebApkValidator.initWithBrowserHostSignature");
@@ -208,7 +196,7 @@ public class WebApkValidator {
         if (isNotWebApkQuick(packageInfo)) {
             return false;
         }
-        if (sOverrideValidationForTesting) {
+        if (sDisableValidation || sOverrideValidationForTesting) {
             if (DEBUG) {
                 Log.d(TAG, "Ok! Looks like a WebApk (has start url) and validation is disabled.");
             }
@@ -224,6 +212,36 @@ public class WebApkValidator {
             return true;
         }
         return verifyCommentSignedWebApk(packageInfo);
+    }
+
+    /**
+     * @param url A Url that might launch a WebApk.
+     * @param applicationPackage The package of the WebApk to restrict the launch to.
+     * @return An intent that could launch a WebApk for the provided URL (and package), if such a
+     *         WebApk exists. If package isn't specified, the intent may create a disambiguation
+     *         dialog when started.
+     */
+    public static Intent createWebApkIntentForUrlAndOptionalPackage(
+            String url, @Nullable String applicationPackage) {
+        Intent intent;
+        try {
+            intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+        } catch (Exception e) {
+            return null;
+        }
+
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+        if (applicationPackage != null) {
+            intent.setPackage(applicationPackage);
+        } else {
+            intent.setComponent(null);
+        }
+        Intent selector = intent.getSelector();
+        if (selector != null) {
+            selector.addCategory(Intent.CATEGORY_BROWSABLE);
+            selector.setComponent(null);
+        }
+        return intent;
     }
 
     /** Determine quickly whether this is definitely not a WebAPK */
@@ -306,8 +324,9 @@ public class WebApkValidator {
             buf.load();
 
             WebApkVerifySignature v = new WebApkVerifySignature(buf);
+            @WebApkVerifySignature.Error
             int result = v.read();
-            if (result != WebApkVerifySignature.ERROR_OK) {
+            if (result != WebApkVerifySignature.Error.OK) {
                 Log.e(TAG, String.format("Failure reading %s: %s", packageFilename, result));
                 return false;
             }
@@ -317,7 +336,7 @@ public class WebApkValidator {
             if (DEBUG) {
                 Log.d(TAG, "File " + packageFilename + ": " + result);
             }
-            return result == WebApkVerifySignature.ERROR_OK;
+            return result == WebApkVerifySignature.Error.OK;
         } catch (Exception e) {
             Log.e(TAG, "WebApk file error for file " + packageFilename, e);
             return false;
@@ -339,6 +358,40 @@ public class WebApkValidator {
     }
 
     /**
+     * Determines if a bound WebAPK generated from |manifestUrl| is installed on the device.
+     * @param context The context to use to check whether WebAPK is valid.
+     * @param manifestUrl The URL of the manifest that was used to generate the WebAPK.
+     * @return The WebAPK's package name if installed, or null otherwise.
+     */
+    public static @Nullable String queryBoundWebApkForManifestUrl(
+            Context context, String manifestUrl) {
+        assert manifestUrl != null;
+
+        List<PackageInfo> packages = context.getPackageManager().getInstalledPackages(
+                PackageManager.GET_SIGNATURES | PackageManager.GET_META_DATA);
+
+        // Filter out unbound & invalid WebAPKs.
+        for (int i = 0; i < packages.size(); i++) {
+            PackageInfo info = packages.get(i);
+
+            if (!verifyV1WebApk(info, info.packageName)) {
+                continue;
+            }
+
+            // |info| belongs to a valid, bound, WebAPK. Check that the metadata contains
+            // |manifestUrl|.
+            String packageManifestUrl = info.applicationInfo.metaData.getString(WEB_MANIFEST_URL);
+            if (!TextUtils.equals(packageManifestUrl, manifestUrl)) {
+                continue;
+            }
+
+            return info.packageName;
+        }
+
+        return null;
+    }
+
+    /**
      * Initializes the WebApkValidator.
      * @param expectedSignature V1 WebAPK RSA signature.
      * @param v2PublicKeyBytes New comment signed public key bytes as x509 encoded public key.
@@ -353,11 +406,19 @@ public class WebApkValidator {
     }
 
     /**
-     * Disables all verification performed by this class. This is meant only for development with
+     * Disables all validation performed by this class. This is meant only for development with
      * unsigned WebApks and should never be enabled in a real build.
      */
     public static void disableValidationForTesting() {
         sOverrideValidationForTesting = true;
+    }
+
+    /**
+     * Disables all validation performed by this class. This should only be called when some other
+     * means of validating WebApks is already present and otherwise should never be called.
+     */
+    public static void disableValidationUnsafe() {
+        sDisableValidation = true;
     }
 
     /**

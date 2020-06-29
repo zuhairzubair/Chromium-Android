@@ -11,7 +11,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="8dp"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="@color/sheet_bg_color">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,7 +30,7 @@
             android:lineSpacingExtra="6dp"
             android:paddingTop="16dp"
             android:textAlignment="viewStart"
-            android:textAppearance="@style/TextAppearance.BlackTitle1" />
+            android:textAppearance="@style/TextAppearance.TextLarge.Primary" />
 
         <TextView
             android:id="@+id/page_info_connection_summary"
@@ -37,7 +38,7 @@
             android:layout_height="wrap_content"
             android:lineSpacingExtra="3dp"
             android:paddingTop="16dp"
-            android:textAppearance="@style/TextAppearance.BlackTitle1"
+            android:textAppearance="@style/TextAppearance.TextLarge.Primary"
             android:visibility="gone" />
 
         <TextView
@@ -46,7 +47,7 @@
             android:layout_height="wrap_content"
             android:lineSpacingExtra="3dp"
             android:paddingTop="8dp"
-            android:textAppearance="@style/TextAppearance.BlackBodyDefault"
+            android:textAppearance="@style/TextAppearance.TextMedium.Primary"
             android:visibility="gone" />
 
         <View
@@ -60,7 +61,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="14dp"
-            android:textAppearance="@style/TextAppearance.BlackTitle1"
+            android:textAppearance="@style/TextAppearance.TextLarge.Primary"
             android:text="@string/page_info_preview_message"
             android:visibility="gone" />
 
@@ -68,7 +69,7 @@
             android:id="@+id/page_info_stale_preview_timestamp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.BlackCaption"
+            android:textAppearance="@style/TextAppearance.TextSmall.Secondary"
             android:visibility="gone" />
 
         <TextView
@@ -76,7 +77,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="12dp"
-            android:textAppearance="@style/TextAppearance.BlackTitle1"
+            android:textAppearance="@style/TextAppearance.TextLarge.Primary"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -107,11 +108,11 @@
     <org.chromium.ui.widget.ButtonCompat
         android:id="@+id/page_info_site_settings_button"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/page_info_popup_button_height"
+        android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginEnd="@dimen/page_info_popup_padding_sides"
         android:layout_marginStart="@dimen/page_info_popup_padding_sides"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="2dp"
         android:paddingEnd="@dimen/page_info_popup_button_padding_sides"
         android:paddingStart="@dimen/page_info_popup_button_padding_sides"
         android:text="@string/page_info_site_settings_button"
@@ -120,11 +121,11 @@
     <org.chromium.ui.widget.ButtonCompat
         android:id="@+id/page_info_open_online_button"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/page_info_popup_button_height"
+        android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginEnd="@dimen/page_info_popup_padding_sides"
         android:layout_marginStart="@dimen/page_info_popup_padding_sides"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="2dp"
         android:paddingEnd="@dimen/page_info_popup_button_padding_sides"
         android:paddingStart="@dimen/page_info_popup_button_padding_sides"
         android:text="@string/page_info_open_online_button"

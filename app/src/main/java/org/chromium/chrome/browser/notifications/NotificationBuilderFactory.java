@@ -4,14 +4,15 @@
 
 package org.chromium.chrome.browser.notifications;
 
-import static org.chromium.chrome.browser.ChromeFeatureList.ALLOW_REMOTE_CONTEXT_FOR_NOTIFICATIONS;
+import static org.chromium.chrome.browser.flags.ChromeFeatureList.ALLOW_REMOTE_CONTEXT_FOR_NOTIFICATIONS;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import org.chromium.base.ContextUtils;
-import org.chromium.chrome.browser.ChromeFeatureList;
+import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.notifications.channels.ChannelsInitializer;
 
 /**

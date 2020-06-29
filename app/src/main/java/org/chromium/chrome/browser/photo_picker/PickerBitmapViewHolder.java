@@ -14,14 +14,14 @@ import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.base.task.AsyncTask;
 import org.chromium.chrome.R;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Holds on to a {@link PickerBitmapView} that displays information about a picker bitmap.
  */
 public class PickerBitmapViewHolder
-        extends ViewHolder implements DecoderServiceHost.ImageDecodedCallback {
+        extends ViewHolder implements DecoderServiceHost.ImagesDecodedCallback {
     // Our parent category.
     private PickerCategoryView mCategoryView;
 
@@ -43,28 +43,44 @@ public class PickerBitmapViewHolder
     // DecoderServiceHost.ImageDecodedCallback
 
     @Override
-    public void imageDecodedCallback(String filePath, Bitmap bitmap) {
-        if (bitmap == null || bitmap.getWidth() == 0 || bitmap.getHeight() == 0) {
-            return;
+    public void imagesDecodedCallback(String filePath, boolean isVideo, boolean fullWidth,
+            List<Bitmap> bitmaps, String videoDuration, float ratio) {
+        if (bitmaps == null || bitmaps.size() == 0) return;
+
+        if (!isVideo) {
+            Bitmap bitmap = bitmaps.get(0);
+            if (bitmap == null || bitmap.getWidth() == 0 || bitmap.getHeight() == 0) return;
         }
 
-        if (mCategoryView.getHighResBitmaps().get(filePath) == null) {
-            mCategoryView.getHighResBitmaps().put(filePath, bitmap);
+        PickerCategoryView.Thumbnail cachedThumbnail = fullWidth
+                ? mCategoryView.getFullScreenBitmaps().get(filePath)
+                : mCategoryView.getHighResThumbnails().get(filePath);
+        if (cachedThumbnail == null
+                || (cachedThumbnail.bitmaps != null
+                        && cachedThumbnail.bitmaps.size() < bitmaps.size())) {
+            if (fullWidth) {
+                mCategoryView.getFullScreenBitmaps().put(filePath,
+                        new PickerCategoryView.Thumbnail(bitmaps, videoDuration, fullWidth, ratio));
+            } else {
+                mCategoryView.getHighResThumbnails().put(filePath,
+                        new PickerCategoryView.Thumbnail(bitmaps, videoDuration, fullWidth, ratio));
+            }
         }
 
-        if (mCategoryView.getLowResBitmaps().get(filePath) == null) {
+        if (mCategoryView.getLowResThumbnails().get(filePath) == null) {
             Resources resources = mItemView.getContext().getResources();
-            new BitmapScalerTask(mCategoryView.getLowResBitmaps(), filePath,
+            new BitmapScalerTask(mCategoryView.getLowResThumbnails(), bitmaps.get(0), filePath,
+                    videoDuration,
                     resources.getDimensionPixelSize(R.dimen.photo_picker_grainy_thumbnail_size),
-                    bitmap)
+                    ratio)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
-        if (!TextUtils.equals(mBitmapDetails.getFilePath(), filePath)) {
+        if (!TextUtils.equals(getFilePath(), filePath)) {
             return;
         }
 
-        if (mItemView.setThumbnailBitmap(bitmap)) {
+        if (mItemView.setThumbnailBitmap(bitmaps, videoDuration, ratio)) {
             mItemView.fadeInThumbnail();
         }
     }
@@ -84,40 +100,61 @@ public class PickerBitmapViewHolder
 
         if (mBitmapDetails.type() == PickerBitmap.TileTypes.CAMERA
                 || mBitmapDetails.type() == PickerBitmap.TileTypes.GALLERY) {
-            mItemView.initialize(mBitmapDetails, null, false);
+            mItemView.initialize(mBitmapDetails, null, null, false, -1);
             return PickerAdapter.DecodeActions.NO_ACTION;
         }
 
-        String filePath = mBitmapDetails.getFilePath();
-        Bitmap original = mCategoryView.getHighResBitmaps().get(filePath);
+        String filePath = mBitmapDetails.getUri().getPath();
+        PickerCategoryView.Thumbnail original = mCategoryView.isInMagnifyingMode()
+                ? mCategoryView.getFullScreenBitmaps().get(filePath)
+                : mCategoryView.getHighResThumbnails().get(filePath);
         if (original != null) {
-            mItemView.initialize(mBitmapDetails, original, false);
+            mItemView.initialize(mBitmapDetails, original.bitmaps, original.videoDuration, false,
+                    original.ratioOriginal);
             return PickerAdapter.DecodeActions.FROM_CACHE;
         }
 
-        int size = mCategoryView.getImageSize();
-        Bitmap placeholder = mCategoryView.getLowResBitmaps().get(filePath);
-        if (placeholder != null) {
-            // For performance stats see http://crbug.com/719919.
-            long begin = SystemClock.elapsedRealtime();
-            placeholder = BitmapUtils.scale(placeholder, size, false);
-            long scaleTime = SystemClock.elapsedRealtime() - begin;
-            RecordHistogram.recordTimesHistogram(
-                    "Android.PhotoPicker.UpscaleLowResBitmap", scaleTime, TimeUnit.MILLISECONDS);
-
-            mItemView.initialize(mBitmapDetails, placeholder, true);
-        } else {
-            mItemView.initialize(mBitmapDetails, null, true);
+        int width = mCategoryView.getImageWidth();
+        PickerCategoryView.Thumbnail payload = null;
+        if (mCategoryView.isInMagnifyingMode()) {
+            payload = mCategoryView.getHighResThumbnails().get(filePath);
+        }
+        if (payload == null) {
+            payload = mCategoryView.getLowResThumbnails().get(filePath);
         }
 
-        mCategoryView.getDecoderServiceHost().decodeImage(filePath, size, this);
+        if (payload != null) {
+            Bitmap placeholder = payload.bitmaps.get(0);
+            // For performance stats see http://crbug.com/719919.
+            long begin = SystemClock.elapsedRealtime();
+            placeholder = BitmapUtils.scale(placeholder, width, false);
+            long scaleTime = SystemClock.elapsedRealtime() - begin;
+            RecordHistogram.recordTimesHistogram(
+                    "Android.PhotoPicker.UpscaleLowResBitmap", scaleTime);
+            List<Bitmap> bitmaps = new ArrayList<>(1);
+            bitmaps.add(placeholder);
+
+            mItemView.initialize(
+                    mBitmapDetails, bitmaps, payload.videoDuration, true, payload.ratioOriginal);
+        } else {
+            mItemView.initialize(mBitmapDetails, null, null, true, -1);
+        }
+
+        mCategoryView.getDecoderServiceHost().decodeImage(mBitmapDetails.getUri(),
+                mBitmapDetails.type(), width, mCategoryView.isInMagnifyingMode(), this);
         return PickerAdapter.DecodeActions.DECODE;
     }
 
     /**
-     * Returns the file path of the current request.
+     * Returns the file path of the current request, or null if no request is in progress for this
+     * holder.
      */
     public String getFilePath() {
-        return mBitmapDetails == null ? null : mBitmapDetails.getFilePath();
+        if (mBitmapDetails == null
+                || (mBitmapDetails.type() != PickerBitmap.TileTypes.PICTURE
+                        && mBitmapDetails.type() != PickerBitmap.TileTypes.VIDEO)) {
+            return null;
+        }
+        return mBitmapDetails.getUri().getPath();
     }
 }

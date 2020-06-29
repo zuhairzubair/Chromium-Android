@@ -12,16 +12,16 @@ import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 import org.chromium.base.Callback;
 import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;
-import org.chromium.base.VisibleForTesting;
-import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.base.task.AsyncTask;
-import org.chromium.chrome.browser.ChromeFeatureList;
 import org.chromium.chrome.browser.content.ContentUtils;
+import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.net.ConnectionType;
 import org.chromium.net.NetworkChangeNotifier;
 
@@ -30,7 +30,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class that detects the network connectivity. We will get the connectivity info from Android
@@ -47,9 +46,9 @@ public class ConnectivityDetector implements NetworkChangeNotifier.ConnectionTyp
     public static final int PROBE_WITH_URL_COUNT = 2;
 
     // Denotes the connection state.
-    @Retention(RetentionPolicy.SOURCE)
     @IntDef({ConnectionState.NONE, ConnectionState.DISCONNECTED, ConnectionState.NO_INTERNET,
             ConnectionState.CAPTIVE_PORTAL, ConnectionState.VALIDATED})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ConnectionState {
         // Initial state or connection state can't be evaluated.
         int NONE = 0;
@@ -67,10 +66,10 @@ public class ConnectivityDetector implements NetworkChangeNotifier.ConnectionTyp
     }
 
     // Denotes how the connectivity check is done.
-    @Retention(RetentionPolicy.SOURCE)
     @IntDef({ConnectivityCheckingState.NOT_STARTED, ConnectivityCheckingState.FROM_SYSTEM,
             ConnectivityCheckingState.PROBE_DEFAULT_URL,
             ConnectivityCheckingState.PROBE_FALLBACK_URL})
+    @Retention(RetentionPolicy.SOURCE)
     private @interface ConnectivityCheckingState {
         // Not started.
         int NOT_STARTED = 0;
@@ -85,11 +84,11 @@ public class ConnectivityDetector implements NetworkChangeNotifier.ConnectionTyp
     // The result of the HTTP probing. Defined in tools/metrics/histograms/enums.xml.
     // These values are persisted to logs. Entries should not be renumbered and
     // numeric values should never be reused.
-    @Retention(RetentionPolicy.SOURCE)
     @IntDef({ProbeResult.NO_INTERNET, ProbeResult.SERVER_ERROR, ProbeResult.NOT_VALIDATED,
             ProbeResult.VALIDATED_WITH_NO_CONTENT,
             ProbeResult.VALIDATED_WITH_OK_BUT_ZERO_CONTENT_LENGTH,
             ProbeResult.VALIDATED_WITH_OK_BUT_NO_CONTENT_LENGTH})
+    @Retention(RetentionPolicy.SOURCE)
     private @interface ProbeResult {
         // The network is connected, but it can't reach the Internet, i.e. connecting to a hotspot
         // that is not conencted to Internet.
@@ -154,10 +153,7 @@ public class ConnectivityDetector implements NetworkChangeNotifier.ConnectionTyp
                                 Context.CONNECTIVITY_SERVICE);
             }
 
-            boolean canGetConnectionStateFromSystem = connectivityManager != null;
-            RecordHistogram.recordBooleanHistogram(
-                    "ConnectivityDetector.FromSystem", canGetConnectionStateFromSystem);
-            if (!canGetConnectionStateFromSystem) return ConnectionState.NONE;
+            if (connectivityManager == null) return ConnectionState.NONE;
 
             boolean isCapitivePortal = false;
             Network[] networks = connectivityManager.getAllNetworks();
@@ -330,7 +326,6 @@ public class ConnectivityDetector implements NetworkChangeNotifier.ConnectionTyp
     private void processConnectivityCheckResult() {
         // If the connection is validated, we're done.
         if (mConnectionState == ConnectionState.VALIDATED) {
-            recordHttpProbeValidatedStats();
             stopConnectivityCheck();
             return;
         }
@@ -387,11 +382,6 @@ public class ConnectivityDetector implements NetworkChangeNotifier.ConnectionTyp
                                     + "ms ret=" + responseCode
                                     + " headers=" + urlConnection.getHeaderFields());
 
-                    RecordHistogram.recordSparseHistogram(useDefaultUrl
-                                    ? "ConnectivityDetector.Probe.HttpResponseCode.Default"
-                                    : "ConnectivityDetector.Probe.HttpResponseCode.Fallback",
-                            responseCode);
-
                     if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
                         return ProbeResult.VALIDATED_WITH_NO_CONTENT;
                     } else if (responseCode >= 400) {
@@ -427,10 +417,6 @@ public class ConnectivityDetector implements NetworkChangeNotifier.ConnectionTyp
 
             @Override
             protected void onPostExecute(Integer result) {
-                RecordHistogram.recordEnumeratedHistogram(useDefaultUrl
-                                ? "ConnectivityDetector.Probe.ProbeResult.Default"
-                                : "ConnectivityDetector.Probe.ProbeResult.Fallback",
-                        result, ProbeResult.RESULT_COUNT);
                 callback.onResult(result);
             }
         }
@@ -485,21 +471,6 @@ public class ConnectivityDetector implements NetworkChangeNotifier.ConnectionTyp
                 break;
         }
         setConnectionState(newConnectionState);
-    }
-
-    private void recordHttpProbeValidatedStats() {
-        if (mConnectivityCheckingState != ConnectivityCheckingState.PROBE_DEFAULT_URL
-                && mConnectivityCheckingState != ConnectivityCheckingState.PROBE_FALLBACK_URL) {
-            return;
-        }
-        RecordHistogram.recordEnumeratedHistogram("ConnectivityDetector.Probe.ValidationUrl",
-                (mConnectivityCheckingState != ConnectivityCheckingState.PROBE_DEFAULT_URL)
-                        ? PROBE_WITH_DEFAULT_URL
-                        : PROBE_WITH_FALLBACK_URL,
-                PROBE_WITH_URL_COUNT);
-        RecordHistogram.recordLongTimesHistogram("ConnectivityDetector.Probe.ValidationTime",
-                SystemClock.elapsedRealtime() - mConnectivityCheckStartTimeMs,
-                TimeUnit.MILLISECONDS);
     }
 
     @VisibleForTesting

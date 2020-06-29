@@ -9,6 +9,7 @@ import android.content.Context;
 
 import com.google.ar.core.ArCoreApk;
 
+import org.chromium.base.StrictModeContext;
 import org.chromium.base.annotations.UsedByReflection;
 import org.chromium.chrome.browser.vr.ArCoreShim.Availability;
 import org.chromium.chrome.browser.vr.ArCoreShim.InstallStatus;
@@ -19,7 +20,7 @@ class ArCoreShimImpl implements ArCoreShim {
     public ArCoreShimImpl() {}
 
     @Override
-    public InstallStatus requestInstall(Activity activity, boolean userRequestedInstall)
+    public @InstallStatus int requestInstall(Activity activity, boolean userRequestedInstall)
             throws UnavailableDeviceNotCompatibleException,
                    UnavailableUserDeclinedInstallationException {
         try {
@@ -35,12 +36,19 @@ class ArCoreShimImpl implements ArCoreShim {
 
     @Override
     public @Availability int checkAvailability(Context applicationContext) {
-        ArCoreApk.Availability availability =
-                ArCoreApk.getInstance().checkAvailability(applicationContext);
-        return mapArCoreApkAvailability(availability);
+        // ARCore's checkAvailability reads shared preferences via ArCoreContentProvider, need to
+        // turn off strict mode to allow that.
+        // TODO(https://crbug.com/1038757): Remove the disk write context when the disk write is
+        // fixed on ArCore's end.
+        try (StrictModeContext ignored = StrictModeContext.allowDiskReads();
+                StrictModeContext ignored2 = StrictModeContext.allowDiskWrites()) {
+            ArCoreApk.Availability availability =
+                    ArCoreApk.getInstance().checkAvailability(applicationContext);
+            return mapArCoreApkAvailability(availability);
+        }
     }
 
-    private InstallStatus mapArCoreApkInstallStatus(ArCoreApk.InstallStatus installStatus) {
+    private @InstallStatus int mapArCoreApkInstallStatus(ArCoreApk.InstallStatus installStatus) {
         switch (installStatus) {
             case INSTALLED:
                 return InstallStatus.INSTALLED;

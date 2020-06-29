@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Жалғастыру"</string>
+<string name="tos_notification_title">"Chrome-ның Қызмет көрсету шарттары 31 наурыздан бастап өзгереді"</string>
+<string name="tos_notification_body_text">"Жаңа шарттарды қарап шығыңыз."</string>
+<string name="tos_notification_ack_button_text">"Түсінікті"</string>
+<string name="tos_notification_review_button_text">"Көру"</string>
+<string name="search_or_type_web_address">"Вебмекенжайды іздеңіз не енгізіңіз"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Ұсыныс буферден өшірілсін бе?"</string>
+<string name="options_homepage_title">"Негізгі бет"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"Бұл сайт инкогнито режимінен тыс қолданбамен ақпаратты бөліскелі тұр."</string>
+<string name="external_app_leave_incognito_warning_title">"Инкогнито режимінен шығасыз ба?"</string>
+<string name="external_app_leave_incognito_stay">"Қалу"</string>
+<string name="external_app_leave_incognito_leave">"Шығу"</string>
+<string name="external_app_restricted_access_error">"Chrome браузері сұралған ресурсқа кіре алмайды."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Маңайдан құрылғы табылған жоқ."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"Рұқсат беру"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Бөгеу"</string>
+<string name="blocked_ads_prompt_title">"Жарнамалар бөгелді"</string>
+<string name="video_call_notification_text_2">"Бейне кіріс қолжетімді"</string>
+<string name="audio_call_notification_text_2">"Аудио кіріс қолжетімді"</string>
+<string name="video_audio_call_notification_text_2">"Аудио және бейне кіріс қолжетімді"</string>
+<string name="video_call_incognito_notification_text_2">"Сайт бейне кірісін пайдалануда"</string>
+<string name="audio_call_incognito_notification_text_2">"Сайт дыбыс кірісін пайдалануда"</string>
+<string name="video_audio_call_incognito_notification_text_2">"Сайт дыбыс және бейне кірісін пайдалануда"</string>
+</resources>

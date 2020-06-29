@@ -5,15 +5,19 @@
 package org.chromium.chrome.browser.payments;
 
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import org.chromium.chrome.browser.ChromeActivity;
+import androidx.annotation.Nullable;
+
+import org.chromium.components.payments.MethodStrings;
+import org.chromium.components.payments.PaymentHandlerHost;
 import org.chromium.content_public.browser.WebContents;
 import org.chromium.payments.mojom.PaymentDetailsModifier;
 import org.chromium.payments.mojom.PaymentItem;
 import org.chromium.payments.mojom.PaymentMethodData;
+import org.chromium.payments.mojom.PaymentOptions;
+import org.chromium.payments.mojom.PaymentRequestDetailsUpdate;
+import org.chromium.payments.mojom.PaymentShippingOption;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -29,24 +33,28 @@ import java.util.Set;
  * Such apps are implemented as service workers according to the Payment
  * Handler API specification.
  *
- * @see https://w3c.github.io/webpayments-payment-handler/
+ * @see https://w3c.github.io/payment-handler/
  */
-public class ServiceWorkerPaymentApp extends PaymentInstrument implements PaymentApp {
+public class ServiceWorkerPaymentApp extends PaymentInstrument {
     private final WebContents mWebContents;
     private final long mRegistrationId;
+    private final URI mScope;
     private final Set<String> mMethodNames;
-    private final boolean mExplicitlyVerified;
     private final Capabilities[] mCapabilities;
     private final boolean mCanPreselect;
     private final Set<String> mPreferredRelatedApplicationIds;
-    private final boolean mIsIncognito;
+    private final SupportedDelegations mSupportedDelegations;
 
     // Below variables are used for installable service worker payment app specifically.
     private final boolean mNeedsInstallation;
     private final String mAppName;
     private final URI mSwUri;
-    private final URI mScope;
     private final boolean mUseCache;
+
+    /* The endpoint for payment handler communication, such as the
+     * change-[payment-method|shipping-address|shipping-option] events.
+     */
+    private PaymentHandlerHost mPaymentHandlerHost;
 
     /**
      * This class represents capabilities of a payment instrument. It is currently only used for
@@ -56,20 +64,14 @@ public class ServiceWorkerPaymentApp extends PaymentInstrument implements Paymen
         // Stores mojom::BasicCardNetwork.
         private int[] mSupportedCardNetworks;
 
-        // Stores mojom::BasicCardType.
-        private int[] mSupportedCardTypes;
-
         /**
          * Build capabilities for a payment instrument.
          *
          * @param supportedCardNetworks The supported card networks of a 'basic-card' payment
          *                              instrument.
-         * @param supportedCardTypes    The supported card types of a 'basic-card' payment
-         *                              instrument.
          */
-        /* package */ Capabilities(int[] supportedCardNetworks, int[] supportedCardTypes) {
+        /* package */ Capabilities(int[] supportedCardNetworks) {
             mSupportedCardNetworks = supportedCardNetworks;
-            mSupportedCardTypes = supportedCardTypes;
         }
 
         /**
@@ -79,15 +81,6 @@ public class ServiceWorkerPaymentApp extends PaymentInstrument implements Paymen
          */
         /* package */ int[] getSupportedCardNetworks() {
             return mSupportedCardNetworks;
-        }
-
-        /**
-         * Gets supported card types.
-         *
-         * @return a set of mojom::BasicCardType.
-         */
-        /* package */ int[] getSupportedCardTypes() {
-            return mSupportedCardTypes;
         }
     }
 
@@ -107,24 +100,22 @@ public class ServiceWorkerPaymentApp extends PaymentInstrument implements Paymen
      * @param icon                           The drawable icon of the payment app.
      * @param methodNames                    A set of payment method names supported by the payment
      *                                       app.
-     * @param explicitlyVerified             A flag indicates whether this app has explicitly
-     *                                       verified payment methods, like listed as default
-     *                                       application or supported origin in the payment methods'
-     *                                       manifest.
      * @param capabilities                   A set of capabilities of the payment instruments in
      *                                       this payment app (only valid for basic-card payment
      *                                       method for now).
      * @param preferredRelatedApplicationIds A set of preferred related application Ids.
+     * @param supportedDelegations           Supported delegations of the payment app.
      */
     public ServiceWorkerPaymentApp(WebContents webContents, long registrationId, URI scope,
             @Nullable String name, @Nullable String userHint, String origin,
-            @Nullable BitmapDrawable icon, String[] methodNames, boolean explicitlyVerified,
-            Capabilities[] capabilities, String[] preferredRelatedApplicationIds) {
+            @Nullable BitmapDrawable icon, String[] methodNames, Capabilities[] capabilities,
+            String[] preferredRelatedApplicationIds, SupportedDelegations supportedDelegations) {
         // Do not display duplicate information.
         super(scope.toString(), TextUtils.isEmpty(name) ? origin : name, userHint,
                 TextUtils.isEmpty(name) ? null : origin, icon);
         mWebContents = webContents;
         mRegistrationId = registrationId;
+        mScope = scope;
 
         // Name and/or icon are set to null if fetching or processing the corresponding web
         // app manifest failed. Then do not preselect this payment app.
@@ -135,21 +126,16 @@ public class ServiceWorkerPaymentApp extends PaymentInstrument implements Paymen
             mMethodNames.add(methodNames[i]);
         }
 
-        mExplicitlyVerified = explicitlyVerified;
-
         mCapabilities = Arrays.copyOf(capabilities, capabilities.length);
 
         mPreferredRelatedApplicationIds = new HashSet<>();
         Collections.addAll(mPreferredRelatedApplicationIds, preferredRelatedApplicationIds);
 
-        ChromeActivity activity = ChromeActivity.fromWebContents(mWebContents);
-        mIsIncognito = activity != null && activity.getCurrentTabModel() != null
-                && activity.getCurrentTabModel().isIncognito();
+        mSupportedDelegations = supportedDelegations;
 
         mNeedsInstallation = false;
         mAppName = name;
         mSwUri = null;
-        mScope = null;
         mUseCache = false;
     }
 
@@ -167,10 +153,12 @@ public class ServiceWorkerPaymentApp extends PaymentInstrument implements Paymen
      * @param icon                            The drawable icon of the payment app.
      * @param methodName                      The supported method name.
      * @param preferredRelatedApplicationIds  A set of preferred related application Ids.
+     * @param supportedDelegations            Supported delegations of the payment app.
      */
     public ServiceWorkerPaymentApp(WebContents webContents, @Nullable String name, String origin,
             URI swUri, URI scope, boolean useCache, @Nullable BitmapDrawable icon,
-            String methodName, String[] preferredRelatedApplicationIds) {
+            String methodName, String[] preferredRelatedApplicationIds,
+            SupportedDelegations supportedDelegations) {
         // Do not display duplicate information.
         super(scope.toString(), TextUtils.isEmpty(name) ? origin : name, null,
                 TextUtils.isEmpty(name) ? null : origin, icon);
@@ -178,105 +166,62 @@ public class ServiceWorkerPaymentApp extends PaymentInstrument implements Paymen
         mWebContents = webContents;
         // No registration ID before the app is registered (installed).
         mRegistrationId = -1;
+        mScope = scope;
         // If name and/or icon is missing or failed to parse from the web app manifest, then do not
         // preselect this payment app.
         mCanPreselect = !TextUtils.isEmpty(name) && icon != null;
         mMethodNames = new HashSet<>();
         mMethodNames.add(methodName);
         // Installable payment apps must be default application of a payment method.
-        mExplicitlyVerified = true;
         mCapabilities = new Capabilities[0];
         mPreferredRelatedApplicationIds = new HashSet<>();
         Collections.addAll(mPreferredRelatedApplicationIds, preferredRelatedApplicationIds);
 
-        ChromeActivity activity = ChromeActivity.fromWebContents(mWebContents);
-        mIsIncognito = activity != null && activity.getCurrentTabModel() != null
-                && activity.getCurrentTabModel().isIncognito();
+        mSupportedDelegations = supportedDelegations;
 
         mNeedsInstallation = true;
         mAppName = name;
         mSwUri = swUri;
-        mScope = scope;
         mUseCache = useCache;
     }
 
-    @Override
-    public void getInstruments(Map<String, PaymentMethodData> methodDataMap, String origin,
-            String iframeOrigin, byte[][] unusedCertificateChain,
-            Map<String, PaymentDetailsModifier> modifiers, final InstrumentsCallback callback) {
-        // Do not send canMakePayment event when in incognito mode or basic-card is the only
-        // supported payment method or this app needs installation for the payment request or this
-        // app has not been explicitly verified.
-        if (mIsIncognito || isOnlySupportBasiccard(methodDataMap) || mNeedsInstallation
-                || !mExplicitlyVerified) {
-            new Handler().post(() -> {
-                List<PaymentInstrument> instruments =
-                        Collections.singletonList(ServiceWorkerPaymentApp.this);
-                callback.onInstrumentsReady(ServiceWorkerPaymentApp.this, instruments);
-            });
-            return;
-        }
-
-        ServiceWorkerPaymentAppBridge.canMakePayment(mWebContents, mRegistrationId, origin,
-                iframeOrigin, new HashSet<>(methodDataMap.values()),
-                new HashSet<>(modifiers.values()), (boolean canMakePayment) -> {
-                    List<PaymentInstrument> instruments = canMakePayment
-                            ? Collections.singletonList(ServiceWorkerPaymentApp.this)
-                            : Collections.emptyList();
-                    callback.onInstrumentsReady(ServiceWorkerPaymentApp.this, instruments);
-                });
+    /**
+     * Sets the endpoint for payment handler communication. Must be called before invoking this
+     * payment handler.
+     * @param host The endpoint for payment handler communication. Should not be null.
+     */
+    /* package */ void setPaymentHandlerHost(PaymentHandlerHost host) {
+        assert host != null;
+        mPaymentHandlerHost = host;
     }
 
-    // Returns true if 'basic-card' is the only supported payment method of this payment app in the
-    // payment request.
-    private boolean isOnlySupportBasiccard(Map<String, PaymentMethodData> methodDataMap) {
-        Set<String> requestMethods = new HashSet<>(methodDataMap.keySet());
-        requestMethods.retainAll(mMethodNames);
-        return requestMethods.size() == 1
-                && requestMethods.contains(BasicCardUtils.BASIC_CARD_METHOD_NAME);
+    /*package*/ URI getScope() {
+        return mScope;
     }
 
-    // Matches |requestMethodData|.supportedTypes and |requestMethodData|.supportedNetwokrs for
-    // 'basic-card' payment method with the Capabilities in this payment app to determine whether
-    // this payment app supports |requestMethodData|.
+    // Matches ||requestMethodData|.supportedNetwokrs for 'basic-card' payment method with the
+    // Capabilities in this payment app to determine whether this payment app supports
+    // |requestMethodData|.
     private boolean matchBasiccardCapabilities(PaymentMethodData requestMethodData) {
-        // Empty supported card types and networks in payment request method data indicates it
-        // supports all card types and networks.
-        if (requestMethodData.supportedTypes.length == 0
-                && requestMethodData.supportedNetworks.length == 0) {
-            return true;
-        }
+        assert requestMethodData != null;
+        // Empty supported card networks in payment request method data indicates it supports all
+        // card types and networks.
+        if (requestMethodData.supportedNetworks.length == 0) return true;
+
         // Payment app with emtpy capabilities can only match payment request method data with empty
         // supported card types and networks.
         if (mCapabilities.length == 0) return false;
 
-        Set<Integer> requestSupportedTypes = new HashSet<>();
-        for (int i = 0; i < requestMethodData.supportedTypes.length; i++) {
-            requestSupportedTypes.add(requestMethodData.supportedTypes[i]);
-        }
         Set<Integer> requestSupportedNetworks = new HashSet<>();
         for (int i = 0; i < requestMethodData.supportedNetworks.length; i++) {
             requestSupportedNetworks.add(requestMethodData.supportedNetworks[i]);
         }
 
-        // If requestSupportedTypes and requestSupportedNetworks are not empty, match them with the
-        // capabilities. Break out of the for loop if a matched capability has been found. So 'j
-        // < mCapabilities.length' indicates that there is a matched capability in this payment
-        // app.
+        // If requestSupportedNetworks are not empty, match them with the capabilities. Break out of
+        // the for loop if a matched capability has been found. So 'j < mCapabilities.length'
+        // indicates that there is a matched capability in this payment app.
         int j = 0;
         for (; j < mCapabilities.length; j++) {
-            if (!requestSupportedTypes.isEmpty()) {
-                int[] supportedTypes = mCapabilities[j].getSupportedCardTypes();
-
-                Set<Integer> capabilitiesSupportedCardTypes = new HashSet<>();
-                for (int i = 0; i < supportedTypes.length; i++) {
-                    capabilitiesSupportedCardTypes.add(supportedTypes[i]);
-                }
-
-                capabilitiesSupportedCardTypes.retainAll(requestSupportedTypes);
-                if (capabilitiesSupportedCardTypes.isEmpty()) continue;
-            }
-
             if (!requestSupportedNetworks.isEmpty()) {
                 int[] supportedNetworks = mCapabilities[j].getSupportedCardNetworks();
 
@@ -295,36 +240,14 @@ public class ServiceWorkerPaymentApp extends PaymentInstrument implements Paymen
     }
 
     @Override
-    public Set<String> getAppMethodNames() {
+    public Set<String> getInstrumentMethodNames() {
         return Collections.unmodifiableSet(mMethodNames);
     }
 
     @Override
-    public boolean supportsMethodsAndData(Map<String, PaymentMethodData> methodsAndData) {
-        Set<String> methodNames = new HashSet<>(methodsAndData.keySet());
-        methodNames.retainAll(mMethodNames);
-        return !methodNames.isEmpty();
-    }
-
-    @Override
-    public Set<String> getPreferredRelatedApplicationIds() {
-        return Collections.unmodifiableSet(mPreferredRelatedApplicationIds);
-    }
-
-    @Override
-    public String getAppIdentifier() {
-        return getIdentifier();
-    }
-
-    @Override
-    public Set<String> getInstrumentMethodNames() {
-        return getAppMethodNames();
-    }
-
-    @Override
-    public boolean isValidForPaymentMethodData(String method, PaymentMethodData data) {
+    public boolean isValidForPaymentMethodData(String method, @Nullable PaymentMethodData data) {
         boolean isSupportedMethod = super.isValidForPaymentMethodData(method, data);
-        if (isSupportedMethod && BasicCardUtils.BASIC_CARD_METHOD_NAME.equals(method)) {
+        if (isSupportedMethod && MethodStrings.BASIC_CARD.equals(method) && data != null) {
             return matchBasiccardCapabilities(data);
         }
         return isSupportedMethod;
@@ -334,24 +257,48 @@ public class ServiceWorkerPaymentApp extends PaymentInstrument implements Paymen
     public void invokePaymentApp(String id, String merchantName, String origin, String iframeOrigin,
             byte[][] unusedCertificateChain, Map<String, PaymentMethodData> methodData,
             PaymentItem total, List<PaymentItem> displayItems,
-            Map<String, PaymentDetailsModifier> modifiers, InstrumentDetailsCallback callback) {
+            Map<String, PaymentDetailsModifier> modifiers, PaymentOptions paymentOptions,
+            List<PaymentShippingOption> shippingOptions, InstrumentDetailsCallback callback) {
+        assert mPaymentHandlerHost != null;
         if (mNeedsInstallation) {
+            assert !mIsMicrotransaction;
             BitmapDrawable icon = (BitmapDrawable) getDrawableIcon();
             ServiceWorkerPaymentAppBridge.installAndInvokePaymentApp(mWebContents, origin,
                     iframeOrigin, id, new HashSet<>(methodData.values()), total,
-                    new HashSet<>(modifiers.values()), callback, mAppName,
-                    icon == null ? null : icon.getBitmap(), mSwUri, mScope, mUseCache,
-                    mMethodNames.toArray(new String[0])[0]);
+                    new HashSet<>(modifiers.values()), paymentOptions, shippingOptions,
+                    mPaymentHandlerHost, callback, mAppName, icon == null ? null : icon.getBitmap(),
+                    mSwUri, mScope, mUseCache, mMethodNames.toArray(new String[0])[0],
+                    mSupportedDelegations);
         } else {
-            ServiceWorkerPaymentAppBridge.invokePaymentApp(mWebContents, mRegistrationId, origin,
-                    iframeOrigin, id, new HashSet<>(methodData.values()), total,
-                    new HashSet<>(modifiers.values()), callback);
+            ServiceWorkerPaymentAppBridge.invokePaymentApp(mWebContents, mRegistrationId,
+                    mScope.toString(), origin, iframeOrigin, id, new HashSet<>(methodData.values()),
+                    total, new HashSet<>(modifiers.values()), paymentOptions, shippingOptions,
+                    mPaymentHandlerHost, mIsMicrotransaction, callback);
         }
     }
 
     @Override
-    public void abortPaymentApp(AbortCallback callback) {
-        ServiceWorkerPaymentAppBridge.abortPaymentApp(mWebContents, mRegistrationId, callback);
+    public void updateWith(PaymentRequestDetailsUpdate response) {
+        assert isWaitingForPaymentDetailsUpdate();
+        mPaymentHandlerHost.updateWith(response);
+    }
+
+    @Override
+    public void onPaymentDetailsNotUpdated() {
+        assert isWaitingForPaymentDetailsUpdate();
+        mPaymentHandlerHost.onPaymentDetailsNotUpdated();
+    }
+
+    @Override
+    public boolean isWaitingForPaymentDetailsUpdate() {
+        return mPaymentHandlerHost != null
+                && mPaymentHandlerHost.isWaitingForPaymentDetailsUpdate();
+    }
+
+    @Override
+    public void abortPaymentApp(String id, AbortCallback callback) {
+        ServiceWorkerPaymentAppBridge.abortPaymentApp(
+                mWebContents, mRegistrationId, mScope.toString(), id, callback);
     }
 
     @Override
@@ -360,5 +307,42 @@ public class ServiceWorkerPaymentApp extends PaymentInstrument implements Paymen
     @Override
     public boolean canPreselect() {
         return mCanPreselect;
+    }
+
+    @Override
+    public boolean handlesShippingAddress() {
+        return mSupportedDelegations.getShippingAddress();
+    }
+
+    @Override
+    public boolean handlesPayerName() {
+        return mSupportedDelegations.getPayerName();
+    }
+
+    @Override
+    public boolean handlesPayerEmail() {
+        return mSupportedDelegations.getPayerEmail();
+    }
+
+    @Override
+    public boolean handlesPayerPhone() {
+        return mSupportedDelegations.getPayerPhone();
+    }
+
+    @Override
+    public boolean isReadyForMicrotransaction() {
+        return true; // TODO(https://crbug.com/1000432): Implement microtransactions.
+    }
+
+    @Override
+    @Nullable
+    public String accountBalance() {
+        return "18.00"; // TODO(https://crbug.com/1000432): Implement microtransactions.
+    }
+
+    @Override
+    @Nullable
+    public Set<String> getApplicationIdentifiersThatHideThisApp() {
+        return mPreferredRelatedApplicationIds;
     }
 }

@@ -6,9 +6,10 @@ package org.chromium.chrome.browser.compositor.animation;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.support.annotation.NonNull;
 
-import org.chromium.base.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+
 import org.chromium.chrome.browser.compositor.layouts.LayoutUpdateHost;
 
 import java.util.ArrayList;
@@ -18,6 +19,9 @@ import java.util.ArrayList;
  * CompositorAnimators.
  */
 public class CompositorAnimationHandler {
+    /** Whether or not testing mode is enabled. In this mode, animations end immediately. */
+    private static boolean sIsInTestingMode;
+
     /** A list of all the handler's animators. */
     private final ArrayList<CompositorAnimator> mAnimators = new ArrayList<>();
 
@@ -36,9 +40,6 @@ public class CompositorAnimationHandler {
      */
     private boolean mWasUpdateRequestedForAnimationStart;
 
-    /** Whether or not testing mode is enabled. In this mode, animations end immediately. */
-    private boolean mIsInTestingMode;
-
     /** The last time that an update was pushed to animations. */
     private long mLastUpdateTimeMs;
 
@@ -56,7 +57,7 @@ public class CompositorAnimationHandler {
      * Add an animator to the list of known animators to start receiving updates.
      * @param animator The animator to start.
      */
-    public final void registerAndStartAnimator(final CompositorAnimator animator) {
+    final void registerAndStartAnimator(final CompositorAnimator animator) {
         // If animations are currently running, the last updated time is being updated. If not,
         // reset the value here. This prevents gaps in animations from breaking timing.
         if (getActiveAnimationCount() <= 0) mLastUpdateTimeMs = System.currentTimeMillis();
@@ -76,7 +77,7 @@ public class CompositorAnimationHandler {
         }
 
         // If in testing mode, immediately push an update and end the animation.
-        if (mIsInTestingMode) pushUpdate(animator.getDuration());
+        if (sIsInTestingMode) pushUpdate(Long.MAX_VALUE);
     }
 
     /**
@@ -129,15 +130,33 @@ public class CompositorAnimationHandler {
      * @return The number of animations that are active inside this handler.
      */
     @VisibleForTesting
-    public int getActiveAnimationCount() {
+    int getActiveAnimationCount() {
         return mAnimators.size();
     }
 
     /**
-     * Enable testing mode. This causes any animations to end immediately.
+     * Enable or disable testing mode. This causes any animations to end immediately.
+     * @param enabled Whether testing mode is enabled or disabled.
      */
     @VisibleForTesting
-    public void enableTestingMode() {
-        mIsInTestingMode = true;
+    public static void setTestingMode(boolean enabled) {
+        sIsInTestingMode = enabled;
+    }
+
+    /**
+     * @return Whether we are in testing mode or not.
+     */
+    @VisibleForTesting
+    public static boolean isInTestingMode() {
+        return sIsInTestingMode;
+    }
+
+    /**
+     * Provides update for animation in testing mode.
+     * @return Whether update was successful or not.
+     */
+    @VisibleForTesting
+    final boolean pushUpdateInTestingMode(long deltaTimeMs) {
+        return sIsInTestingMode ? pushUpdate(deltaTimeMs) : false;
     }
 }

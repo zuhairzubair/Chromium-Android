@@ -6,12 +6,14 @@ package org.chromium.chrome.browser.autofill;
 
 import android.app.Activity;
 
-import org.chromium.base.ThreadUtils;
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.JNINamespace;
+import org.chromium.base.annotations.NativeMethods;
+import org.chromium.base.task.PostTask;
 import org.chromium.chrome.browser.ChromeActivity;
 import org.chromium.chrome.browser.ResourceId;
 import org.chromium.chrome.browser.autofill.AutofillNameFixFlowPrompt.AutofillNameFixFlowPromptDelegate;
+import org.chromium.content_public.browser.UiThreadTaskTraits;
 import org.chromium.ui.base.WindowAndroid;
 import org.chromium.ui.modaldialog.DialogDismissalCause;
 
@@ -42,7 +44,7 @@ final class AutofillNameFixFlowBridge implements AutofillNameFixFlowPromptDelega
             mNameFixFlowPrompt = null;
             // Clean up the native counterpart. This is posted to allow the native counterpart
             // to fully finish the construction of this glue object before we attempt to delete it.
-            ThreadUtils.postOnUiThread(() -> onPromptDismissed());
+            PostTask.postTask(UiThreadTaskTraits.DEFAULT, () -> onPromptDismissed());
         }
     }
 
@@ -56,12 +58,14 @@ final class AutofillNameFixFlowBridge implements AutofillNameFixFlowPromptDelega
 
     @Override
     public void onPromptDismissed() {
-        nativePromptDismissed(mNativeCardNameFixFlowViewAndroid);
+        AutofillNameFixFlowBridgeJni.get().promptDismissed(
+                mNativeCardNameFixFlowViewAndroid, AutofillNameFixFlowBridge.this);
     }
 
     @Override
     public void onUserAccept(String name) {
-        nativeOnUserAccept(mNativeCardNameFixFlowViewAndroid, name);
+        AutofillNameFixFlowBridgeJni.get().onUserAccept(
+                mNativeCardNameFixFlowViewAndroid, AutofillNameFixFlowBridge.this, name);
     }
 
     /**
@@ -87,6 +91,11 @@ final class AutofillNameFixFlowBridge implements AutofillNameFixFlowPromptDelega
         }
     }
 
-    private native void nativePromptDismissed(long nativeCardNameFixFlowViewAndroid);
-    private native void nativeOnUserAccept(long nativeCardNameFixFlowViewAndroid, String name);
+    @NativeMethods
+    interface Natives {
+        void promptDismissed(
+                long nativeCardNameFixFlowViewAndroid, AutofillNameFixFlowBridge caller);
+        void onUserAccept(long nativeCardNameFixFlowViewAndroid, AutofillNameFixFlowBridge caller,
+                String name);
+    }
 }

@@ -19,7 +19,7 @@ import org.chromium.media.MediaCodecUtil.MimeTypes;
 @JNINamespace("media")
 @MainDex
 class MediaCodecBridgeBuilder {
-    private static final String TAG = "cr_MediaCodecBridge";
+    private static final String TAG = "MediaCodecBridge";
 
     @CalledByNative
     static MediaCodecBridge createVideoDecoder(String mime, @CodecType int codecType,
@@ -71,8 +71,8 @@ class MediaCodecBridgeBuilder {
                 ? new MediaCodecEncoder(info.mediaCodec, info.bitrateAdjuster)
                 : new MediaCodecBridge(info.mediaCodec, info.bitrateAdjuster, false);
         MediaFormat format = MediaFormatBuilder.createVideoEncoderFormat(mime, width, height,
-                bitRate, info.bitrateAdjuster.getInitialFrameRate(frameRate), iFrameInterval,
-                colorFormat, info.supportsAdaptivePlayback);
+                bitRate, BitrateAdjuster.getInitialFrameRate(info.bitrateAdjuster, frameRate),
+                iFrameInterval, colorFormat, info.supportsAdaptivePlayback);
 
         if (!bridge.configureVideo(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)) {
             return null;

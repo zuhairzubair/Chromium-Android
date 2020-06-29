@@ -5,20 +5,29 @@
 package org.chromium.ui.base;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.style.CharacterStyle;
 import android.text.style.ParagraphStyle;
 import android.text.style.UpdateAppearance;
 
+import androidx.annotation.Nullable;
+
 import org.chromium.base.ApiCompatibilityUtils;
+import org.chromium.base.BuildInfo;
 import org.chromium.base.ContextUtils;
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.JNINamespace;
+import org.chromium.base.annotations.NativeMethods;
+import org.chromium.base.compat.ApiHelperForO;
 import org.chromium.base.metrics.RecordUserAction;
 import org.chromium.ui.R;
 import org.chromium.ui.widget.Toast;
@@ -36,6 +45,8 @@ public class Clipboard implements ClipboardManager.OnPrimaryClipChangedListener 
     private final Context mContext;
 
     private final ClipboardManager mClipboardManager;
+
+    private long mNativeClipboard;
 
     /**
      * Get the singleton Clipboard instance (creating it if needed).
@@ -117,6 +128,25 @@ public class Clipboard implements ClipboardManager.OnPrimaryClipChangedListener 
     }
 
     /**
+     * Gets the Uri of top item on the primary clip on the Android clipboard.
+     *
+     * @return an Uri if any, or null if there is no Uri or no entries on the primary clip.
+     */
+    public @Nullable Uri getUri() {
+        // getPrimaryClip() has been observed to throw unexpected exceptions for some devices (see
+        // crbug.com/654802).
+        try {
+            ClipData clipData = mClipboardManager.getPrimaryClip();
+            if (clipData == null) return null;
+            if (clipData.getItemCount() == 0) return null;
+
+            return clipData.getItemAt(0).getUri();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Gets the HTML text of top item on the primary clip on the Android clipboard.
      *
      * @return a Java string with the html text if any, or null if there is no html
@@ -147,6 +177,24 @@ public class Clipboard implements ClipboardManager.OnPrimaryClipChangedListener 
     }
 
     /**
+     * Setting the clipboard's current primary clip to an image.
+     * @param Uri The {@link Uri} will become the content of the clipboard's primary clip.
+     */
+    public void setImage(final Uri uri) {
+        if (uri == null) {
+            showCopyToClipboardFailureMessage();
+            return;
+        }
+
+        ContextUtils.getApplicationContext().grantUriPermission(
+                ClipboardManager.class.getCanonicalName(), uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        ClipData clip = ClipData.newUri(
+                ContextUtils.getApplicationContext().getContentResolver(), "image", uri);
+        setPrimaryClipNoException(clip);
+    }
+
+    /**
      * Writes HTML to the clipboard, together with a plain-text representation
      * of that very data.
      *
@@ -172,9 +220,18 @@ public class Clipboard implements ClipboardManager.OnPrimaryClipChangedListener 
             mClipboardManager.setPrimaryClip(clip);
         } catch (Exception ex) {
             // Ignore any exceptions here as certain devices have bugs and will fail.
-            String text = mContext.getString(R.string.copy_to_clipboard_failure_message);
-            Toast.makeText(mContext, text, Toast.LENGTH_SHORT).show();
+            showCopyToClipboardFailureMessage();
         }
+    }
+
+    private void showCopyToClipboardFailureMessage() {
+        String text = mContext.getString(R.string.copy_to_clipboard_failure_message);
+        Toast.makeText(mContext, text, Toast.LENGTH_SHORT).show();
+    }
+
+    @CalledByNative
+    private void setNativePtr(long nativeClipboard) {
+        mNativeClipboard = nativeClipboard;
     }
 
     /**
@@ -185,8 +242,9 @@ public class Clipboard implements ClipboardManager.OnPrimaryClipChangedListener 
     @Override
     public void onPrimaryClipChanged() {
         RecordUserAction.record("MobileClipboardChanged");
-        long nativeClipboardAndroid = nativeInit();
-        if (nativeClipboardAndroid != 0) nativeOnPrimaryClipChanged(nativeClipboardAndroid);
+        if (mNativeClipboard != 0) {
+            ClipboardJni.get().onPrimaryClipChanged(mNativeClipboard, Clipboard.this);
+        }
     }
 
     /**
@@ -199,6 +257,42 @@ public class Clipboard implements ClipboardManager.OnPrimaryClipChangedListener 
         Toast.makeText(mContext, R.string.url_copied, Toast.LENGTH_SHORT).show();
     }
 
-    private native long nativeInit();
-    private native void nativeOnPrimaryClipChanged(long nativeClipboardAndroid);
+    /**
+     * Because Android may not notify apps in the background that the content of clipboard has
+     * changed, this method proactively considers clipboard invalidated, when the app loses focus.
+     * @param hasFocus Whether or not {@code activity} gained or lost focus.
+     */
+    public void onWindowFocusChanged(boolean hasFocus) {
+        if (mNativeClipboard == 0 || !hasFocus || !BuildInfo.isAtLeastQ()) return;
+        onPrimaryClipTimestampInvalidated();
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private void onPrimaryClipTimestampInvalidated() {
+        ClipDescription clipDescription = mClipboardManager.getPrimaryClipDescription();
+        if (clipDescription == null) return;
+
+        long timestamp = ApiHelperForO.getTimestamp(clipDescription);
+        ClipboardJni.get().onPrimaryClipTimestampInvalidated(
+                mNativeClipboard, Clipboard.this, timestamp);
+    }
+
+    /**
+     * Gets the last modified timestamp observed by the native side ClipboardAndroid, not the
+     * Android framework.
+     *
+     * @return the last modified time in millisecond.
+     */
+    public long getLastModifiedTimeMs() {
+        if (mNativeClipboard == 0) return 0;
+        return ClipboardJni.get().getLastModifiedTimeToJavaTime(mNativeClipboard);
+    }
+
+    @NativeMethods
+    interface Natives {
+        void onPrimaryClipChanged(long nativeClipboardAndroid, Clipboard caller);
+        void onPrimaryClipTimestampInvalidated(
+                long nativeClipboardAndroid, Clipboard caller, long timestamp);
+        long getLastModifiedTimeToJavaTime(long nativeClipboardAndroid);
+    }
 }

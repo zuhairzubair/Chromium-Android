@@ -66,7 +66,7 @@ public class PackageMetrics {
                     pmd.codeSize += storageStats.getAppBytes();
                     pmd.dataSize += (storageStats.getDataBytes() - storageStats.getCacheBytes());
                     pmd.cacheSize += storageStats.getCacheBytes();
-                } catch (IOException | NameNotFoundException ex) {
+                } catch (IOException | NameNotFoundException | SecurityException ex) {
                     Log.e(TAG, "Error calling into queryStatsForPackage", ex);
                 }
             }
@@ -84,11 +84,11 @@ public class PackageMetrics {
         PackageMetricsData data = getPackageStatsForAndroidO();
         if (data != null) {
             RecordHistogram.recordCustomCountHistogram("Android.PackageStats.DataSize",
-                    Math.round(ConversionUtils.bytesToMegabytes(data.dataSize)), 1, 10000, 50);
+                    (int) ConversionUtils.bytesToMegabytes(data.dataSize), 1, 10000, 50);
             RecordHistogram.recordCustomCountHistogram("Android.PackageStats.CacheSize",
-                    Math.round(ConversionUtils.bytesToMegabytes(data.cacheSize)), 1, 10000, 50);
+                    (int) ConversionUtils.bytesToMegabytes(data.cacheSize), 1, 10000, 50);
             RecordHistogram.recordSparseHistogram("Android.PackageStats.CodeSize",
-                    Math.round(ConversionUtils.bytesToMegabytes(data.codeSize)));
+                    (int) ConversionUtils.bytesToMegabytes(data.codeSize));
         }
     }
 }

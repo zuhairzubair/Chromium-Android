@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Продолжи"</string>
+<string name="tos_notification_title">"„Условите за користење“ на Chrome се менуваат на 31 март"</string>
+<string name="tos_notification_body_text">"Прегледајте ги новите услови"</string>
+<string name="tos_notification_ack_button_text">"Сфатив"</string>
+<string name="tos_notification_review_button_text">"Прегледајте"</string>
+<string name="search_or_type_web_address">"Пребарајте или внесете веб-адреса"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Дали да се отстрани предлогот од привремената меморија?"</string>
+<string name="options_homepage_title">"Почетна страница"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"Сајтов ќе сподели информации со една апликација надвор од режимот „Инкогнито“."</string>
+<string name="external_app_leave_incognito_warning_title">"Да се напушти режимот „Инкогнито“?"</string>
+<string name="external_app_leave_incognito_stay">"Остани"</string>
+<string name="external_app_leave_incognito_leave">"Напушти"</string>
+<string name="external_app_restricted_access_error">"Chrome нема пристап до бараниот ресурс."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Не се најдени уреди во близина."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"Дозволи"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Блокирај"</string>
+<string name="blocked_ads_prompt_title">"Рекламите се блокирани"</string>
+<string name="video_call_notification_text_2">"Се пристапува до видеовлезот"</string>
+<string name="audio_call_notification_text_2">"Пристап до аудиовлез"</string>
+<string name="video_audio_call_notification_text_2">"Пристап до аудио- и видеовлез"</string>
+<string name="video_call_incognito_notification_text_2">"Еден сајт пристапува до видеозапис"</string>
+<string name="audio_call_incognito_notification_text_2">"Еден сајт пристапува до аудиозапис"</string>
+<string name="video_audio_call_incognito_notification_text_2">"Еден сајт пристапува до аудио и видеозаписи"</string>
+</resources>

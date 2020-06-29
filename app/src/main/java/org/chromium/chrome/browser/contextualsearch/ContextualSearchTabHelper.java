@@ -8,22 +8,23 @@ import android.app.Activity;
 import android.view.ContextMenu;
 
 import org.chromium.base.annotations.CalledByNative;
+import org.chromium.base.annotations.NativeMethods;
 import org.chromium.chrome.browser.ChromeActivity;
 import org.chromium.chrome.browser.compositor.CompositorViewHolder;
 import org.chromium.chrome.browser.compositor.bottombar.OverlayPanel.StateChangeReason;
 import org.chromium.chrome.browser.compositor.bottombar.OverlayPanelManager.OverlayPanelManagerObserver;
 import org.chromium.chrome.browser.compositor.layouts.LayoutManager;
+import org.chromium.chrome.browser.contextualsearch.ContextualSearchFieldTrial.ContextualSearchSwitch;
 import org.chromium.chrome.browser.firstrun.FirstRunStatus;
-import org.chromium.chrome.browser.fullscreen.FullscreenOptions;
 import org.chromium.chrome.browser.locale.LocaleManager;
-import org.chromium.chrome.browser.preferences.PrefServiceBridge;
 import org.chromium.chrome.browser.profiles.Profile;
-import org.chromium.chrome.browser.search_engines.TemplateUrlService;
-import org.chromium.chrome.browser.search_engines.TemplateUrlService.TemplateUrlServiceObserver;
+import org.chromium.chrome.browser.search_engines.TemplateUrlServiceFactory;
 import org.chromium.chrome.browser.tab.EmptyTabObserver;
 import org.chromium.chrome.browser.tab.Tab;
-import org.chromium.chrome.browser.tab.Tab.TabHidingType;
-import org.chromium.chrome.browser.tabmodel.TabSelectionType;
+import org.chromium.chrome.browser.tab.TabHidingType;
+import org.chromium.chrome.browser.tab.TabImpl;
+import org.chromium.chrome.browser.tab.TabSelectionType;
+import org.chromium.components.search_engines.TemplateUrlService.TemplateUrlServiceObserver;
 import org.chromium.content_public.browser.GestureListenerManager;
 import org.chromium.content_public.browser.GestureStateListener;
 import org.chromium.content_public.browser.SelectionPopupController;
@@ -61,6 +62,7 @@ public class ContextualSearchTabHelper
      */
     private SelectionClientManager mSelectionClientManager;
 
+    /** The pointer to our native C++ implementation. */
     private long mNativeHelper;
 
     /** {@code true} while observing other overlay panel via {@link OverlayPanelManagerObserver} */
@@ -71,6 +73,9 @@ public class ContextualSearchTabHelper
      * showing on it, or {@code null}.
      */
     private Tab mUnhookedTab;
+
+    /** Whether the current default search engine is Google.  Is {@code null} if not inited. */
+    private Boolean mIsDefaultSearchEngineGoogle;
 
     /**
      * Creates a contextual search tab helper for the given tab.
@@ -92,8 +97,9 @@ public class ContextualSearchTabHelper
             NetworkChangeNotifier.addConnectionTypeObserver(this);
         }
         float scaleFactor = 1.f;
-        if (tab != null && tab.getActivity() != null && tab.getActivity().getResources() != null) {
-            scaleFactor /= tab.getActivity().getResources().getDisplayMetrics().density;
+        if (tab != null && ((TabImpl) tab).getActivity() != null
+                && ((TabImpl) tab).getActivity().getResources() != null) {
+            scaleFactor /= ((TabImpl) tab).getActivity().getResources().getDisplayMetrics().density;
         }
         mPxToDp = scaleFactor;
     }
@@ -108,7 +114,7 @@ public class ContextualSearchTabHelper
             // This leaves the handling of the hooks to the responsibility of the activity tab.
             // Restoring them will be then done by the tab that was the activity tab when
             // the panel was shown.
-            Tab activityTab = mTab.getActivity().getActivityTabProvider().getActivityTab();
+            Tab activityTab = ((TabImpl) mTab).getActivity().getActivityTabProvider().get();
             if (activityTab != mTab) return;
 
             // Removes the hooks if the panel other than contextual search panel just got shown.
@@ -157,8 +163,8 @@ public class ContextualSearchTabHelper
     }
 
     private static LayoutManager getLayoutManager(Tab tab) {
-        if (tab.getActivity() == null) return null;
-        CompositorViewHolder cvh = tab.getActivity().getCompositorViewHolder();
+        if (((TabImpl) tab).getActivity() == null) return null;
+        CompositorViewHolder cvh = ((TabImpl) tab).getActivity().getCompositorViewHolder();
         return cvh != null ? cvh.getLayoutManager() : null;
     }
 
@@ -195,16 +201,23 @@ public class ContextualSearchTabHelper
         // Native initialization happens after a page loads or content is changed to ensure profile
         // is initialized.
         if (mNativeHelper == 0) {
-            mNativeHelper = nativeInit(tab.getProfile());
+            mNativeHelper = ContextualSearchTabHelperJni.get().init(
+                    ContextualSearchTabHelper.this, ((TabImpl) tab).getProfile());
         }
         if (mTemplateUrlObserver == null) {
             mTemplateUrlObserver = new TemplateUrlServiceObserver() {
                 @Override
                 public void onTemplateURLServiceChanged() {
-                    updateContextualSearchHooks(mWebContents);
+                    boolean isDefaultSearchEngineGoogle =
+                            TemplateUrlServiceFactory.get().isDefaultSearchEngineGoogle();
+                    if (mIsDefaultSearchEngineGoogle == null
+                            || isDefaultSearchEngineGoogle != mIsDefaultSearchEngineGoogle) {
+                        mIsDefaultSearchEngineGoogle = isDefaultSearchEngineGoogle;
+                        updateContextualSearchHooks(mWebContents);
+                    }
                 }
             };
-            TemplateUrlService.getInstance().addObserver(mTemplateUrlObserver);
+            TemplateUrlServiceFactory.get().addObserver(mTemplateUrlObserver);
         }
         updateHooksForTab(tab);
     }
@@ -217,11 +230,12 @@ public class ContextualSearchTabHelper
     @Override
     public void onDestroyed(Tab tab) {
         if (mNativeHelper != 0) {
-            nativeDestroy(mNativeHelper);
+            ContextualSearchTabHelperJni.get().destroy(
+                    mNativeHelper, ContextualSearchTabHelper.this);
             mNativeHelper = 0;
         }
         if (mTemplateUrlObserver != null) {
-            TemplateUrlService.getInstance().removeObserver(mTemplateUrlObserver);
+            TemplateUrlServiceFactory.get().removeObserver(mTemplateUrlObserver);
         }
         if (NetworkChangeNotifier.isInitialized()) {
             NetworkChangeNotifier.removeConnectionTypeObserver(this);
@@ -232,22 +246,6 @@ public class ContextualSearchTabHelper
         mContextualSearchManager = null;
         mSelectionClientManager = null;
         mGestureStateListener = null;
-    }
-
-    @Override
-    public void onEnterFullscreenMode(Tab tab, FullscreenOptions options) {
-        ContextualSearchManager manager = getContextualSearchManager(tab);
-        if (manager != null) {
-            manager.hideContextualSearch(StateChangeReason.UNKNOWN);
-        }
-    }
-
-    @Override
-    public void onExitFullscreenMode(Tab tab) {
-        ContextualSearchManager manager = getContextualSearchManager(tab);
-        if (manager != null) {
-            manager.hideContextualSearch(StateChangeReason.UNKNOWN);
-        }
     }
 
     @Override
@@ -332,9 +330,8 @@ public class ContextualSearchTabHelper
             controller.setSelectionClient(
                     mSelectionClientManager.addContextualSearchSelectionClient(
                             contextualSearchManager.getContextualSearchSelectionClient()));
-            contextualSearchManager.suppressContextualSearchForSmartSelection(
-                    mSelectionClientManager.isSmartSelectionEnabledInChrome());
-            nativeInstallUnhandledTapNotifierIfNeeded(mNativeHelper, webContents, mPxToDp);
+            ContextualSearchTabHelperJni.get().installUnhandledTapNotifierIfNeeded(
+                    mNativeHelper, ContextualSearchTabHelper.this, webContents, mPxToDp);
         }
     }
 
@@ -372,22 +369,23 @@ public class ContextualSearchTabHelper
         if (manager == null) return false;
 
         return !webContents.isIncognito() && FirstRunStatus.getFirstRunFlowComplete()
-                && !PrefServiceBridge.getInstance().isContextualSearchDisabled()
-                && TemplateUrlService.getInstance().isDefaultSearchEngineGoogle()
+                && !ContextualSearchManager.isContextualSearchDisabled()
+                && TemplateUrlServiceFactory.get().isDefaultSearchEngineGoogle()
                 && !LocaleManager.getInstance().needToCheckForSearchEnginePromo()
                 // Svelte and Accessibility devices are incompatible with the first-run flow and
-                // Talkback has poor interaction with tap to search (see http://crbug.com/399708 and
-                // http://crbug.com/396934).
+                // Talkback has poor interaction with Contextual Search (see http://crbug.com/399708
+                // and http://crbug.com/396934).
                 && !manager.isRunningInCompatibilityMode()
-                && !(mTab.isShowingErrorPage() || mTab.isShowingInterstitialPage())
+                && !(mTab.isShowingErrorPage() || ((TabImpl) mTab).isShowingInterstitialPage())
                 && isDeviceOnline(manager) && mUnhookedTab == null;
     }
 
     /** @return Whether the device is online, or we have disabled online-detection. */
     private boolean isDeviceOnline(ContextualSearchManager manager) {
-        if (ContextualSearchFieldTrial.isOnlineDetectionDisabled()) return true;
-
-        return manager.isDeviceOnline();
+        return ContextualSearchFieldTrial.getSwitch(
+                       ContextualSearchSwitch.IS_ONLINE_DETECTION_DISABLED)
+                ? true
+                : manager.isDeviceOnline();
     }
 
     /**
@@ -413,8 +411,8 @@ public class ContextualSearchTabHelper
 
         ContextualSearchManager manager = getContextualSearchManager(mTab);
         if (manager != null) {
-            boolean isEnabled = !PrefServiceBridge.getInstance().isContextualSearchDisabled()
-                    && !PrefServiceBridge.getInstance().isContextualSearchUninitialized();
+            boolean isEnabled = !ContextualSearchManager.isContextualSearchDisabled()
+                    && !ContextualSearchManager.isContextualSearchUninitialized();
             manager.onContextualSearchPrefChanged(isEnabled);
         }
     }
@@ -432,8 +430,11 @@ public class ContextualSearchTabHelper
         }
     }
 
-    private native long nativeInit(Profile profile);
-    private native void nativeInstallUnhandledTapNotifierIfNeeded(
-            long nativeContextualSearchTabHelper, WebContents webContents, float pxToDpScaleFactor);
-    private native void nativeDestroy(long nativeContextualSearchTabHelper);
+    @NativeMethods
+    interface Natives {
+        long init(ContextualSearchTabHelper caller, Profile profile);
+        void installUnhandledTapNotifierIfNeeded(long nativeContextualSearchTabHelper,
+                ContextualSearchTabHelper caller, WebContents webContents, float pxToDpScaleFactor);
+        void destroy(long nativeContextualSearchTabHelper, ContextualSearchTabHelper caller);
+    }
 }

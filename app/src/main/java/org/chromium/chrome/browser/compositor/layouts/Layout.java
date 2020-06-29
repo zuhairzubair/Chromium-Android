@@ -7,11 +7,12 @@ package org.chromium.chrome.browser.compositor.layouts;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.support.annotation.IntDef;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 
-import org.chromium.base.VisibleForTesting;
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
+
 import org.chromium.chrome.browser.compositor.LayerTitleCache;
 import org.chromium.chrome.browser.compositor.animation.CompositorAnimationHandler;
 import org.chromium.chrome.browser.compositor.layouts.components.LayoutTab;
@@ -23,6 +24,7 @@ import org.chromium.chrome.browser.compositor.scene_layer.SceneLayer;
 import org.chromium.chrome.browser.compositor.scene_layer.SceneOverlayLayer;
 import org.chromium.chrome.browser.fullscreen.ChromeFullscreenManager;
 import org.chromium.chrome.browser.tab.Tab;
+import org.chromium.chrome.browser.tab.TabImpl;
 import org.chromium.chrome.browser.tabmodel.TabModel;
 import org.chromium.chrome.browser.tabmodel.TabModelSelector;
 import org.chromium.chrome.browser.tabmodel.TabModelUtils;
@@ -43,6 +45,8 @@ public abstract class Layout implements TabContentManager.ThumbnailChangeListene
     /**
      * The orientation of the device.
      */
+    @IntDef({Orientation.UNSET, Orientation.PORTRAIT, Orientation.LANDSCAPE})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface Orientation {
         int UNSET = 0;
         int PORTRAIT = 1;
@@ -57,7 +61,7 @@ public abstract class Layout implements TabContentManager.ThumbnailChangeListene
     public @interface ViewportMode {
         /** The viewport is assumed to be always fullscreen. */
         int ALWAYS_FULLSCREEN = 0;
-        /** The viewport is assuming that browser controls are permenantly shown. */
+        /** The viewport is assuming that browser controls are permanently shown. */
         int ALWAYS_SHOWING_BROWSER_CONTROLS = 1;
         /** The viewport will account for animating browser controls (both shown and hidden). */
         int DYNAMIC_BROWSER_CONTROLS = 2;
@@ -84,7 +88,7 @@ public abstract class Layout implements TabContentManager.ThumbnailChangeListene
     private Context mContext;
 
     /** The current {@link Orientation} of the layout. */
-    private int mCurrentOrientation;
+    private @Orientation int mCurrentOrientation;
 
     // Tabs
     protected TabModelSelector mTabModelSelector;
@@ -308,7 +312,7 @@ public abstract class Layout implements TabContentManager.ThumbnailChangeListene
      */
     public final void sizeChanged(RectF visibleViewportPx, RectF screenViewportPx,
             float topBrowserControlsHeightPx, float bottomBrowserControlsHeightPx,
-            int orientation) {
+            @Orientation int orientation) {
         // 1. Pull out this Layout's width and height properties based on the viewport.
         float width = screenViewportPx.width() / mDpToPx;
         float height = screenViewportPx.height() / mDpToPx;
@@ -347,7 +351,7 @@ public abstract class Layout implements TabContentManager.ThumbnailChangeListene
      * @param height      The new height in dp.
      * @param orientation The new orientation.
      */
-    protected void notifySizeChanged(float width, float height, int orientation) { }
+    protected void notifySizeChanged(float width, float height, @Orientation int orientation) {}
 
     /**
      * Notify the a title has changed.
@@ -529,7 +533,7 @@ public abstract class Layout implements TabContentManager.ThumbnailChangeListene
      * @return The orientation of the screen (portrait or landscape). Values are defined by
      *         {@link Orientation}.
      */
-    public int getOrientation() {
+    public @Orientation int getOrientation() {
         return mCurrentOrientation;
     }
 
@@ -883,8 +887,9 @@ public abstract class Layout implements TabContentManager.ThumbnailChangeListene
      */
     public ChromeFullscreenManager getFullscreenManager() {
         if (mTabModelSelector == null) return null;
-        if (mTabModelSelector.getCurrentTab() == null) return null;
-        if (mTabModelSelector.getCurrentTab().getActivity() == null) return null;
-        return mTabModelSelector.getCurrentTab().getActivity().getFullscreenManager();
+        Tab tab = mTabModelSelector.getCurrentTab();
+        if (tab == null) return null;
+        if (((TabImpl) tab).getActivity() == null) return null;
+        return ((TabImpl) tab).getActivity().getFullscreenManager();
     }
 }

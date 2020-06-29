@@ -26,13 +26,13 @@ task clean(type: Delete) {
 
 ext {
     versionCode = 17
-    versionName = "73.0.3683.93"
+    versionName = "81.0.4044.117"
 
     // third_party/android_sdk/README.chromium
-    compileSdkVersion = 28
-    buildToolsVersion = "28.0.3"
+    compileSdkVersion = 29
+    buildToolsVersion = "29.0.3"
     minSdkVersion = 19
-    targetSdkVersion = 28
+    targetSdkVersion = 29
 
     // tools/android/roll/update_support_library.py
     supportLibraryVersion = "28.0.0"

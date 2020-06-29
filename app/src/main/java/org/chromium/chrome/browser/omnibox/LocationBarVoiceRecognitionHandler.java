@@ -6,24 +6,25 @@ package org.chromium.chrome.browser.omnibox;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.support.annotation.IntDef;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
+
+import org.chromium.base.ThreadUtils;
 import org.chromium.base.metrics.CachedMetrics;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.omnibox.suggestions.AutocompleteController;
+import org.chromium.chrome.browser.flags.FeatureUtilities;
 import org.chromium.chrome.browser.omnibox.suggestions.AutocompleteCoordinator;
-import org.chromium.chrome.browser.search_engines.TemplateUrlService;
+import org.chromium.chrome.browser.omnibox.voice.AssistantVoiceSearchService;
+import org.chromium.chrome.browser.search_engines.TemplateUrlServiceFactory;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.toolbar.ToolbarDataProvider;
-import org.chromium.chrome.browser.util.FeatureUtilities;
+import org.chromium.content_public.browser.NavigationHandle;
 import org.chromium.content_public.browser.RenderFrameHost;
 import org.chromium.content_public.browser.WebContents;
 import org.chromium.content_public.browser.WebContentsObserver;
@@ -67,18 +68,20 @@ public class LocationBarVoiceRecognitionHandler {
             new CachedMetrics.EnumeratedHistogramSample(
                     "VoiceInteraction.VoiceResultConfidenceValue", 101);
 
-    final private Delegate mDelegate;
+    private final Delegate mDelegate;
     private WebContentsObserver mVoiceSearchWebContentsObserver;
+    private AssistantVoiceSearchService mAssistantVoiceSearchService;
 
     // VoiceInteractionEventSource defined in tools/metrics/histograms/enums.xml.
     // Do not reorder or remove items, only add new items before HISTOGRAM_BOUNDARY.
     @IntDef({VoiceInteractionSource.OMNIBOX, VoiceInteractionSource.NTP,
-            VoiceInteractionSource.SEARCH_WIDGET})
+            VoiceInteractionSource.SEARCH_WIDGET, VoiceInteractionSource.TASKS_SURFACE})
     public @interface VoiceInteractionSource {
         int OMNIBOX = 0;
         int NTP = 1;
         int SEARCH_WIDGET = 2;
-        int HISTOGRAM_BOUNDARY = 3;
+        int TASKS_SURFACE = 3;
+        int HISTOGRAM_BOUNDARY = 4;
     }
 
     /**
@@ -163,6 +166,12 @@ public class LocationBarVoiceRecognitionHandler {
         mDelegate = delegate;
     }
 
+    /** Set the AssistantVoiceSearchService for this class. */
+    public void setAssistantVoiceSearchService(
+            AssistantVoiceSearchService assistantVoiceSearchService) {
+        mAssistantVoiceSearchService = assistantVoiceSearchService;
+    }
+
     /**
      * Instantiated when a voice search is performed to monitor the web contents for a navigation
      * to be started so we can notify the render frame that a user gesture has been performed. This
@@ -186,18 +195,17 @@ public class LocationBarVoiceRecognitionHandler {
 
             RenderFrameHost renderFrameHost = webContents.getMainFrame();
             if (renderFrameHost == null) return;
-            if (TemplateUrlService.getInstance().isSearchResultsPageFromDefaultSearchProvider(
-                        url)) {
+            if (TemplateUrlServiceFactory.get().isSearchResultsPageFromDefaultSearchProvider(url)) {
                 renderFrameHost.notifyUserActivation();
             }
         }
 
         @Override
-        public void didFinishNavigation(String url, boolean isInMainFrame, boolean isErrorPage,
-                boolean hasCommitted, boolean isSameDocument, boolean isFragmentNavigation,
-                boolean isRendererInitiated, boolean isDownload, @Nullable Integer pageTransition,
-                int errorCode, String errorDescription, int httpStatusCode) {
-            if (hasCommitted && isInMainFrame && !isErrorPage) setReceivedUserGesture(url);
+        public void didFinishNavigation(NavigationHandle navigation) {
+            if (navigation.hasCommitted() && navigation.isInMainFrame()
+                    && !navigation.isErrorPage()) {
+                setReceivedUserGesture(navigation.getUrl());
+            }
             destroy();
         }
     }
@@ -254,9 +262,9 @@ public class LocationBarVoiceRecognitionHandler {
                 return;
             }
 
-            String url = AutocompleteController.nativeQualifyPartialURLQuery(topResultQuery);
+            String url = autocompleteCoordinator.qualifyPartialURLQuery(topResultQuery);
             if (url == null) {
-                url = TemplateUrlService.getInstance().getUrlForVoiceSearchQuery(topResultQuery);
+                url = TemplateUrlServiceFactory.get().getUrlForVoiceSearchQuery(topResultQuery);
             }
 
             // Since voice was used, we need to let the frame know that there was a user gesture.
@@ -278,7 +286,7 @@ public class LocationBarVoiceRecognitionHandler {
 
     /** Convert the android voice intent bundle to a list of result objects. */
     @VisibleForTesting
-    protected static List<VoiceResult> convertBundleToVoiceResults(Bundle extras) {
+    protected List<VoiceResult> convertBundleToVoiceResults(Bundle extras) {
         if (extras == null) return null;
 
         ArrayList<String> strings = extras.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
@@ -286,6 +294,9 @@ public class LocationBarVoiceRecognitionHandler {
 
         if (strings == null || confidences == null) return null;
         if (strings.size() != confidences.length) return null;
+
+        AutocompleteCoordinator autocompleteCoordinator = mDelegate.getAutocompleteCoordinator();
+        assert autocompleteCoordinator != null;
 
         List<VoiceResult> results = new ArrayList<>();
         for (int i = 0; i < strings.size(); ++i) {
@@ -296,7 +307,7 @@ public class LocationBarVoiceRecognitionHandler {
             // If the string appears to be a URL, then use it instead of the string returned from
             // the voice engine.
             String culledString = strings.get(i).replaceAll(" ", "");
-            String url = AutocompleteController.nativeQualifyPartialURLQuery(culledString);
+            String url = autocompleteCoordinator.qualifyPartialURLQuery(culledString);
             results.add(
                     new VoiceResult(url == null ? strings.get(i) : culledString, confidences[i]));
         }
@@ -305,36 +316,26 @@ public class LocationBarVoiceRecognitionHandler {
 
     /**
      * Triggers a voice recognition intent to allow the user to specify a search query.
+     *
      * @param source The source of the voice recognition initiation, such as NTP or omnibox.
      */
     public void startVoiceRecognition(@VoiceInteractionSource int source) {
+        ThreadUtils.assertOnUiThread();
+
         WindowAndroid windowAndroid = mDelegate.getWindowAndroid();
         if (windowAndroid == null) return;
         Activity activity = windowAndroid.getActivity().get();
         if (activity == null) return;
 
-        if (!windowAndroid.hasPermission(Manifest.permission.RECORD_AUDIO)) {
-            if (windowAndroid.canRequestPermission(Manifest.permission.RECORD_AUDIO)) {
-                PermissionCallback callback = new PermissionCallback() {
-                    @Override
-                    public void onRequestPermissionsResult(
-                            String[] permissions, int[] grantResults) {
-                        if (grantResults.length != 1) return;
-
-                        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                            startVoiceRecognition(source);
-                        } else {
-                            mDelegate.updateMicButtonState();
-                        }
-                    }
-                };
-                windowAndroid.requestPermissions(
-                        new String[] {Manifest.permission.RECORD_AUDIO}, callback);
-            } else {
-                mDelegate.updateMicButtonState();
-            }
+        // Check if this can be handled by Assistant Voice Search, if so let it handle the search.
+        if (mAssistantVoiceSearchService != null
+                && mAssistantVoiceSearchService.shouldRequestAssistantVoiceSearch()) {
+            startAGSAForAssistantVoiceSearch(windowAndroid, source);
             return;
         }
+        // Check if we need to request audio permissions. If we don't, then trigger a permissions
+        // prompt will appear and startVoiceRecognition will be called again.
+        if (!ensureAudioPermissionGranted(windowAndroid, source)) return;
 
         // Record metrics on the source of a voice search interaction, such as NTP or omnibox.
         recordVoiceSearchStartEventSource(source);
@@ -348,7 +349,55 @@ public class LocationBarVoiceRecognitionHandler {
 
         if (!showSpeechRecognitionIntent(windowAndroid, intent, source)) {
             // Requery whether or not the recognition intent can be handled.
-            isRecognitionIntentPresent(activity, false);
+            isRecognitionIntentPresent(false);
+            mDelegate.updateMicButtonState();
+            recordVoiceSearchFailureEventSource(source);
+        }
+    }
+
+    /**
+     * Requests the audio permission and resolves the voice recognition request if necessary.
+     *
+     * @param windowAndroid Used to request audio permissions from the Android system.
+     * @param source The source of the mic button click, used to record metrics.
+     * @return Whether audio permissions are granted.
+     */
+    @VisibleForTesting
+    boolean ensureAudioPermissionGranted(
+            WindowAndroid windowAndroid, @VoiceInteractionSource int source) {
+        if (windowAndroid.hasPermission(Manifest.permission.RECORD_AUDIO)) return true;
+
+        // If we don't have permission and also can't ask, then there's no more work left other
+        // than telling the delegate to update the mic state.
+        if (!windowAndroid.canRequestPermission(Manifest.permission.RECORD_AUDIO)) {
+            mDelegate.updateMicButtonState();
+            return false;
+        }
+
+        PermissionCallback callback = (permissions, grantResults) -> {
+            if (grantResults.length != 1) {
+                return;
+            }
+
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startVoiceRecognition(source);
+            } else {
+                mDelegate.updateMicButtonState();
+            }
+        };
+        windowAndroid.requestPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, callback);
+
+        return false;
+    }
+
+    /** Start AGSA to fulfill the current voice search. */
+    private void startAGSAForAssistantVoiceSearch(
+            WindowAndroid windowAndroid, @VoiceInteractionSource int source) {
+        recordVoiceSearchStartEventSource(source);
+
+        Intent intent = mAssistantVoiceSearchService.getAssistantVoiceSearchIntent();
+
+        if (!showSpeechRecognitionIntent(windowAndroid, intent, source)) {
             mDelegate.updateMicButtonState();
             recordVoiceSearchFailureEventSource(source);
         }
@@ -388,7 +437,7 @@ public class LocationBarVoiceRecognitionHandler {
         }
 
         Activity activity = windowAndroid.getActivity().get();
-        return activity != null && isRecognitionIntentPresent(activity, true);
+        return activity != null && isRecognitionIntentPresent(true);
     }
 
     /**
@@ -456,13 +505,11 @@ public class LocationBarVoiceRecognitionHandler {
      * {@link RecognizerIntent#ACTION_WEB_SEARCH} {@link Intent} is handled by any
      * {@link android.app.Activity}s in the system.
      *
-     * @param context        The {@link Context} to use to check to see if the {@link Intent} will
-     *                       be handled.
      * @param useCachedValue Whether or not to use the cached value from a previous result.
      * @return {@code true} if recognition is supported.  {@code false} otherwise.
      */
     @VisibleForTesting
-    protected boolean isRecognitionIntentPresent(Context context, boolean useCachedValue) {
-        return FeatureUtilities.isRecognitionIntentPresent(context, useCachedValue);
+    protected boolean isRecognitionIntentPresent(boolean useCachedValue) {
+        return FeatureUtilities.isRecognitionIntentPresent(useCachedValue);
     }
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<string name="infobar_update_permissions_button_text">"Continuar"</string>
+<string name="tos_notification_title">"As Condicións de servizo de Chrome cambiarán o 31 de marzo"</string>
+<string name="tos_notification_body_text">"Revísaas"</string>
+<string name="tos_notification_ack_button_text">"De acordo"</string>
+<string name="tos_notification_review_button_text">"Revisar"</string>
+<string name="search_or_type_web_address">"Busca ou escribe o enderezo web"</string>
+<string name="omnibox_confirm_delete_from_clipboard">"Queres quitar a suxestión do portapapeis?"</string>
+<string name="options_homepage_title">"Páxina de inicio"</string>
+<string name="autofill_from_google_account">"Google Pay"</string>
+<string name="external_app_leave_incognito_warning">"Neste sitio estase a piques de compartir información cunha aplicación fóra do modo de incógnito."</string>
+<string name="external_app_leave_incognito_warning_title">"Saír do modo de incógnito?"</string>
+<string name="external_app_leave_incognito_stay">"Quedar"</string>
+<string name="external_app_leave_incognito_leave">"Saír"</string>
+<string name="external_app_restricted_access_error">"Chrome non ten acceso ao recurso solicitado."</string>
+<string name="bluetooth_scanning_prompt_no_devices_found_prompt">"Non se encontraron dispositivos cerca."</string>
+<string name="bluetooth_scanning_prompt_allow_button_text">"Permitir"</string>
+<string name="bluetooth_scanning_prompt_block_button_text">"Bloquear"</string>
+<string name="blocked_ads_prompt_title">"Bloqueáronse os anuncios"</string>
+<string name="video_call_notification_text_2">"Accedendo á entrada de vídeo"</string>
+<string name="audio_call_notification_text_2">"Accedendo á entrada de audio"</string>
+<string name="video_audio_call_notification_text_2">"Accedendo á entrada de vídeo e audio"</string>
+<string name="video_call_incognito_notification_text_2">"Un sitio está accedendo á entrada de vídeo"</string>
+<string name="audio_call_incognito_notification_text_2">"Un sitio está accedendo á entrada de audio"</string>
+<string name="video_audio_call_incognito_notification_text_2">"Un sitio está accedendo á entrada de audio e vídeo"</string>
+</resources>

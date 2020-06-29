@@ -13,8 +13,11 @@ import org.chromium.chrome.browser.ActivityTabProvider;
 import org.chromium.chrome.browser.ActivityTabProvider.ActivityTabTabObserver;
 import org.chromium.chrome.browser.ThemeColorProvider;
 import org.chromium.chrome.browser.ThemeColorProvider.TintObserver;
-import org.chromium.chrome.browser.UrlConstants;
+import org.chromium.chrome.browser.compositor.layouts.EmptyOverviewModeObserver;
+import org.chromium.chrome.browser.compositor.layouts.OverviewModeBehavior;
 import org.chromium.chrome.browser.tab.Tab;
+import org.chromium.chrome.browser.tab.TabImpl;
+import org.chromium.chrome.browser.util.UrlConstants;
 import org.chromium.ui.widget.ChromeImageButton;
 
 /**
@@ -24,11 +27,24 @@ class ShareButton extends ChromeImageButton implements TintObserver {
     /** A provider that notifies components when the theme color changes.*/
     private ThemeColorProvider mThemeColorProvider;
 
-    /** The {@link sActivityTabTabObserver} used to know when the active page changed. */
+    /** The {@link ActivityTabTabObserver} used to know when the active page changed. */
     private ActivityTabTabObserver mActivityTabTabObserver;
+
+    /** The {@link OverviewModeBehavior} used to observe overview state changes.  */
+    private OverviewModeBehavior mOverviewModeBehavior;
+
+    /** The {@link OvervieModeObserver} observing the OverviewModeBehavior  */
+    private OverviewModeBehavior.OverviewModeObserver mOverviewModeObserver;
 
     public ShareButton(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        mOverviewModeObserver = new EmptyOverviewModeObserver() {
+            @Override
+            public void onOverviewModeStartedShowing(boolean showTabSwitcherToolbar) {
+                setEnabled(false);
+            }
+        };
     }
 
     void setThemeColorProvider(ThemeColorProvider themeColorProvider) {
@@ -40,16 +56,20 @@ class ShareButton extends ChromeImageButton implements TintObserver {
         mActivityTabTabObserver = new ActivityTabTabObserver(activityTabProvider) {
             @Override
             public void onObservingDifferentTab(Tab tab) {
-                if (tab == null) return;
-                setEnabled(shouldEnableShare(tab));
+                updateButtonEnabledState(tab);
             }
 
             @Override
             public void onUpdateUrl(Tab tab, String url) {
-                if (tab == null) return;
-                setEnabled(shouldEnableShare(tab));
+                updateButtonEnabledState(tab);
             }
         };
+    }
+
+    public void setOverviewModeBehavior(OverviewModeBehavior overviewModeBehavior) {
+        assert overviewModeBehavior != null;
+        mOverviewModeBehavior = overviewModeBehavior;
+        mOverviewModeBehavior.addOverviewModeObserver(mOverviewModeObserver);
     }
 
     void destroy() {
@@ -61,13 +81,23 @@ class ShareButton extends ChromeImageButton implements TintObserver {
             mActivityTabTabObserver.destroy();
             mActivityTabTabObserver = null;
         }
+
+        if (mOverviewModeBehavior != null) {
+            mOverviewModeBehavior.removeOverviewModeObserver(mOverviewModeObserver);
+            mOverviewModeObserver = null;
+        }
     }
 
-    private static boolean shouldEnableShare(Tab tab) {
+    public void updateButtonEnabledState(Tab tab) {
+        if (tab == null) {
+            setEnabled(false);
+            return;
+        }
         final String url = tab.getUrl();
         final boolean isChromeScheme = url.startsWith(UrlConstants.CHROME_URL_PREFIX)
                 || url.startsWith(UrlConstants.CHROME_NATIVE_URL_PREFIX);
-        return !isChromeScheme && !tab.isShowingInterstitialPage();
+        final boolean isEnabled = !isChromeScheme && !((TabImpl) tab).isShowingInterstitialPage();
+        setEnabled(isEnabled);
     }
 
     @Override

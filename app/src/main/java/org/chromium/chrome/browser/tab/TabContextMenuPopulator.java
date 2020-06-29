@@ -8,6 +8,8 @@ import android.content.Context;
 import android.util.Pair;
 import android.view.ContextMenu;
 
+import androidx.annotation.Nullable;
+
 import org.chromium.base.ObserverList.RewindableIterator;
 import org.chromium.chrome.browser.contextmenu.ContextMenuHelper;
 import org.chromium.chrome.browser.contextmenu.ContextMenuItem;
@@ -20,8 +22,9 @@ import java.util.List;
  * A simple wrapper around a {@link ContextMenuPopulator} to handle observer notification.
  */
 public class TabContextMenuPopulator implements ContextMenuPopulator {
+    @Nullable
     private final ContextMenuPopulator mPopulator;
-    private final Tab mTab;
+    private final TabImpl mTab;
 
     /**
      * Constructs an instance of a {@link ContextMenuPopulator} and delegate calls to
@@ -31,12 +34,14 @@ public class TabContextMenuPopulator implements ContextMenuPopulator {
      */
     public TabContextMenuPopulator(ContextMenuPopulator populator, Tab tab) {
         mPopulator = populator;
-        mTab = tab;
+        mTab = (TabImpl) tab;
     }
 
     @Override
     public void onDestroy() {
-        mPopulator.onDestroy();
+        // |mPopulator| can be null for activities that do not use context menu. Following
+        // methods are not called, but |onDestroy| is.
+        if (mPopulator != null) mPopulator.onDestroy();
     }
 
     @Override
@@ -55,4 +60,7 @@ public class TabContextMenuPopulator implements ContextMenuPopulator {
     public boolean onItemSelected(ContextMenuHelper helper, ContextMenuParams params, int itemId) {
         return mPopulator.onItemSelected(helper, params, itemId);
     }
+
+    @Override
+    public void onMenuClosed() {}
 }
