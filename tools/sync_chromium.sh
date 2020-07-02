@@ -20,7 +20,7 @@ sync_ui() {
 }
 
 sync_components() {
-	mkdir -p ${MODULES_DIR}/components/{autofill,components_base,embedder_support}/src/main/res
+	mkdir -p ${MODULES_DIR}/components/{autofill,components_base,embedder_support,browser_ui_styles}/src/main/res
 
 	local components="${BASE_DIR}/components"
 	cp -r ${components}/autofill/android/java/src/* \
@@ -54,6 +54,7 @@ sync_components() {
 		${components}/variations/android/java/src/* \
 		${components}/version_info/android/java/src/* \
 		${components}/viz/service/java/src/* \
+		${components}/browser_ui/styles/android/java/src/* \
 		"${APP_DIR}/src/main/java"
 
 	cp -r ${RELEASE_DIR}/gen/components/version_info/android/java/* \
@@ -69,6 +70,10 @@ sync_components() {
 
 	cp -r ${RELEASE_DIR}/gen/components/strings/java/res/* \
 		"${MODULES_DIR}/components/components_base/src/main/res"
+
+	cp -r ${components}/browser_ui/styles/android/java/res/* \
+		${components}/browser_ui/styles/android/java/res-night/* \
+                "${MODULES_DIR}/components/browser_ui_styles/src/main/res"
 }
 
 sync_content() {
