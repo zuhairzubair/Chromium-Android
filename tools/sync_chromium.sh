@@ -20,7 +20,9 @@ sync_ui() {
 }
 
 sync_components() {
-	mkdir -p ${MODULES_DIR}/components/{autofill,components_base,embedder_support,browser_ui_styles}/src/main/res
+	mkdir -p ${MODULES_DIR}/components/{autofill,components_base,embedder_support}/src/main/res
+	mkdir -p ${MODULES_DIR}/components/browser_ui/style_res
+	mkdir -p ${MODULES_DIR}/components/browser_ui/widget_res
 
 	local components="${BASE_DIR}/components"
 	cp -r ${components}/autofill/android/java/src/* \
@@ -74,11 +76,11 @@ sync_components() {
 
 	cp -r ${components}/browser_ui/styles/android/java/res/* \
 		${components}/browser_ui/styles/android/java/res-night/* \
-                "${MODULES_DIR}/components/browser_ui_styles/src/main/res"
+                "${MODULES_DIR}/components/browser_ui/style_res/"
 
 	cp -r ${components}/browser_ui/widget/android/java/res/* \
 		${components}/browser_ui/widget/android/java/res-night/* \
-                "${MODULES_DIR}/components/browser_ui_widget/src/main/res"
+                "${MODULES_DIR}/components/browser_ui/widget_res/"
 }
 
 sync_content() {
@@ -190,6 +192,7 @@ sync_chrome() {
 		${BASE_DIR}/chrome/android/webapk/libs/client/src/* \
 		${BASE_DIR}/chrome/android/webapk/libs/common/src/* \
 		${BASE_DIR}/chrome/browser/settings/android/java/src/* \
+		${BASE_DIR}/chrome/browser/settings/android/widget/java/src/* \
 		${BASE_DIR}/device/bluetooth/android/java/src/* \
 		${BASE_DIR}/device/gamepad/android/java/src/* \
 		${BASE_DIR}/services/device/usb/android/java/src/* \

@@ -189,6 +189,7 @@ sync_chrome() {
 		${BASE_DIR}/chrome/android/third_party/compositor_animator/java/src/* \
 		${BASE_DIR}/chrome/android/webapk/libs/client/src/* \
 		${BASE_DIR}/chrome/android/webapk/libs/common/src/* \
+		${BASE_DIR}/chrome/browser/settings/android/java/src/* \
 		${BASE_DIR}/device/bluetooth/android/java/src/* \
 		${BASE_DIR}/device/gamepad/android/java/src/* \
 		${BASE_DIR}/services/device/usb/android/java/src/* \
