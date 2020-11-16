@@ -96,6 +96,8 @@ dependencies {
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
     implementation project(':components:autofill')
     implementation project(':components:embedder_support')
+    implementation project(':components:browser_ui_styles')
+    implementation project(':components:browser_ui_widget')
     implementation project(':content')
     implementation project(':data_chart')
     implementation project(':download')

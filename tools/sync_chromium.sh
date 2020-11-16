@@ -55,6 +55,7 @@ sync_components() {
 		${components}/version_info/android/java/src/* \
 		${components}/viz/service/java/src/* \
 		${components}/browser_ui/styles/android/java/src/* \
+		${components}/browser_ui/widget/android/java/src/* \
 		"${APP_DIR}/src/main/java"
 
 	cp -r ${RELEASE_DIR}/gen/components/version_info/android/java/* \
@@ -74,6 +75,10 @@ sync_components() {
 	cp -r ${components}/browser_ui/styles/android/java/res/* \
 		${components}/browser_ui/styles/android/java/res-night/* \
                 "${MODULES_DIR}/components/browser_ui_styles/src/main/res"
+
+	cp -r ${components}/browser_ui/widget/android/java/res/* \
+		${components}/browser_ui/widget/android/java/res-night/* \
+                "${MODULES_DIR}/components/browser_ui_widget/src/main/res"
 }
 
 sync_content() {
@@ -184,6 +189,7 @@ sync_chrome() {
 		${BASE_DIR}/chrome/android/third_party/compositor_animator/java/src/* \
 		${BASE_DIR}/chrome/android/webapk/libs/client/src/* \
 		${BASE_DIR}/chrome/android/webapk/libs/common/src/* \
+		${BASE_DIR}/chrome/browser/settings/android/java/src/* \
 		${BASE_DIR}/device/bluetooth/android/java/src/* \
 		${BASE_DIR}/device/gamepad/android/java/src/* \
 		${BASE_DIR}/services/device/usb/android/java/src/* \

@@ -20,7 +20,7 @@ sync_ui() {
 }
 
 sync_components() {
-	mkdir -p ${MODULES_DIR}/components/{autofill,components_base,embedder_support}/src/main/res
+	mkdir -p ${MODULES_DIR}/components/{autofill,components_base,embedder_support,browser_ui_styles}/src/main/res
 
 	local components="${BASE_DIR}/components"
 	cp -r ${components}/autofill/android/java/src/* \
@@ -54,6 +54,8 @@ sync_components() {
 		${components}/variations/android/java/src/* \
 		${components}/version_info/android/java/src/* \
 		${components}/viz/service/java/src/* \
+		${components}/browser_ui/styles/android/java/src/* \
+		${components}/browser_ui/widget/android/java/src/* \
 		"${APP_DIR}/src/main/java"
 
 	cp -r ${RELEASE_DIR}/gen/components/version_info/android/java/* \
@@ -69,6 +71,14 @@ sync_components() {
 
 	cp -r ${RELEASE_DIR}/gen/components/strings/java/res/* \
 		"${MODULES_DIR}/components/components_base/src/main/res"
+
+	cp -r ${components}/browser_ui/styles/android/java/res/* \
+		${components}/browser_ui/styles/android/java/res-night/* \
+                "${MODULES_DIR}/components/browser_ui_styles/src/main/res"
+
+	cp -r ${components}/browser_ui/widget/android/java/res/* \
+		${components}/browser_ui/widget/android/java/res-night/* \
+                "${MODULES_DIR}/components/browser_ui_widget/src/main/res"
 }
 
 sync_content() {
@@ -285,13 +295,6 @@ clean_project() {
 		${APP_DIR}/src/main/java/org/chromium/components/embedder_support/media \
 		${APP_DIR}/src/main/java/org/chromium/chrome/browser/offlinepages/evaluation \
 		${APP_DIR}/src/main/java/{src,test,templates}
-
-	local feed_dir="${APP_DIR}/src/main/java/com/google/android/libraries/feed"
-	find "$feed_dir" -regextype "posix-egrep" -regex ".*/(testing|test_data|res)" -type d -print0 | \
-		xargs -0 rm -rf
-
-	find "$feed_dir" -regextype "posix-egrep" -regex ".*/AndroidManifest.xml" -type f -print0 | \
-		xargs -0 rm -f
 
 	local del_files="README|OWNERS|COPYING|BUILD|.*\.template|R\.java|.*\.stamp|.*stamp\.d|.*\.py|.*\.flags"
 	find "$PRO_DIR" -regextype "posix-egrep" -regex ".*/(${del_files})" -type f -print0 | \
