@@ -22,6 +22,7 @@ sync_ui() {
 sync_components() {
 	mkdir -p ${MODULES_DIR}/components/{autofill,components_base,embedder_support}/src/main/res
 	mkdir -p ${MODULES_DIR}/components/browser_ui/style_res
+	mkdir -p ${MODULES_DIR}/components/browser_ui/src/main/res/values
 	mkdir -p ${MODULES_DIR}/components/browser_ui/widget_res
 
 	local components="${BASE_DIR}/components"
@@ -81,6 +82,10 @@ sync_components() {
 	cp -r ${components}/browser_ui/widget/android/java/res/* \
 		${components}/browser_ui/widget/android/java/res-night/* \
                 "${MODULES_DIR}/components/browser_ui/widget_res/"
+
+	cp -r ${RELEASE_DIR}/gen/components/browser_ui/strings/android/browser_ui_strings_grd_grit_output/values/* \
+	"${MODULES_DIR}/components/browser_ui/src/main/res/"
+
 }
 
 sync_content() {
@@ -134,10 +139,13 @@ sync_download() {
 }
 
 sync_autofill_assistant() {
-	mkdir -p ${MODULES_DIR}/autofill_assistant/src/main/res
+	mkdir -p ${MODULES_DIR}/autofill_assistant/src/main/res/values
 
 	cp -r ${BASE_DIR}/chrome/android/features/autofill_assistant/java/res/* \
 		"${MODULES_DIR}/autofill_assistant/src/main/res"
+
+	cp -r ${RELEASE_DIR}/gen/chrome/android/features/autofill_assistant/java_strings_grd_grit_output/values/* \
+		"${MODULES_DIR}/autofill_assistant/src/main/res/values"
 }
 
 sync_customtabs() {
@@ -180,7 +188,7 @@ sync_aidl() {
 }
 
 sync_chrome() {
-	mkdir -p ${APP_DIR}/{src/main/{java,res,aidl},libs}
+	mkdir -p ${APP_DIR}/{src/main/{java,res,aidl},libs,settings_res,strings_res/values, ui_res}
 	local src_dir="${APP_DIR}/src/main/java"
 	local res_dir="${APP_DIR}/src/main/res"
 
@@ -259,6 +267,18 @@ sync_chrome() {
 		${RELEASE_DIR}/gen/net/android/net_errors_java/java_cpp_template/* \
 		${RELEASE_DIR}/gen/base/base_java/generated_java/* \
 		"$src_dir"
+	
+	cp -r ${BASE_DIR}/chrome/browser/settings/android/java/res/* \
+		"${APP_DIR}/settings_res/"
+
+	cp -r ${RELEASE_DIR}/gen/chrome/browser/ui/android/strings/ui_strings_grd_grit_output/values/* \
+		"${APP_DIR}/strings_res/values/"
+
+	cp -r ${BASE_DIR}/chrome/browser/ui/messages/android/java/src/* \
+		"${APP_DIR}/src/main/java/"
+
+  cp -r ${BASE_DIR}/chrome/browser/ui/messages/android/java/res/* \
+  "${APP_DIR}/ui_res/"
 }
 
 sync_assets() {

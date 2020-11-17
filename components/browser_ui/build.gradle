@@ -24,7 +24,7 @@ android {
     sourceSets {
         main {
             res {
-                srcDirs = [
+                srcDirs += [
                         "style_res",
                         "widget_res"
                 ]
