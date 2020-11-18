@@ -237,6 +237,9 @@ sync_chrome() {
 		${BASE_DIR}/third_party/protobuf/java/core/src/main/java/* \
 		"$src_dir"
 
+	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
+		"$src_dir"
+
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
 		"$src_dir/org"
 
