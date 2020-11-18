@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.vr;
 import android.app.Activity;
 import android.content.Context;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

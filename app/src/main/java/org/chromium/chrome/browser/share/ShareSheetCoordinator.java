@@ -10,7 +10,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.support.v7.content.res.AppCompatResources;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ActivityTabProvider;

@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.contextmenu;
 
 import android.net.Uri;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.content_public.browser.WebContents;
 import org.chromium.content_public.common.Referrer;

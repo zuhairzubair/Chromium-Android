@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.sync;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.chrome.R;
 

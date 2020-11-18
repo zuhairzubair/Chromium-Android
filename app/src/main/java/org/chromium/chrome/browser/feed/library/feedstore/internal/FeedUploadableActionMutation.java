@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.feedstore.internal;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.api.host.storage.CommitResult;
 import org.chromium.chrome.browser.feed.library.api.internal.store.UploadableActionMutation;

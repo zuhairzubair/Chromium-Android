@@ -10,7 +10,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.StringRes;
+import android.support.annotation.StringRes;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.metrics.WebApkUma;

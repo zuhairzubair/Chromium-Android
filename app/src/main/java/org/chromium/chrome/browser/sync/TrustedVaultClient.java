@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.sync;
 import android.app.Activity;
 import android.app.PendingIntent;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.base.Promise;

@@ -10,9 +10,9 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.util.ObjectsCompat;
 import android.support.v7.content.res.AppCompatResources;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 
 import org.chromium.base.annotations.RemovableInRelease;
 

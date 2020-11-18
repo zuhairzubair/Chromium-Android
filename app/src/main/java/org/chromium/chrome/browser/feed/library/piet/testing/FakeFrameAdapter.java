@@ -11,7 +11,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.piet.FrameAdapter;
 import org.chromium.chrome.browser.feed.library.piet.host.ActionHandler;

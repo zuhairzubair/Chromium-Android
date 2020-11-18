@@ -8,7 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.init.SingleWindowKeyboardVisibilityDelegate;
 

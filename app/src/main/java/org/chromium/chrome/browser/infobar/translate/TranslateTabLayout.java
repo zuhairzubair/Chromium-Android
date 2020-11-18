@@ -15,7 +15,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.chrome.R;
 import org.chromium.components.browser_ui.widget.animation.Interpolators;

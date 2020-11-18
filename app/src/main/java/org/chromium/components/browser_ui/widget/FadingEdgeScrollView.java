@@ -11,7 +11,7 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.widget.ScrollView;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.ApiCompatibilityUtils;
 

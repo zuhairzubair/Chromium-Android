@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.directactions;
 
 import android.annotation.TargetApi;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

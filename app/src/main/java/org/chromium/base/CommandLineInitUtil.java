@@ -9,7 +9,7 @@ import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.supplier.Supplier;
 

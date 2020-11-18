@@ -9,8 +9,8 @@ import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.ColorRes;
-import androidx.annotation.Nullable;
+import android.support.annotation.ColorRes;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.NativeMethods;

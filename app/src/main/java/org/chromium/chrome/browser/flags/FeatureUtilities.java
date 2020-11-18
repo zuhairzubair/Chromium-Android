@@ -9,8 +9,8 @@ import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.speech.RecognizerIntent;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.BuildInfo;
 import org.chromium.base.CommandLine;

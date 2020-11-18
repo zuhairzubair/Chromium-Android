@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.toolbar.top;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
-import androidx.annotation.StringRes;
+import android.support.annotation.StringRes;
 
 import org.chromium.chrome.browser.toolbar.IncognitoStateProvider;
 import org.chromium.chrome.browser.ui.appmenu.AppMenuButtonHelper;

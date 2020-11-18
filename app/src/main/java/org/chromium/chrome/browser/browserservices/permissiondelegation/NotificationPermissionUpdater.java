@@ -19,7 +19,7 @@ import org.chromium.content_public.browser.UiThreadTaskTraits;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import androidx.annotation.WorkerThread;
+import android.support.annotation.WorkerThread;
 
 /**
  * This class updates the notification permission for an Origin based on the notification permission

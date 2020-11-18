@@ -11,7 +11,7 @@ import android.os.Build;
 import android.view.View;
 import android.view.WindowInsets;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ObserverList;
 

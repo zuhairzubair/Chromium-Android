@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.api.host.storage;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.api.host.storage.ContentOperation.Delete;
 import org.chromium.chrome.browser.feed.library.api.host.storage.ContentOperation.DeleteAll;

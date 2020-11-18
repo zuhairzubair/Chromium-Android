@@ -14,9 +14,9 @@ import android.support.v4.util.ObjectsCompat;
 import android.support.v7.content.res.AppCompatResources;
 import android.view.View;
 
-import androidx.annotation.ColorRes;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.Nullable;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.Nullable;
 
 import org.chromium.ui.UiUtils;
 import org.chromium.ui.modelutil.PropertyKey;

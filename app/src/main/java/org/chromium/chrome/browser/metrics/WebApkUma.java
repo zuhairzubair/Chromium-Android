@@ -13,7 +13,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.metrics.RecordHistogram;

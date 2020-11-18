@@ -9,8 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.annotation.LayoutRes;
-import androidx.annotation.StringRes;
+import android.support.annotation.LayoutRes;
+import android.support.annotation.StringRes;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.metrics.ImpressionTracker.Listener;

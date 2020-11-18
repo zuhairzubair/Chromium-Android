@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.ScrollView;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * ScrollView without the top edge that also sends notification when it is scrolled to the bottom.

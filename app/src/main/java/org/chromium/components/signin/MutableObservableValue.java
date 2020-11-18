@@ -4,7 +4,7 @@
 
 package org.chromium.components.signin;
 
-import androidx.annotation.MainThread;
+import android.support.annotation.MainThread;
 
 /**
  * {@link ObservableValue} subclass that allow value modification using {@link #set} method. Should

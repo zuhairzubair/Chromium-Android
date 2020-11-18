@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.background_task_scheduler;
 
 import android.content.Context;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.base.ThreadUtils;

@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.suggestions;
 
 import static org.chromium.chrome.browser.flags.ChromeFeatureList.INTEREST_FEED_CONTENT_SUGGESTIONS;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.DiscardableReferencePool;
 import org.chromium.base.ThreadUtils;

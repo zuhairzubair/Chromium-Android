@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.download;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.Log;
 import org.chromium.base.library_loader.LibraryProcessType;

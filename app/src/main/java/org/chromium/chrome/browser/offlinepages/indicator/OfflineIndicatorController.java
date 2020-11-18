@@ -12,7 +12,7 @@ import android.os.SystemClock;
 import android.support.v7.content.res.AppCompatResources;
 import android.text.TextUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ApplicationState;
 import org.chromium.base.ApplicationStatus;

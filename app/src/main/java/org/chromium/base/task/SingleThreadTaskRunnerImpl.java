@@ -9,7 +9,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.annotations.JNINamespace;
 

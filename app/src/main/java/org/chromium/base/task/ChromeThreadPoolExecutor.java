@@ -8,7 +8,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.os.Process;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.BuildConfig;
 

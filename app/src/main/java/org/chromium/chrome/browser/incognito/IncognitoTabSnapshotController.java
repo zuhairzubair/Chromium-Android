@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.incognito;
 import android.view.Window;
 import android.view.WindowManager;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.compositor.layouts.EmptyOverviewModeObserver;
 import org.chromium.chrome.browser.compositor.layouts.LayoutManagerChrome;

@@ -7,8 +7,8 @@ package org.chromium.components.variations.firstrun;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.BuildConfig;
 import org.chromium.base.ContextUtils;

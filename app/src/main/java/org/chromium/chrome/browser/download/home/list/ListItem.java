@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.download.home.list;
 import android.util.Pair;
 import android.view.View;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.download.home.StableIds;
 import org.chromium.components.offline_items_collection.OfflineItem;

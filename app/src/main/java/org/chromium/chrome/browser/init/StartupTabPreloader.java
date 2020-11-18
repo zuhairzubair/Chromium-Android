@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.init;
 import android.content.Intent;
 import android.text.TextUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.TraceEvent;
 import org.chromium.base.metrics.RecordHistogram;

@@ -4,8 +4,8 @@
 
 package org.chromium.components.feature_engagement;
 
-import androidx.annotation.CheckResult;
-import androidx.annotation.Nullable;
+import android.support.annotation.CheckResult;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Callback;
 

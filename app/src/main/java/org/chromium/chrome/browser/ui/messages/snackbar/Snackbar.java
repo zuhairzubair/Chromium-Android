@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.ui.messages.snackbar;
 
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.chrome.browser.ui.messages.snackbar.SnackbarManager.SnackbarController;

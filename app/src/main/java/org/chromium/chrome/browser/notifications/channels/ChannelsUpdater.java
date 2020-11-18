@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.notifications.channels;
 import android.content.SharedPreferences;
 import android.os.Build;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.chrome.browser.notifications.NotificationManagerProxyImpl;

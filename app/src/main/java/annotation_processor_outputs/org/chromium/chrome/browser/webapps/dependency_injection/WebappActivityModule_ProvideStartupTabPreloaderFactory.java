@@ -1,6 +1,6 @@
 package org.chromium.chrome.browser.webapps.dependency_injection;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 import dagger.internal.Factory;
 import javax.annotation.Generated;
 import org.chromium.chrome.browser.init.StartupTabPreloader;

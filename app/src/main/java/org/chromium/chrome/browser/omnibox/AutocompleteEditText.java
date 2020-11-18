@@ -17,8 +17,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
 
-import androidx.annotation.CallSuper;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.CallSuper;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.base.StrictModeContext;

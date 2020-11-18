@@ -28,7 +28,7 @@ import android.view.animation.Interpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ntp.cards.CardViewHolder;

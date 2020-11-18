@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.feed.library.basicstream.internal.actions;
 
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.supplier.Supplier;
 import org.chromium.chrome.browser.feed.library.api.client.knowncontent.ContentMetadata;

@@ -6,7 +6,7 @@ package org.chromium.components.offline_items_collection;
 
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Legacy helper information meant to help with the migration process to OfflineItems.

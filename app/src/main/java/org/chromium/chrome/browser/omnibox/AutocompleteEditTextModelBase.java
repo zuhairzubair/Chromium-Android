@@ -11,7 +11,7 @@ import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * An abstraction of the text model to show, keep track of, and update autocomplete.

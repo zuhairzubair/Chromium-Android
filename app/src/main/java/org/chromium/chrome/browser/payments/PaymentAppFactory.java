@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.payments;
 
 import android.support.v4.util.ArrayMap;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.payments.PaymentApp.InstrumentsCallback;

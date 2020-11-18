@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.SnackbarActivity;
 import org.chromium.chrome.browser.util.UrlConstants;

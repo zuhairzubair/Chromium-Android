@@ -6,7 +6,7 @@ package org.chromium.components.gcm_driver;
 
 import android.os.SystemClock;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.base.ThreadUtils;

@@ -7,7 +7,7 @@ package org.chromium.components.gcm_driver;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.json.JSONArray;
 import org.json.JSONException;

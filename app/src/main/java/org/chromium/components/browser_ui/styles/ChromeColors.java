@@ -9,7 +9,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.support.v7.content.res.AppCompatResources;
 
-import androidx.annotation.ColorRes;
+import android.support.annotation.ColorRes;
 
 import org.chromium.base.ApiCompatibilityUtils;
 

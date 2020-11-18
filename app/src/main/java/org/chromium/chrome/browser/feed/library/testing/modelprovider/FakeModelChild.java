@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.feed.library.testing.modelprovider;
 import static org.chromium.chrome.browser.feed.library.common.Validators.checkNotNull;
 import static org.chromium.chrome.browser.feed.library.common.Validators.checkState;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.api.internal.modelprovider.ModelChild;
 import org.chromium.chrome.browser.feed.library.api.internal.modelprovider.ModelFeature;

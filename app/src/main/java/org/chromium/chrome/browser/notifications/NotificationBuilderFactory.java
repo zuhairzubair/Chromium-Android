@@ -9,7 +9,7 @@ import static org.chromium.chrome.browser.flags.ChromeFeatureList.ALLOW_REMOTE_C
 import android.content.Context;
 import android.content.pm.PackageManager;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.chrome.browser.flags.ChromeFeatureList;

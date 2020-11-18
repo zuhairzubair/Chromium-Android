@@ -12,10 +12,10 @@ import android.os.Build;
 import android.support.v7.content.res.AppCompatResources;
 import android.text.TextUtils;
 
-import androidx.annotation.ColorRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.ColorRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.LocaleUtils;
 import org.chromium.base.SysUtils;

@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.widget.bottomsheet;
 import android.view.View;
 import android.view.Window;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.supplier.Supplier;
 import org.chromium.chrome.browser.ActivityTabProvider;

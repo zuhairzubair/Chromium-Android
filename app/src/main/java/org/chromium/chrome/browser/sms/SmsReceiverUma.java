@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.sms;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.metrics.RecordHistogram;
 

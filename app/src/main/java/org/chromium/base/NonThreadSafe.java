@@ -4,7 +4,7 @@
 
 package org.chromium.base;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * NonThreadSafe is a helper class used to help verify that methods of a

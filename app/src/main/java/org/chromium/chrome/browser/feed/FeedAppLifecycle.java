@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.feed;
 
 import android.app.Activity;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.ActivityState;
 import org.chromium.base.ApplicationStatus;

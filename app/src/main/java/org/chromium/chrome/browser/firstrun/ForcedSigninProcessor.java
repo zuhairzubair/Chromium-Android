@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.firstrun;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Log;
 import org.chromium.chrome.browser.ChromeActivity;

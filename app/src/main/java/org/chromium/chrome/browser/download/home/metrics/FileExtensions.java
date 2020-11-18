@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.download.home.metrics;
 
 import android.text.TextUtils;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.FileUtils;
 

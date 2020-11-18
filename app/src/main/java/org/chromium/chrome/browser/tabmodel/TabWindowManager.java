@@ -8,7 +8,7 @@ import android.app.Activity;
 import android.os.Build;
 import android.util.SparseArray;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ActivityState;
 import org.chromium.base.ApplicationStatus;

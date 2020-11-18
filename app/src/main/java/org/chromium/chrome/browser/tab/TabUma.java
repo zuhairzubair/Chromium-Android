@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.tab;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.UserData;
 import org.chromium.base.metrics.RecordHistogram;

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser;
 
-import androidx.annotation.CallSuper;
+import android.support.annotation.CallSuper;
 
 import org.chromium.base.ObserverList;
 import org.chromium.base.ObserverList.RewindableIterator;

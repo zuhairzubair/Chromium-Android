@@ -12,8 +12,8 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.text.TextUtils;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ThreadUtils;
 import org.chromium.base.metrics.CachedMetrics;

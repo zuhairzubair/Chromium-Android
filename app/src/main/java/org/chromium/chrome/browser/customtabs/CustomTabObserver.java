@@ -13,7 +13,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 import androidx.browser.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.metrics.RecordHistogram;

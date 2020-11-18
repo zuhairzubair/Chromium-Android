@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.ntp.cards;
 
 import android.text.TextUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.components.variations.VariationsAssociatedData;

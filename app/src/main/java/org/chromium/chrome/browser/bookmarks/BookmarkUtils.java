@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.provider.Browser;
 import android.text.TextUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.BuildInfo;
 import org.chromium.base.Log;

@@ -12,7 +12,7 @@ import android.os.Build.VERSION_CODES;
 import android.support.v4.view.ViewCompat;
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.piet.host.ActionHandler;
 import org.chromium.chrome.browser.feed.library.piet.host.ActionHandler.ActionType;

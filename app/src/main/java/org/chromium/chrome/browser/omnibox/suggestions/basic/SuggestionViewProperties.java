@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.omnibox.suggestions.basic;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.chrome.browser.omnibox.suggestions.base.BaseSuggestionViewProperties;
 import org.chromium.chrome.browser.omnibox.suggestions.base.SuggestionSpannable;

@@ -7,8 +7,8 @@ package org.chromium.chrome.browser;
 import android.content.Context;
 import android.content.res.ColorStateList;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Nullable;
+import android.support.annotation.ColorInt;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ObserverList;
 import org.chromium.chrome.browser.toolbar.ToolbarColors;

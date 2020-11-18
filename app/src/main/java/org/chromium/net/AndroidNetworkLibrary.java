@@ -24,7 +24,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.base.ContextUtils;

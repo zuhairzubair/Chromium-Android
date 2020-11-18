@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.suggestions.tile;
 
 import android.view.View;
 
-import androidx.annotation.CallSuper;
-import androidx.annotation.Nullable;
+import android.support.annotation.CallSuper;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.ntp.cards.NewTabPageViewHolder;
 import org.chromium.chrome.browser.suggestions.SiteSuggestion;

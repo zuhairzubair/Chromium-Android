@@ -12,7 +12,7 @@ import android.nfc.NfcAdapter;
 import android.os.Process;
 import android.provider.Settings;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.annotations.CalledByNative;

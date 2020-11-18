@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.background_sync;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.base.annotations.CalledByNative;

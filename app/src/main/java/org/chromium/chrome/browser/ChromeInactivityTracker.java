@@ -6,7 +6,7 @@ package org.chromium.chrome.browser;
 
 import android.text.format.DateUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.chrome.browser.flags.ChromeFeatureList;

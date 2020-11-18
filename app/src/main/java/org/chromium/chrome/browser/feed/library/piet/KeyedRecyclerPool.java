@@ -8,7 +8,7 @@ import static org.chromium.chrome.browser.feed.library.common.Validators.checkNo
 
 import android.util.LruCache;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * This is a simple implementation of a recycling pool for Adapters.

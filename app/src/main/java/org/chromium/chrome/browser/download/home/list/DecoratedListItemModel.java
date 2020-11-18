@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.download.home.list;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.download.home.list.ListItem.ViewListItem;
 import org.chromium.ui.modelutil.ListObservable;

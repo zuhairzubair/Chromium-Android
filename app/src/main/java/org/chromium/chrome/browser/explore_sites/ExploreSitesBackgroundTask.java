@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.explore_sites;
 import android.content.Context;
 import android.text.format.DateUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.annotations.JNINamespace;

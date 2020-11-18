@@ -12,8 +12,8 @@ import android.net.Uri;
 import android.support.v7.content.res.AppCompatResources;
 import android.text.TextUtils;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Callback;
 import org.chromium.base.Consumer;

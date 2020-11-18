@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 package org.chromium.chrome.browser.feed.library.sharedstream.scroll;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.common.concurrent.CancelableTask;
 import org.chromium.chrome.browser.feed.library.common.concurrent.MainThreadRunner;

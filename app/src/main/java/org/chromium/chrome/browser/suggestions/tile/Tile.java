@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.suggestions.tile;
 
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.favicon.IconType;
 import org.chromium.chrome.browser.suggestions.OfflinableSuggestion;

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.historyreport;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import java.io.PrintWriter;
 

@@ -4,7 +4,7 @@
 
 package org.chromium.base;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.annotations.CheckDiscard;
 

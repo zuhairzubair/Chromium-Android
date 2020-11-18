@@ -24,7 +24,7 @@ import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.TextView;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.Checkable;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * ImageView that has checkable state. Checkable state can be used with StateListDrawable and

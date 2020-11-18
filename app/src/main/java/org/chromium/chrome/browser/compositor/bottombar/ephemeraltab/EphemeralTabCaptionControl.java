@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.TextView;
 
-import androidx.annotation.DrawableRes;
+import android.support.annotation.DrawableRes;
 
 import org.chromium.base.supplier.Supplier;
 import org.chromium.chrome.R;

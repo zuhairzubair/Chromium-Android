@@ -9,7 +9,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.UserManager;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.annotations.NativeMethods;

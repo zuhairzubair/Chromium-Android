@@ -12,8 +12,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.text.TextUtils;
 
-import androidx.annotation.VisibleForTesting;
-import androidx.annotation.WorkerThread;
+import android.support.annotation.VisibleForTesting;
+import android.support.annotation.WorkerThread;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;

@@ -8,7 +8,7 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.text.Html;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.common.logging.Logger;
 import org.chromium.chrome.browser.feed.library.common.time.Clock;

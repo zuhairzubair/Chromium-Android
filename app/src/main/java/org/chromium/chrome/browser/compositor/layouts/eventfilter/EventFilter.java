@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.compositor.layouts.eventfilter;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * {@link EventFilter} is an abstract minimal {@link EventFilter}. This class is designed to use or

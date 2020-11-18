@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.browserservices.trustedwebactivityui;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode.ImmersiveMode;
 

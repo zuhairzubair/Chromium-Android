@@ -8,7 +8,7 @@ import android.accounts.Account;
 import android.content.Intent;
 import android.os.Build;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.protos.ipc.invalidation.Types;
 

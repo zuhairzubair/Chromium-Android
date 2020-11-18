@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.omnibox;
 import android.text.TextWatcher;
 import android.view.ActionMode;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.Callback;
 import org.chromium.chrome.browser.WindowDelegate;

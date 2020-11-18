@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.basicstream.internal.drivers;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 /**
  * A FeatureDriver is an object which can generate a {@link LeafFeatureDriver} from a {@link
  * org.chromium.chrome.browser.feed.library.api.internal.modelprovider.ModelFeature}.

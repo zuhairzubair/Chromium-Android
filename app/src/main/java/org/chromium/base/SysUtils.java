@@ -14,7 +14,7 @@ import android.os.StatFs;
 import android.os.StrictMode;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.JNINamespace;

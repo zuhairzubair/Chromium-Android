@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.contextualsearch;
 import android.text.format.DateUtils;
 import android.util.Pair;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.base.metrics.RecordUserAction;

@@ -8,7 +8,7 @@ import android.content.res.Configuration;
 import android.view.Gravity;
 import android.view.WindowManager;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.customtabs.content.CustomTabActivityTabProvider;

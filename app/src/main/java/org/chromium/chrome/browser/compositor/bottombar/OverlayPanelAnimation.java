@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.compositor.bottombar;
 import android.animation.Animator;
 import android.content.Context;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.MathUtils;
 import org.chromium.chrome.browser.compositor.animation.CompositorAnimationHandler;

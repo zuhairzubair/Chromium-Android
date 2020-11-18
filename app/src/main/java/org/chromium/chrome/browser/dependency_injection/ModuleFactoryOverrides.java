@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.dependency_injection;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

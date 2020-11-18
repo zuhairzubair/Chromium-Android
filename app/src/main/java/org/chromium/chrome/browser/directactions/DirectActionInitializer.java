@@ -9,7 +9,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.AppHooks;

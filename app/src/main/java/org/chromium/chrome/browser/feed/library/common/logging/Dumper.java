@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.feed.library.common.logging;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;

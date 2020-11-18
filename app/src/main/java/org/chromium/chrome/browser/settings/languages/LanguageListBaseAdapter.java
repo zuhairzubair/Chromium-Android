@@ -18,8 +18,8 @@ import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeL
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 
 import org.chromium.chrome.R;
 import org.chromium.components.browser_ui.widget.dragreorder.DragReorderableListAdapter;

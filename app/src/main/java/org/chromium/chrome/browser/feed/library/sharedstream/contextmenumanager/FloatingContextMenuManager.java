@@ -14,7 +14,7 @@ import android.view.ViewParent;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.feed.R;
 

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.ntp;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.tab.Tab;
 

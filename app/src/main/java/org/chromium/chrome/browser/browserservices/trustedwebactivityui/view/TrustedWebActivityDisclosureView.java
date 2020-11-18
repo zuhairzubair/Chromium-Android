@@ -11,7 +11,7 @@ import static org.chromium.chrome.browser.browserservices.trustedwebactivityui.T
 
 import android.content.res.Resources;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.browserservices.trustedwebactivityui.TrustedWebActivityModel;

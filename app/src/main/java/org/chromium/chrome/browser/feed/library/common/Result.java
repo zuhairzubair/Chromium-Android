@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.common;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /** Wrapper that allows callbacks to return a value as well as whether the call was successful. */
 public class Result<T> {

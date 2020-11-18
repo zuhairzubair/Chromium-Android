@@ -9,8 +9,8 @@ import android.content.SharedPreferences.Editor;
 import android.support.v4.util.ObjectsCompat;
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.chrome.browser.omnibox.MatchClassificationStyle;

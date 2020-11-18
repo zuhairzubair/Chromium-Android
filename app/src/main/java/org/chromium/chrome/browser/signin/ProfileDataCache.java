@@ -20,10 +20,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.content.res.AppCompatResources;
 
-import androidx.annotation.MainThread;
-import androidx.annotation.Nullable;
-import androidx.annotation.Px;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.MainThread;
+import android.support.annotation.Nullable;
+import android.support.annotation.Px;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ObserverList;
 import org.chromium.base.ThreadUtils;

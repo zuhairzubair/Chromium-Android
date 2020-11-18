@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.feed.library.common.intern;
 
 import android.annotation.SuppressLint;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import com.google.protobuf.GeneratedMessageLite;
 import com.google.protobuf.MessageLite;

@@ -11,7 +11,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Consumer;
 

@@ -9,7 +9,7 @@ import android.os.Build;
 import android.os.Looper;
 import android.os.StrictMode;
 
-import androidx.annotation.UiThread;
+import android.support.annotation.UiThread;
 
 import org.chromium.base.BuildConfig;
 import org.chromium.base.CommandLine;

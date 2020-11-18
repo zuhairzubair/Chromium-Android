@@ -9,7 +9,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ActivityState;
 import org.chromium.base.ApplicationStatus;

@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.directactions;
 import android.annotation.TargetApi;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.base.Callback;
 import org.chromium.base.metrics.CachedMetrics;

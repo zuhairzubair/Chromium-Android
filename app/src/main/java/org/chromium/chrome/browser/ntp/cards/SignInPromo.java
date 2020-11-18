@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.ntp.cards;
 import android.content.Context;
 import android.text.format.DateUtils;
 
-import androidx.annotation.StringRes;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Callback;
 import org.chromium.base.ContextUtils;

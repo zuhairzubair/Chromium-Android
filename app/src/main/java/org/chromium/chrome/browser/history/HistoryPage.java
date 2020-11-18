@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.history;
 
 import android.app.Activity;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ChromeActivity;

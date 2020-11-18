@@ -13,7 +13,7 @@ import android.os.Process;
 import android.text.TextUtils;
 import android.util.Base64;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.json.JSONArray;
 import org.json.JSONException;

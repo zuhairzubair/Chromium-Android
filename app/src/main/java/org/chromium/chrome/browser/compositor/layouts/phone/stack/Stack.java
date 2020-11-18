@@ -12,7 +12,7 @@ import android.content.res.Resources;
 import android.graphics.RectF;
 import android.util.Pair;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.MathUtils;
 import org.chromium.base.metrics.RecordUserAction;

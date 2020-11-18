@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.api.internal.actionmanager;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Consumer;
 import org.chromium.components.feed.core.proto.libraries.api.internal.StreamDataProto.StreamDataOperation;

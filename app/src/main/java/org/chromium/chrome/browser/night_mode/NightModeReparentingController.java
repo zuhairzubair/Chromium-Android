@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.night_mode;
 
 import android.util.SparseArray;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.chrome.browser.ActivityTabProvider;
 import org.chromium.chrome.browser.tab.Tab;

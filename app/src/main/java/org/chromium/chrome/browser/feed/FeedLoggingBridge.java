@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.base.annotations.JNINamespace;
 import org.chromium.base.annotations.NativeMethods;

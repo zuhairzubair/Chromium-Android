@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.ntp.snippets;
 import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Nullable;
+import android.support.annotation.ColorInt;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.DiscardableReferencePool.DiscardableReference;
 import org.chromium.chrome.browser.ntp.cards.NewTabPageViewHolder.PartialBindCallback;

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.common.intern;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.WeakHashMap;

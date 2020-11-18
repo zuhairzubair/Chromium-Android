@@ -12,7 +12,7 @@ import android.util.Property;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.ui.interpolators.BakedBezierInterpolator;
 

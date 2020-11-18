@@ -6,7 +6,7 @@ package org.chromium.components.background_task_scheduler;
 
 import android.os.Build;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;

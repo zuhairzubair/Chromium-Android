@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.services;
 import android.annotation.SuppressLint;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ApplicationState;
 import org.chromium.base.ApplicationStatus;

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.crash;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.components.minidump_uploader.CrashFileManager;

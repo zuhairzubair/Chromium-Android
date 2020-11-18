@@ -14,7 +14,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 
-import androidx.annotation.StyleRes;
+import android.support.annotation.StyleRes;
 
 import org.chromium.ui.R;
 

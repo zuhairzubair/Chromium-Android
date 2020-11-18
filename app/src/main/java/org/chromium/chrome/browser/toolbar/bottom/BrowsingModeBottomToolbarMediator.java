@@ -8,8 +8,8 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.StringRes;
+import android.support.annotation.ColorInt;
+import android.support.annotation.StringRes;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.chrome.R;

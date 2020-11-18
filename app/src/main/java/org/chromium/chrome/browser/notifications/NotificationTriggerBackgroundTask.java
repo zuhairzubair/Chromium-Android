@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.notifications;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.chrome.browser.background_task_scheduler.NativeBackgroundTask;

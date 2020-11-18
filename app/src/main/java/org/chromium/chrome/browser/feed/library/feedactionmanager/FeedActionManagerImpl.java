@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.feed.library.feedactionmanager;
 import android.net.Uri;
 import android.util.Base64;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Consumer;
 import org.chromium.chrome.browser.feed.library.api.common.MutationContext;

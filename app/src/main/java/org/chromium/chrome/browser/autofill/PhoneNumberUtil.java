@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.autofill;
 import android.text.Editable;
 import android.text.TextWatcher;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.annotations.JNINamespace;
 import org.chromium.base.annotations.NativeMethods;

@@ -4,8 +4,8 @@
 
 package org.chromium.content_public.browser;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * The NavigationController Java wrapper to allow communicating with the native

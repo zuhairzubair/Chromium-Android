@@ -14,7 +14,7 @@ import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 

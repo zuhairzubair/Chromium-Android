@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.notifications;
 
 import android.app.Notification;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * A wrapper class of {@link Notification}, which also contains the notification id and tag, etc.

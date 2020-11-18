@@ -13,9 +13,9 @@ import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
 import android.system.Os;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.BaseSwitches;
 import org.chromium.base.BuildConfig;

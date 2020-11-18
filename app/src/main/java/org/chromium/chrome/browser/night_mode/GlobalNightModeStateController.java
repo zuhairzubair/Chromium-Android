@@ -9,7 +9,7 @@ import static org.chromium.chrome.browser.preferences.ChromePreferenceKeys.UI_TH
 import android.support.v7.app.AppCompatDelegate;
 import android.text.TextUtils;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.base.ApplicationState;
 import org.chromium.base.ApplicationStatus;

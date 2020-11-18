@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.api.common;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.components.feed.core.proto.libraries.api.internal.StreamDataProto.StreamToken;
 import org.chromium.components.feed.core.proto.libraries.api.internal.StreamDataProto.UiContext;

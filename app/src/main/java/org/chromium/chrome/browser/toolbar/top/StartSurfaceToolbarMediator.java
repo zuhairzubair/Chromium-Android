@@ -25,7 +25,7 @@ import static org.chromium.chrome.browser.toolbar.top.StartSurfaceToolbarPropert
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
-import androidx.annotation.StringRes;
+import android.support.annotation.StringRes;
 
 import org.chromium.chrome.browser.compositor.layouts.EmptyOverviewModeObserver;
 import org.chromium.chrome.browser.compositor.layouts.OverviewModeBehavior;

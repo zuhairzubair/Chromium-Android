@@ -10,9 +10,9 @@ import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.View;
 
-import androidx.annotation.CallSuper;
-import androidx.annotation.StringRes;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.CallSuper;
+import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ActivityState;
 import org.chromium.base.ApplicationStatus;

@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.toolbar;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.DimenRes;
-import androidx.annotation.IntDef;
+import android.support.annotation.DimenRes;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.metrics.RecordUserAction;
 import org.chromium.chrome.R;

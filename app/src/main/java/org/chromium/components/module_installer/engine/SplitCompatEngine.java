@@ -6,7 +6,7 @@ package org.chromium.components.module_installer.engine;
 
 import android.app.Activity;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.android.play.core.splitinstall.SplitInstallException;
 import com.google.android.play.core.splitinstall.SplitInstallRequest;

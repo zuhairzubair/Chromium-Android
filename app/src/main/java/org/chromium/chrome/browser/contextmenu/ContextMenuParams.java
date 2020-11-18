@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.contextmenu;
 
 import android.text.TextUtils;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.JNINamespace;

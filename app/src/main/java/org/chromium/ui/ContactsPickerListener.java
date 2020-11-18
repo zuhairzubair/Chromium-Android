@@ -4,7 +4,7 @@
 
 package org.chromium.ui;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.blink.mojom.ContactIconBlob;
 import org.chromium.payments.mojom.PaymentAddress;

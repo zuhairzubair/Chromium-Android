@@ -15,7 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.incognito.IncognitoUtils;

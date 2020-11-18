@@ -6,8 +6,8 @@ package org.chromium.components.background_task_scheduler;
 
 import android.content.Context;
 
-import androidx.annotation.AnyThread;
-import androidx.annotation.MainThread;
+import android.support.annotation.AnyThread;
+import android.support.annotation.MainThread;
 
 /**
  * Entry point for callbacks from {@link BackgroundTaskScheduler}. Any classes implementing

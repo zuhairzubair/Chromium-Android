@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.ntp;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Provides functions for working with link titles.

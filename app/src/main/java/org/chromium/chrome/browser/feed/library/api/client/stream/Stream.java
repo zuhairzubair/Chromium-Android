@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.IntDef;
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.List;
 

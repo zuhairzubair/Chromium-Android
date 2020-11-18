@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewStub;
 import android.widget.Button;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.chrome.R;

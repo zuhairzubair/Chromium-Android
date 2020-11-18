@@ -12,7 +12,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.PackageUtils;

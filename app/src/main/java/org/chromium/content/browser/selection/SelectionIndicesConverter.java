@@ -4,7 +4,7 @@
 
 package org.chromium.content.browser.selection;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import java.text.BreakIterator;
 import java.util.regex.Pattern;

@@ -8,7 +8,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.util.Pair;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.MathUtils;
 import org.chromium.chrome.browser.compositor.animation.CompositorAnimationHandler;

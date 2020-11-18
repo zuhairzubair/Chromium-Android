@@ -6,7 +6,7 @@ package org.chromium.chrome.browser;
 
 import android.content.Context;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;

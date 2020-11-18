@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.feedback;
 
 import android.graphics.Bitmap;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /** An interface for a class that can provide screenshots to a consumer. */
 public interface ScreenshotSource {

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.api.internal.scope;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.api.host.logging.RequestReason;
 import org.chromium.chrome.browser.feed.library.api.host.logging.Task;

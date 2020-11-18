@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.tab;
 import android.content.Context;
 import android.view.View;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.UserDataHost;
 import org.chromium.chrome.browser.ui.native_page.NativePage;

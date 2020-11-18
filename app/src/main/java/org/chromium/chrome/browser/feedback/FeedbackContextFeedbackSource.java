@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.feedback;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.CollectionUtil;
 

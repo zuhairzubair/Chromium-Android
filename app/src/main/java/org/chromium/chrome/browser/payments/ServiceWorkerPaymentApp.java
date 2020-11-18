@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.payments;
 import android.graphics.drawable.BitmapDrawable;
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.components.payments.MethodStrings;
 import org.chromium.components.payments.PaymentHandlerHost;

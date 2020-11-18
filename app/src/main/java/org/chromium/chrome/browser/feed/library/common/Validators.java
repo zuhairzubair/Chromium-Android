@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.common;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Class similar to Guava's Preconditions. Not all users of Feed can use Guava libraries so we

@@ -10,7 +10,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.widget.ImageView;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.annotations.CalledByNative;

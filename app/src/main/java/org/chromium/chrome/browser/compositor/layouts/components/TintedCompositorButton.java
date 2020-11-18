@@ -6,9 +6,9 @@ package org.chromium.chrome.browser.compositor.layouts.components;
 
 import android.content.Context;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IdRes;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.IdRes;
 
 /**
  * Class for a CompositorButton that uses tint instead of multiple drawable resources.

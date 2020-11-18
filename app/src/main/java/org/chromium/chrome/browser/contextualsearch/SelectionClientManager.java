@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.contextualsearch;
 import android.os.Build;
 import android.view.textclassifier.TextClassifier;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.content_public.browser.SelectionClient;

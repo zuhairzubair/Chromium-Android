@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.signin;
 
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Immutable holder for displayable profile data.

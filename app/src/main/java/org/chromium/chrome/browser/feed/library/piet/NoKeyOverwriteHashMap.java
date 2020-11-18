@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.piet;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.components.feed.core.proto.ui.piet.ErrorsProto.ErrorCode;
 

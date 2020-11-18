@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.customtabs;
 
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.browserservices.BrowserServicesIntentDataProvider;
 import org.chromium.chrome.browser.dependency_injection.ActivityScope;

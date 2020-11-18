@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.settings.website;
 
 import android.net.Uri;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.util.UrlConstants;
 import org.chromium.chrome.browser.util.UrlUtilities;

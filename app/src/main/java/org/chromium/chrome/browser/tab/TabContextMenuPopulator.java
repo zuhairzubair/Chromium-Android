@@ -8,7 +8,7 @@ import android.content.Context;
 import android.util.Pair;
 import android.view.ContextMenu;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ObserverList.RewindableIterator;
 import org.chromium.chrome.browser.contextmenu.ContextMenuHelper;

@@ -8,7 +8,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.json.JSONArray;
 import org.json.JSONException;

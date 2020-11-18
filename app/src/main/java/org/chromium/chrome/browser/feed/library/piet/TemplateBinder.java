@@ -9,7 +9,7 @@ import static org.chromium.chrome.browser.feed.library.common.Validators.checkSt
 
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.components.feed.core.proto.ui.piet.ElementsProto.BindingContext;
 import org.chromium.components.feed.core.proto.ui.piet.PietProto.PietSharedState;

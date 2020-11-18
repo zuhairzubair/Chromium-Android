@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.browserservices;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.StrictModeContext;
 import org.chromium.base.ThreadUtils;

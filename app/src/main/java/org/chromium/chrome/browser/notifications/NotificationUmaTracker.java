@@ -12,8 +12,8 @@ import android.os.Build;
 import android.support.v4.app.NotificationManagerCompat;
 import android.text.format.DateUtils;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.Nullable;
+import android.support.annotation.IntDef;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.MathUtils;

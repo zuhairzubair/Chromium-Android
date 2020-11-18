@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.browserservices.trustedwebactivityui.control
 
 import org.chromium.base.Promise;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * A Delegate for the {@link CurrentPageVerifier} that provides implementation specific to

@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.search_engines;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ChromeVersionInfo;

@@ -8,7 +8,7 @@ import org.chromium.chrome.browser.dependency_injection.ActivityScope;
 
 import javax.inject.Inject;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * This class is used to decide whether a navigation to a certain URL should be kept within Chrome

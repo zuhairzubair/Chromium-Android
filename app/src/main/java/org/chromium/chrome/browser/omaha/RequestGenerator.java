@@ -11,7 +11,7 @@ import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.Xml;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.xmlpull.v1.XmlSerializer;
 

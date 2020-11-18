@@ -4,7 +4,7 @@
 
 package org.chromium.content_public.browser;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.blink.mojom.ViewportFit;
 

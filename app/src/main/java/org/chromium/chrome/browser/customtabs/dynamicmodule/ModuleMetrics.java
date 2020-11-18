@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.customtabs.dynamicmodule;
 
 import android.os.SystemClock;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.StringDef;
+import android.support.annotation.IntDef;
+import android.support.annotation.StringDef;
 
 import org.chromium.base.Log;
 import org.chromium.base.metrics.RecordHistogram;

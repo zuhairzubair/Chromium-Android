@@ -15,7 +15,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.common.ui.LayoutUtils;
 import org.chromium.components.feed.core.proto.ui.piet.ErrorsProto.ErrorCode;

@@ -19,8 +19,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.PopupMenu;
 
-import androidx.annotation.CallSuper;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.CallSuper;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * ClickableSpan isn't accessible by default, so we create a subclass

@@ -11,7 +11,7 @@ import android.content.pm.PackageManager;
 import android.util.Pair;
 import android.view.Surface;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ActivityState;
 import org.chromium.base.ApplicationStatus;

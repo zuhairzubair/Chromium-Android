@@ -4,7 +4,7 @@
 
 package org.chromium.components.minidump_uploader;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.base.ThreadUtils;

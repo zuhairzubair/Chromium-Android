@@ -18,11 +18,11 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserManager;
 
-import androidx.annotation.AnyThread;
-import androidx.annotation.MainThread;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-import androidx.annotation.WorkerThread;
+import android.support.annotation.AnyThread;
+import android.support.annotation.MainThread;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.annotation.WorkerThread;
 
 import org.chromium.base.Callback;
 import org.chromium.base.ContextUtils;

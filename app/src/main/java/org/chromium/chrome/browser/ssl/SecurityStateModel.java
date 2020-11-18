@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.ssl;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.annotations.NativeMethods;
 import org.chromium.components.security_state.ConnectionSecurityLevel;

@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.searchwidget;
 
 import android.content.res.Resources;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.ColorRes;
+import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
 
 import org.chromium.base.library_loader.LibraryLoader;
 import org.chromium.chrome.browser.ntp.NewTabPage;

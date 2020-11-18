@@ -6,7 +6,7 @@ package org.chromium.components.background_task_scheduler;
 
 import android.content.Context;
 
-import androidx.annotation.MainThread;
+import android.support.annotation.MainThread;
 
 /**
  * A BackgroundTaskScheduler is used to schedule jobs that run in the background.

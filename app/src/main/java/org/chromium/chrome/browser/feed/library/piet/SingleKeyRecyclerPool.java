@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.feed.library.piet;
 
 import android.support.v4.util.Pools.SimplePool;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /** A very simple, single pool version of a {@link RecyclerPool} */
 class SingleKeyRecyclerPool<A extends ElementAdapter<?, ?>> implements RecyclerPool<A> {

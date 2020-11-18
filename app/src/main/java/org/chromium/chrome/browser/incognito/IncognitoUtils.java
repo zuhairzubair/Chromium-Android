@@ -11,7 +11,7 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Pair;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.ContextUtils;

@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * An interface for providing a custom view binder for a menu item displayed in the app menu.

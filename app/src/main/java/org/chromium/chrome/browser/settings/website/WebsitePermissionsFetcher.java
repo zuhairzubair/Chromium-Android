@@ -8,7 +8,7 @@ import static org.chromium.chrome.browser.settings.website.WebsitePreferenceBrid
 
 import android.util.Pair;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Callback;
 import org.chromium.base.CommandLine;

@@ -11,7 +11,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.widget.RemoteViews;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsSessionToken;
 
 /**

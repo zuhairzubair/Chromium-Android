@@ -12,9 +12,9 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.StyleRes;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.StyleRes;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.ChromeBaseAppCompatActivity;
 import org.chromium.chrome.browser.flags.FeatureUtilities;

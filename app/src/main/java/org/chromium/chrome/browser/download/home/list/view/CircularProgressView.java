@@ -12,8 +12,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.StringRes;
+import android.support.annotation.IntDef;
+import android.support.annotation.StringRes;
 
 import org.chromium.base.MathUtils;
 import org.chromium.chrome.download.R;

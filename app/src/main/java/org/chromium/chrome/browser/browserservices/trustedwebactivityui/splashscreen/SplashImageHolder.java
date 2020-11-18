@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.browserservices.trustedwebactivityui.splashs
 import android.graphics.Bitmap;
 import android.util.ArrayMap;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsSessionToken;
 
 import java.util.Collections;

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.webauth;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.PackageUtils;

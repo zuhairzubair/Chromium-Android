@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.feed.library.feedmodelprovider.internal;
 
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.api.internal.modelprovider.ModelChild;
 import org.chromium.chrome.browser.feed.library.api.internal.modelprovider.ModelFeature;

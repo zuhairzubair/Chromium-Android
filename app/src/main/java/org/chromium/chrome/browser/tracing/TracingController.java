@@ -10,8 +10,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContentUriUtils;
 import org.chromium.base.ContextUtils;

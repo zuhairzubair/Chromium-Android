@@ -6,7 +6,7 @@ package org.chromium.chrome.browser;
 
 import android.os.Bundle;
 
-import androidx.annotation.CallSuper;
+import android.support.annotation.CallSuper;
 
 import org.chromium.chrome.browser.bookmarks.BookmarkActivity;
 import org.chromium.chrome.browser.init.ChromeBrowserInitializer;

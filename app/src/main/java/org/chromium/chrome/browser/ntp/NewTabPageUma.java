@@ -8,7 +8,7 @@ import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.TimeUtils;
 import org.chromium.base.metrics.RecordHistogram;

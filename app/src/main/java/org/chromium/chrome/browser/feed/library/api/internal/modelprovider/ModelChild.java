@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.feed.library.api.internal.modelprovider;
 
 import android.support.annotation.IntDef;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Abstract Interface defining a Child of a feature which may be returned by a {@link ModelCursor}.

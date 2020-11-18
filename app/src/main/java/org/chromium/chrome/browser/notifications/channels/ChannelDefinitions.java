@@ -11,7 +11,7 @@ import android.app.NotificationManager;
 import android.content.res.Resources;
 import android.os.Build;
 
-import androidx.annotation.StringDef;
+import android.support.annotation.StringDef;
 
 import org.chromium.chrome.R;
 

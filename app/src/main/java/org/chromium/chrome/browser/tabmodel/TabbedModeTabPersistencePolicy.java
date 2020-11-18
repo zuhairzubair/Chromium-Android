@@ -8,8 +8,8 @@ import android.os.StrictMode;
 import android.util.Pair;
 import android.util.SparseBooleanArray;
 
-import androidx.annotation.VisibleForTesting;
-import androidx.annotation.WorkerThread;
+import android.support.annotation.VisibleForTesting;
+import android.support.annotation.WorkerThread;
 
 import org.chromium.base.Callback;
 import org.chromium.base.ContextUtils;

@@ -15,7 +15,7 @@ import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.annotations.RemovableInRelease;
 

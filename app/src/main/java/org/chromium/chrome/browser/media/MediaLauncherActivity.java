@@ -11,7 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.MimeTypeMap;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.metrics.CachedMetrics;
 import org.chromium.chrome.browser.customtabs.CustomTabIntentDataProvider;

@@ -16,9 +16,9 @@ import android.text.TextUtils;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import androidx.annotation.BinderThread;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
+import android.support.annotation.BinderThread;
+import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 
 import com.google.android.apps.chrome.appwidget.bookmarks.BookmarkThumbnailWidgetProvider;
 

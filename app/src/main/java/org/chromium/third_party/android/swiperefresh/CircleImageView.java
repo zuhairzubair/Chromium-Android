@@ -28,8 +28,8 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.ColorRes;
+import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
 
 /**
  * Private class created to work around issues with AnimationListeners being

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.gsa;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * The interface that allows the current browsing context to be reported to GSA.

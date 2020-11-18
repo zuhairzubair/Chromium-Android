@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.services.gcm;
 
 import android.content.Context;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.metrics.CachedMetrics;

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.bookmarks;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ObserverList;
 import org.chromium.chrome.browser.profiles.Profile;

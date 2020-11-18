@@ -9,7 +9,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.StrictMode;
 
-import androidx.annotation.DrawableRes;
+import android.support.annotation.DrawableRes;
 
 import org.chromium.base.CommandLine;
 import org.chromium.base.ThreadUtils;

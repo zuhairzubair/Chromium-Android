@@ -4,8 +4,8 @@
 
 package org.chromium.chrome.browser.directactions;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.metrics.CachedMetrics.EnumeratedHistogramSample;
 

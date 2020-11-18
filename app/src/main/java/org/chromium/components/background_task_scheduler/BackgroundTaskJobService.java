@@ -9,7 +9,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.os.Build;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;

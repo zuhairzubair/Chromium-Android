@@ -8,7 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 /**
  * An interface that provides and notifies about night mode state.

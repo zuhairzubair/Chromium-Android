@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.feed;
 
 import android.app.Activity;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.feed.library.api.client.stream.Stream;
 import org.chromium.chrome.browser.ntp.NewTabPage;

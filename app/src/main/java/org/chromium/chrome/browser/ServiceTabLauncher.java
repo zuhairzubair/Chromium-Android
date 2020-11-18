@@ -11,7 +11,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.provider.Browser;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsIntent;
 
 import org.chromium.base.ApplicationStatus;

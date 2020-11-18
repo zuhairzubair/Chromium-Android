@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.infobar;
 
 import android.graphics.Bitmap;
 
-import androidx.annotation.ColorRes;
+import android.support.annotation.ColorRes;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.chrome.browser.ResourceId;

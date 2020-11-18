@@ -13,7 +13,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.webkit.URLUtil;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.base.ThreadUtils;

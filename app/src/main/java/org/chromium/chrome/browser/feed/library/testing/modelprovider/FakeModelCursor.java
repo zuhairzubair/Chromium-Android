@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.testing.modelprovider;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 

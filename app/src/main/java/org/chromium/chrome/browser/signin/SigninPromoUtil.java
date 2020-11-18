@@ -9,7 +9,7 @@ import android.app.Activity;
 import android.support.v4.util.ArraySet;
 import android.text.TextUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.supplier.Supplier;

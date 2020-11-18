@@ -4,8 +4,8 @@
 
 package org.chromium.chrome.browser.toolbar.bottom;
 
-import androidx.annotation.StringDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.StringDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.flags.FeatureUtilities;
 import org.chromium.chrome.browser.incognito.IncognitoUtils;

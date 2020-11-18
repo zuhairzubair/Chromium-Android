@@ -11,7 +11,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.SparseArray;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.task.PostTask;

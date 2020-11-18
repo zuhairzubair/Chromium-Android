@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.omaha.inline;
 import android.app.Activity;
 import android.content.Intent;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.omaha.UpdateStatusProvider;
 

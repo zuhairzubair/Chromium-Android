@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.banners;
 import android.app.PendingIntent;
 import android.content.Intent;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * Stores information about a particular app.

@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.usage_stats;
 
 import android.app.Activity;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.BuildInfo;
 import org.chromium.base.Log;

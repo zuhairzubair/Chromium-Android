@@ -16,7 +16,7 @@ import android.os.Build;
 import android.support.graphics.drawable.Animatable2Compat;
 import android.support.v7.graphics.drawable.DrawableWrapper;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.task.PostTask;
 import org.chromium.content_public.browser.UiThreadTaskTraits;

@@ -6,7 +6,7 @@ package org.chromium.content.browser.input;
 
 import android.content.Context;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.UserData;
 import org.chromium.base.annotations.CalledByNative;

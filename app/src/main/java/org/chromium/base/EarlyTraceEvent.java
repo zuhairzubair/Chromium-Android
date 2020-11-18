@@ -10,7 +10,7 @@ import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.JNINamespace;

@@ -4,7 +4,7 @@
 
 package org.chromium.components.signin;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * AccountManagerResult encapsulates result of {@link AccountManagerFacade} method call. It is a

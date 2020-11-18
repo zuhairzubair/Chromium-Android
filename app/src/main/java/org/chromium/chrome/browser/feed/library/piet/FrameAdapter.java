@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.feed.library.piet;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.components.feed.core.proto.ui.piet.PietAndroidSupport.ShardingControl;
 import org.chromium.components.feed.core.proto.ui.piet.PietProto.Frame;

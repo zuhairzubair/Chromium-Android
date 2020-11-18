@@ -15,7 +15,7 @@ import android.security.KeyChainException;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ThreadUtils;
 import org.chromium.base.annotations.CalledByNative;

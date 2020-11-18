@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.externalnav;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.base.PackageManagerUtils;
 import org.chromium.chrome.browser.externalnav.ExternalNavigationHandler.OverrideUrlLoadingResult;

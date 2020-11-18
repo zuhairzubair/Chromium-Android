@@ -8,7 +8,7 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.util.Pair;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.JNINamespace;

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.customtabs.content;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.base.ObserverList;
 import org.chromium.chrome.browser.dependency_injection.ActivityScope;

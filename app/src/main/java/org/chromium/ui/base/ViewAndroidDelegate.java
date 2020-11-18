@@ -18,7 +18,7 @@ import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputConnection;
 import android.widget.ImageView;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ObserverList;
 import org.chromium.base.annotations.CalledByNative;

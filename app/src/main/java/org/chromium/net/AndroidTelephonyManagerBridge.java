@@ -9,8 +9,8 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 
-import androidx.annotation.AnyThread;
-import androidx.annotation.MainThread;
+import android.support.annotation.AnyThread;
+import android.support.annotation.MainThread;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.ThreadUtils;

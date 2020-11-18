@@ -13,8 +13,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Callback;
 import org.chromium.base.ContextUtils;

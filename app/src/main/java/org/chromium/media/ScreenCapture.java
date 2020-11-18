@@ -27,7 +27,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.ContextUtils;

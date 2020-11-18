@@ -9,7 +9,7 @@ import android.text.Editable;
 import android.text.Selection;
 import android.text.TextUtils;
 
-import androidx.annotation.ColorRes;
+import android.support.annotation.ColorRes;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.base.Callback;

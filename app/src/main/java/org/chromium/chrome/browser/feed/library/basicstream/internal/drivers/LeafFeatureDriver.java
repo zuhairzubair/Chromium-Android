@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.basicstream.internal.drivers;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.basicstream.internal.viewholders.FeedViewHolder;
 import org.chromium.chrome.browser.feed.library.basicstream.internal.viewholders.ViewHolderType;

@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.photo_picker;
 
 import android.net.Uri;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.ApiCompatibilityUtils;
 

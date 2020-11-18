@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.autofill;
 import android.content.Context;
 import android.text.format.DateUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ThreadUtils;
 import org.chromium.base.annotations.CalledByNative;

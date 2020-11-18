@@ -5,7 +5,7 @@ package org.chromium.ui.modelutil;
 
 import android.support.v7.widget.RecyclerView;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * A model change processor (MCP), i.e. an implementation of {@link RecyclerViewAdapter.Delegate},

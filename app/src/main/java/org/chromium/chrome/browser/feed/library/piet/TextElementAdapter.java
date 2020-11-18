@@ -16,7 +16,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Consumer;
 import org.chromium.chrome.browser.feed.library.common.ui.LayoutUtils;

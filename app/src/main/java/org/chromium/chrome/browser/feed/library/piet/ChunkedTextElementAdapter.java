@@ -30,7 +30,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Consumer;
 import org.chromium.chrome.browser.feed.library.common.logging.Logger;

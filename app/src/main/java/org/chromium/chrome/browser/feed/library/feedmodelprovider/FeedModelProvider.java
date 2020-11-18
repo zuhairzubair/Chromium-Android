@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.feed.library.feedmodelprovider;
 
 import android.support.annotation.VisibleForTesting;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import com.google.protobuf.ByteString;
 

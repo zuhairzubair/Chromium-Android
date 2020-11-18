@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.api.internal.modelprovider;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.common.feedobservable.Observable;
 import org.chromium.components.feed.core.proto.libraries.api.internal.StreamDataProto.StreamFeature;

@@ -9,8 +9,8 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.util.Base64;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.ipc.invalidation.external.client.types.ObjectId;
 

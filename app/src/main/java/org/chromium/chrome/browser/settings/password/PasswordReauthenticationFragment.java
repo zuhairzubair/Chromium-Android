@@ -15,7 +15,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 /** Show the lock screen confirmation and lock the screen. */
 public class PasswordReauthenticationFragment extends Fragment {

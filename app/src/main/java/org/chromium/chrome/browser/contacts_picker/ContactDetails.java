@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.contacts_picker;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.blink.mojom.ContactIconBlob;
 import org.chromium.chrome.R;

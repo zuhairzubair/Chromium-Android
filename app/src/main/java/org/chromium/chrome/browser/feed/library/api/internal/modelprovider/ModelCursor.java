@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.api.internal.modelprovider;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * This represents a Cursor through the children of a {@link ModelFeature}. A Cursor will provide

@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.fullscreen;
 import android.os.Handler;
 import android.os.SystemClock;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.CommandLine;
 import org.chromium.base.supplier.ObservableSupplier;

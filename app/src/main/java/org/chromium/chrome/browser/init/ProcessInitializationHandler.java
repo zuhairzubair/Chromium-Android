@@ -13,7 +13,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
-import androidx.annotation.WorkerThread;
+import android.support.annotation.WorkerThread;
 
 import com.google.ipc.invalidation.external.client.android.service.AndroidLogger;
 

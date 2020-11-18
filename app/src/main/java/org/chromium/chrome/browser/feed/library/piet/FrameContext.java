@@ -14,7 +14,7 @@ import static org.chromium.components.feed.core.proto.ui.piet.ErrorsProto.ErrorC
 import android.support.annotation.VisibleForTesting;
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.api.host.config.DebugBehavior;
 import org.chromium.chrome.browser.feed.library.common.logging.Logger;

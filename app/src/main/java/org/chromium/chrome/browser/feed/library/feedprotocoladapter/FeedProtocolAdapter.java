@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.feedprotocoladapter;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import com.google.protobuf.ByteString;
 

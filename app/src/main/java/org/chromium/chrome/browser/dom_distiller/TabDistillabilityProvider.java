@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.dom_distiller;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ObserverList;
 import org.chromium.base.UserData;

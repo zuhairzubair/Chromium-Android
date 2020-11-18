@@ -7,8 +7,8 @@ package org.chromium.components.invalidation;
 import android.os.Bundle;
 import android.util.Base64;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.components.invalidation.SerializedInvalidation.Invalidation;

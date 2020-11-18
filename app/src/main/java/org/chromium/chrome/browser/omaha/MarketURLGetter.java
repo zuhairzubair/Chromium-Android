@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.omaha;
 
 import android.content.SharedPreferences;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ThreadUtils;
 

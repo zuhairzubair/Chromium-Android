@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.BuildInfo;
 import org.chromium.base.ContextUtils;

@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.settings.website;
 
 import static org.chromium.chrome.browser.settings.website.WebsitePreferenceBridge.SITE_WILDCARD;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.MathUtils;
 import org.chromium.base.metrics.RecordUserAction;

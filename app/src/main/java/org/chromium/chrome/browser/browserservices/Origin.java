@@ -8,7 +8,7 @@ import android.net.Uri;
 
 import org.chromium.chrome.browser.util.UrlConstants;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * A class to canonically represent a HTTP or HTTPS web origin in Java. In comparison to

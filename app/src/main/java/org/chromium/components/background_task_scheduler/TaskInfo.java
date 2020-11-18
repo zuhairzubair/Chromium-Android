@@ -7,8 +7,8 @@ package org.chromium.components.background_task_scheduler;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
+import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

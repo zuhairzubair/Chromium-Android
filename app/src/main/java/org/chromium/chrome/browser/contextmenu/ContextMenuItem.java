@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.contextmenu;
 
 import android.content.Context;
 
-import androidx.annotation.IdRes;
+import android.support.annotation.IdRes;
 
 /**
  * An interface to get information of context menu.

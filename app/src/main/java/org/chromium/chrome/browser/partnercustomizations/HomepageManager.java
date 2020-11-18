@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.partnercustomizations;
 
 import android.text.TextUtils;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
+import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 
 import org.chromium.base.ObserverList;
 import org.chromium.base.metrics.RecordHistogram;

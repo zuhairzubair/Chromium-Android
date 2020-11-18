@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.ntp.cards;
 
 import android.content.Context;
 
-import androidx.annotation.StringRes;
+import android.support.annotation.StringRes;
 
 import org.chromium.chrome.R;
 

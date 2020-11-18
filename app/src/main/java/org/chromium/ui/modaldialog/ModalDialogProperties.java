@@ -7,7 +7,7 @@ package org.chromium.ui.modaldialog;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.ui.modelutil.PropertyKey;
 import org.chromium.ui.modelutil.PropertyModel;

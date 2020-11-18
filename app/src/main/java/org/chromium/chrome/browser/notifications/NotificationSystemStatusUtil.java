@@ -8,7 +8,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.support.v4.app.NotificationManagerCompat;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.annotations.CalledByNative;

@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
-import androidx.annotation.StringRes;
+import android.support.annotation.StringRes;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.ThreadUtils;

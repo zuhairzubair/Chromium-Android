@@ -12,7 +12,7 @@ import android.graphics.Shader.TileMode;
 import android.graphics.drawable.ShapeDrawable;
 import android.support.annotation.VisibleForTesting;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.supplier.Supplier;
 

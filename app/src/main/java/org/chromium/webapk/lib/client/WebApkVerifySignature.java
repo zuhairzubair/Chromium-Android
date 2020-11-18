@@ -8,7 +8,7 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import android.util.Log;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

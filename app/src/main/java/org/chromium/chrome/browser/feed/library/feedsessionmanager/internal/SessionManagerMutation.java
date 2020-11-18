@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.feed.library.feedsessionmanager.internal;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Consumer;
 import org.chromium.chrome.browser.feed.library.api.client.knowncontent.KnownContent;

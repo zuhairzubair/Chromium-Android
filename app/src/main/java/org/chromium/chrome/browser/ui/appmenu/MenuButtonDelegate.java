@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.ui.appmenu;
 
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /** A delegate that provides the button that triggers the app menu. */
 public interface MenuButtonDelegate {

@@ -11,7 +11,7 @@ import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.chrome.R;

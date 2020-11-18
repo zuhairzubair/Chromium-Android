@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.webapps;
 
 import android.content.Intent;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.chrome.browser.ShortcutHelper;
 import org.chromium.chrome.browser.ShortcutSource;

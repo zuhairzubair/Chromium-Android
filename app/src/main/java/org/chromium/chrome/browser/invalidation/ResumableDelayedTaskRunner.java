@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Runner which can be paused. When the runner is paused, the execution of its

@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.text.Spanned;
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.CollectionUtil;
 import org.chromium.chrome.browser.util.UrlConstants;

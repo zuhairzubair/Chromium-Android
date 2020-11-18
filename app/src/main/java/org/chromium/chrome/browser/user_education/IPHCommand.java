@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.user_education;
 import android.graphics.Rect;
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Class encapsulating the data needed to show in-product help (IPH).

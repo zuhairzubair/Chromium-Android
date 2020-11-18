@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.browserservices;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.Log;

@@ -13,7 +13,7 @@ import android.os.Build;
 import android.os.Process;
 import android.provider.Settings;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.base.Callback;

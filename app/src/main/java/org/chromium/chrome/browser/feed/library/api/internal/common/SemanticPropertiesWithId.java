@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.api.internal.common;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.Arrays;
 

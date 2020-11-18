@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.customtabs.dynamicmodule;
 
 import android.os.SystemClock;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.TimeUtilsJni;
 import org.chromium.chrome.browser.ActivityTabProvider;

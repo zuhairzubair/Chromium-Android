@@ -4,7 +4,7 @@
 
 package org.chromium.components.module_installer.builder;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.BundleUtils;
 import org.chromium.base.StrictModeContext;

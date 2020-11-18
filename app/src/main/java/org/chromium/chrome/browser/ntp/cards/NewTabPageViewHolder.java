@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import androidx.annotation.CallSuper;
+import android.support.annotation.CallSuper;
 
 import org.chromium.base.Callback;
 import org.chromium.chrome.browser.metrics.ImpressionTracker;

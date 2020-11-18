@@ -11,7 +11,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.util.Pair;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.ThreadUtils;
 import org.chromium.base.task.AsyncTask;

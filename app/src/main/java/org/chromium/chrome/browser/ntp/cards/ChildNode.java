@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.ntp.cards;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.ui.modelutil.ListObservableImpl;
 import org.chromium.ui.modelutil.RecyclerViewAdapter;

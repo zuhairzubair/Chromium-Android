@@ -14,8 +14,8 @@ import android.net.Uri;
 import android.provider.Browser;
 import android.support.v4.app.NotificationCompat;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.annotations.CalledByNative;

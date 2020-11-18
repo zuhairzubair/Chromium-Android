@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.offlinepages;
 
 import android.app.Activity;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ActivityState;
 import org.chromium.base.ApplicationStatus;

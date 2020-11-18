@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.fullscreen;
 import android.view.View;
 import android.view.Window;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.fullscreen.FullscreenHtmlApiHandler.FullscreenHtmlApiDelegate;
 import org.chromium.chrome.browser.tab.Tab;

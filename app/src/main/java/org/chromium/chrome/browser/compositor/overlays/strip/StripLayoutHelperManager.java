@@ -9,7 +9,7 @@ import android.content.res.Resources;
 import android.graphics.RectF;
 import android.os.SystemClock;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.compositor.LayerTitleCache;

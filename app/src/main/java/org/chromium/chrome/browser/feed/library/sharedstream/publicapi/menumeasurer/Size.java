@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.sharedstream.publicapi.menumeasurer;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Class to represent the width and height of a view in pixels. This is a minimal version of {@link

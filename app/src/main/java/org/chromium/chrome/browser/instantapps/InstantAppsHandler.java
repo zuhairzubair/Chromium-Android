@@ -12,7 +12,7 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.provider.Browser;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;

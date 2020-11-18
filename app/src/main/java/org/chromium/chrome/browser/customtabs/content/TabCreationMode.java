@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.customtabs.content;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.chrome.browser.customtabs.CustomTabsConnection;
 import org.chromium.chrome.browser.init.StartupTabPreloader;

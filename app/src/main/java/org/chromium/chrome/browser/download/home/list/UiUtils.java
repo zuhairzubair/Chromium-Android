@@ -9,7 +9,7 @@ import android.content.res.Resources;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
 
-import androidx.annotation.DrawableRes;
+import android.support.annotation.DrawableRes;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.MathUtils;

@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.ntp.snippets;
 import android.content.Context;
 import android.net.ConnectivityManager;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;

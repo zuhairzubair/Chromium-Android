@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.autofill.prefeditor;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * An option that the user can select, e.g., a shipping option, a shipping address, or a payment

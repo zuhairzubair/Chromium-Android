@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import androidx.annotation.AnyRes;
+import android.support.annotation.AnyRes;
 
 import org.chromium.chrome.R;
 

@@ -15,7 +15,7 @@ import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.view.ActionMode;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Callback;
 import org.chromium.base.ContextUtils;

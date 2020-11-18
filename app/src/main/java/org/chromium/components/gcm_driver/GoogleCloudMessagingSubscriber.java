@@ -6,7 +6,7 @@ package org.chromium.components.gcm_driver;
 
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.io.IOException;
 

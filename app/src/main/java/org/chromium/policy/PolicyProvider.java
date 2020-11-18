@@ -6,7 +6,7 @@ package org.chromium.policy;
 
 import android.os.Bundle;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ThreadUtils;
 

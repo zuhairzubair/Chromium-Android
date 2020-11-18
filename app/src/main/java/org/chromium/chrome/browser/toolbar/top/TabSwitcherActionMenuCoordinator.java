@@ -13,8 +13,8 @@ import android.view.View.OnLongClickListener;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Callback;
 import org.chromium.base.metrics.RecordUserAction;

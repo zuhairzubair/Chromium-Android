@@ -4,7 +4,7 @@
 
 package org.chromium.components.background_task_scheduler;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * Helper class to allow external code (typically Chrome-specific BackgroundTaskScheduler code) to

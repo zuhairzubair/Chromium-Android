@@ -9,7 +9,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.support.v4.util.Pair;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Callback;
 import org.chromium.base.CollectionUtil;

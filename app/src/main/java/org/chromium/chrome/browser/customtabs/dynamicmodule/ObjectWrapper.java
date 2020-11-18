@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.customtabs.dynamicmodule;
 
 import android.os.IBinder;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import java.lang.reflect.Field;
 

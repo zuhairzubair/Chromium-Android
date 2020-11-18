@@ -25,7 +25,7 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * A custom {@link ImageView} that is able to render bitmaps and colors with rounded off corners.

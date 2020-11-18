@@ -10,7 +10,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.SystemClock;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.MemoryPressureLevel;

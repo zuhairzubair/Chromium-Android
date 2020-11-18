@@ -12,8 +12,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.PersistableBundle;
 
-import androidx.annotation.StringDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.StringDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.Log;

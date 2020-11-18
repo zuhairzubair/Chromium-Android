@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.feed.library.feedmodelprovider;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.api.host.config.Configuration;
 import org.chromium.chrome.browser.feed.library.api.host.logging.BasicLoggingApi;

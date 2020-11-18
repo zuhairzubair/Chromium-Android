@@ -8,7 +8,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.UserData;
 import org.chromium.base.annotations.CalledByNative;

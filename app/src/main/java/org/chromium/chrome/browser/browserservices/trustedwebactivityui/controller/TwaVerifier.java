@@ -20,7 +20,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsService;
 
 /**

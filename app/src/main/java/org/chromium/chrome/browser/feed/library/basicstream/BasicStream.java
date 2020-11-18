@@ -21,7 +21,7 @@ import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.OnLayoutChangeListener;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 

@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.tab;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.base.ObserverList.RewindableIterator;
 import org.chromium.base.UserData;

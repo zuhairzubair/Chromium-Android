@@ -6,7 +6,7 @@ package org.chromium.components.background_task_scheduler;
 
 import android.os.Build;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ThreadUtils;
 

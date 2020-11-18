@@ -18,7 +18,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.chromium.base.ContextUtils;
@@ -43,7 +43,7 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.browser.trusted.TrustedWebActivityServiceConnection;

@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.identity;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.preferences.SharedPreferencesManager;
 

@@ -10,9 +10,9 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import androidx.annotation.CallSuper;
-import androidx.annotation.Nullable;
-import androidx.annotation.StyleRes;
+import android.support.annotation.CallSuper;
+import android.support.annotation.Nullable;
+import android.support.annotation.StyleRes;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.chrome.browser.night_mode.GlobalNightModeStateProviderHolder;

@@ -9,7 +9,7 @@ import static org.chromium.chrome.browser.feed.library.common.Validators.checkSt
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.RecyclerView;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Consumer;
 import org.chromium.base.supplier.Supplier;

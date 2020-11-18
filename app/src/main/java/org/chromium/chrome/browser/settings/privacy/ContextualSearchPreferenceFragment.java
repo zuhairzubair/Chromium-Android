@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.settings.privacy;
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
-import androidx.annotation.XmlRes;
+import android.support.annotation.XmlRes;
 
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.contextualsearch.ContextualSearchManager;

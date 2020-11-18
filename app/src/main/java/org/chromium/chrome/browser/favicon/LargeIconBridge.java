@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.favicon;
 import android.graphics.Bitmap;
 import android.util.LruCache;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.NativeMethods;

@@ -7,7 +7,7 @@ package org.chromium.ui.base;
 import android.content.res.Configuration;
 import android.view.View;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.LocaleUtils;

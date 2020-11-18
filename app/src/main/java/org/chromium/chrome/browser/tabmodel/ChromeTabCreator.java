@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.tabmodel;
 import android.content.Intent;
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.SysUtils;
 import org.chromium.base.TraceEvent;

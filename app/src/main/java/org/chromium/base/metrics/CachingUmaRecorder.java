@@ -7,7 +7,7 @@ package org.chromium.base.metrics;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.Log;
 

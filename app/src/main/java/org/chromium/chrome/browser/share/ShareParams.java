@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.share;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.share.ShareHelper.TargetChosenCallback;
 import org.chromium.components.dom_distiller.core.DomDistillerUrlUtils;

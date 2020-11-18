@@ -16,9 +16,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-import androidx.annotation.WorkerThread;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.annotation.WorkerThread;
 import androidx.browser.trusted.Token;
 
 /**

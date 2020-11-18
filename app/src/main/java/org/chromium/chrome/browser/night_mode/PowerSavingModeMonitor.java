@@ -12,7 +12,7 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.PowerManager;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ApplicationState;
 import org.chromium.base.ApplicationStatus;

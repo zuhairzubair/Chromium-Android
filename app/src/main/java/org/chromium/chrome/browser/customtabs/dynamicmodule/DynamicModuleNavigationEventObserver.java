@@ -15,8 +15,8 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.TextUtils;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import androidx.browser.customtabs.CustomTabsCallback;
 
 import org.chromium.chrome.browser.ssl.SecurityStateModel;

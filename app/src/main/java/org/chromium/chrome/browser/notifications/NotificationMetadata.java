@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.notifications;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Struct to contain information to identify the notification.

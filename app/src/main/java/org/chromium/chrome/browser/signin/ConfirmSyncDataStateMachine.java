@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.signin;
 import android.os.Handler;
 import android.text.TextUtils;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.Nullable;
+import android.support.annotation.IntDef;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ThreadUtils;
 

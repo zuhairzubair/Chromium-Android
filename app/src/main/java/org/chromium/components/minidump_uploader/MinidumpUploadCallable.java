@@ -4,7 +4,7 @@
 
 package org.chromium.components.minidump_uploader;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.Log;
 import org.chromium.components.minidump_uploader.util.CrashReportingPermissionManager;

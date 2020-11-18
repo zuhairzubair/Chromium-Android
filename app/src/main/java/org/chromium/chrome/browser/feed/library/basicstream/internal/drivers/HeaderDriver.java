@@ -8,7 +8,7 @@ import static org.chromium.chrome.browser.feed.library.common.Validators.checkSt
 
 import android.support.annotation.VisibleForTesting;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.chrome.browser.feed.library.api.client.stream.Header;
 import org.chromium.chrome.browser.feed.library.basicstream.internal.viewholders.FeedViewHolder;

@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.download.home.filter;
 
 import android.text.TextUtils;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.components.offline_items_collection.OfflineItem;
 import org.chromium.components.url_formatter.SchemeDisplay;

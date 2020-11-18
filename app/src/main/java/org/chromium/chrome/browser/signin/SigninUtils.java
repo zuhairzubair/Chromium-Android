@@ -11,7 +11,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.provider.Settings;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ThreadUtils;
 import org.chromium.base.annotations.CalledByNative;

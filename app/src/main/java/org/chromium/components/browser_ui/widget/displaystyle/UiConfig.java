@@ -7,7 +7,7 @@ package org.chromium.components.browser_ui.widget.displaystyle;
 import android.content.Context;
 import android.view.View;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.ui.widget.Toast;

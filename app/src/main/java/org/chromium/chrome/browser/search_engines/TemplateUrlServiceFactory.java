@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.search_engines;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ThreadUtils;
 import org.chromium.base.annotations.NativeMethods;

@@ -7,7 +7,7 @@ package org.chromium.chrome.browser.download.home.list;
 import android.support.v7.util.BatchingListUpdateCallback;
 import android.support.v7.util.ListUpdateCallback;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.ui.modelutil.ListModel;
 

@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.feed.library.api.internal.modelprovider;
 
 import android.support.annotation.IntDef;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import com.google.protobuf.ByteString;
 

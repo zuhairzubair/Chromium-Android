@@ -6,7 +6,7 @@ package org.chromium.chrome.browser;
 
 import android.content.pm.PackageManager;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.base.ContextUtils;
