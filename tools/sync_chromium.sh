@@ -275,10 +275,12 @@ sync_chrome() {
 		"${APP_DIR}/strings_res/values/"
 
 	cp -r ${BASE_DIR}/chrome/browser/ui/messages/android/java/src/* \
+	      ${BASE_DIR}/chrome/browser/ui/android/appmenu/java/src/* \
 		"${APP_DIR}/src/main/java/"
 
   cp -r ${BASE_DIR}/chrome/browser/ui/messages/android/java/res/* \
-  "${APP_DIR}/ui_res/"
+        ${BASE_DIR}/chrome/browser/ui/android/appmenu/java/res/* \
+    "${APP_DIR}/ui_res/"
 }
 
 sync_assets() {
