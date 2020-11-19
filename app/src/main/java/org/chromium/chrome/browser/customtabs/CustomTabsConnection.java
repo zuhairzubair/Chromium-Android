@@ -23,11 +23,11 @@ import android.widget.RemoteViews;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsCallback;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.customtabs.CustomTabsSessionToken;
-import androidx.browser.customtabs.PostMessageServiceConnection;
+import android.support.customtabs.CustomTabsCallback;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.PostMessageServiceConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;

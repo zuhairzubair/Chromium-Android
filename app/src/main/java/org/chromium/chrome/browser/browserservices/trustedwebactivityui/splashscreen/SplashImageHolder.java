@@ -8,7 +8,7 @@ import android.graphics.Bitmap;
 import android.util.ArrayMap;
 
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import java.util.Collections;
 import java.util.Map;

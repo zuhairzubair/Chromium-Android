@@ -12,8 +12,8 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import android.support.annotation.WorkerThread;
-import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.FileUtils;
 import org.chromium.base.Log;

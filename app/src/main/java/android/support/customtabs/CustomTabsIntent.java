@@ -113,7 +113,7 @@ public final class CustomTabsIntent {
      * {@link #COLOR_SCHEME_SYSTEM}.
      */
     public static final String EXTRA_COLOR_SCHEME =
-            "androidx.browser.customtabs.extra.COLOR_SCHEME";
+            "android.support.customtabs.extra.COLOR_SCHEME";
 
     /**
      * Extra that changes the background color for the toolbar. colorRes is an int that specifies a
@@ -282,14 +282,14 @@ public final class CustomTabsIntent {
      * {@link CustomTabColorSchemeParams}.
      */
     public static final String EXTRA_COLOR_SCHEME_PARAMS =
-            "androidx.browser.customtabs.extra.COLOR_SCHEME_PARAMS";
+            "android.support.customtabs.extra.COLOR_SCHEME_PARAMS";
 
     /**
      * Extra that contains the color of the navigation bar.
      * See {@link Builder#setNavigationBarColor}.
      */
     public static final String EXTRA_NAVIGATION_BAR_COLOR =
-            "androidx.browser.customtabs.extra.NAVIGATION_BAR_COLOR";
+            "android.support.customtabs.extra.NAVIGATION_BAR_COLOR";
 
     /**
      * Key that specifies the unique ID for an action button. To make a button to show on the

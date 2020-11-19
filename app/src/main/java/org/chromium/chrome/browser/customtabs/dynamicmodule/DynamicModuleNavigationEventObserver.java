@@ -4,11 +4,11 @@
 
 package org.chromium.chrome.browser.customtabs.dynamicmodule;
 
-import static androidx.browser.customtabs.CustomTabsCallback.NAVIGATION_FAILED;
-import static androidx.browser.customtabs.CustomTabsCallback.NAVIGATION_FINISHED;
-import static androidx.browser.customtabs.CustomTabsCallback.NAVIGATION_STARTED;
-import static androidx.browser.customtabs.CustomTabsCallback.TAB_HIDDEN;
-import static androidx.browser.customtabs.CustomTabsCallback.TAB_SHOWN;
+import static android.support.customtabs.CustomTabsCallback.NAVIGATION_FAILED;
+import static android.support.customtabs.CustomTabsCallback.NAVIGATION_FINISHED;
+import static android.support.customtabs.CustomTabsCallback.NAVIGATION_STARTED;
+import static android.support.customtabs.CustomTabsCallback.TAB_HIDDEN;
+import static android.support.customtabs.CustomTabsCallback.TAB_SHOWN;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,7 +17,7 @@ import android.text.TextUtils;
 
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsCallback;
+import android.support.customtabs.CustomTabsCallback;
 
 import org.chromium.chrome.browser.ssl.SecurityStateModel;
 import org.chromium.chrome.browser.tab.EmptyTabObserver;

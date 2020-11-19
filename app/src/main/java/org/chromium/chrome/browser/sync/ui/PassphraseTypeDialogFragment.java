@@ -25,7 +25,7 @@ import android.widget.CheckedTextView;
 import android.widget.ListView;
 
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.chrome.R;

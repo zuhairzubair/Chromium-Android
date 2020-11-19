@@ -14,7 +14,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import android.support.annotation.IntDef;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.chrome.R;

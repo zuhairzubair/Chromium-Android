@@ -11,7 +11,7 @@ import android.net.Uri;
 import android.provider.Browser;
 import android.provider.ContactsContract;
 
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.PackageManagerUtils;

@@ -11,8 +11,8 @@ import android.os.IBinder;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.chrome.browser.browserservices.Origin;
 import org.chromium.chrome.browser.firstrun.FirstRunFlowSequencer;

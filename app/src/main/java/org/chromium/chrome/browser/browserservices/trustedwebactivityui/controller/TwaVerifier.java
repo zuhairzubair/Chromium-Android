@@ -21,7 +21,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsService;
 
 /**
  * Provides Trusted Web Activity specific behaviour for the {@link CurrentPageVerifier}.

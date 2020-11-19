@@ -14,8 +14,8 @@ import android.text.TextUtils;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.customtabs.CustomTabsService.Relation;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsService.Relation;
 
 import org.chromium.base.CommandLine;
 import org.chromium.base.ContextUtils;

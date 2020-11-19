@@ -12,7 +12,7 @@ import android.view.Window;
 
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsSessionToken;
 import androidx.browser.trusted.sharing.ShareTarget;
 
 import org.chromium.base.metrics.RecordHistogram;

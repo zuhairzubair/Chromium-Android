@@ -4,8 +4,8 @@
 
 package org.chromium.chrome.browser.customtabs;
 
-import static androidx.browser.customtabs.CustomTabsIntent.COLOR_SCHEME_LIGHT;
-import static androidx.browser.customtabs.CustomTabsIntent.COLOR_SCHEME_SYSTEM;
+import static android.support.customtabs.CustomTabsIntent.COLOR_SCHEME_LIGHT;
+import static android.support.customtabs.CustomTabsIntent.COLOR_SCHEME_SYSTEM;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -27,10 +27,10 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabColorSchemeParams;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsSessionToken;
-import androidx.browser.customtabs.TrustedWebUtils;
+import android.support.customtabs.CustomTabColorSchemeParams;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.TrustedWebUtils;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.sharing.ShareData;
@@ -172,14 +172,14 @@ public class CustomTabIntentDataProvider extends BrowserServicesIntentDataProvid
      * specified target language.
      */
     private static final String EXTRA_TRANSLATE_LANGUAGE =
-            "androidx.browser.customtabs.extra.TRANSLATE_LANGUAGE";
+            "android.support.customtabs.extra.TRANSLATE_LANGUAGE";
 
     /**
      * Extra used to provide a PendingIntent that we can launch to focus the client.
      * TODO(peconn): Move to AndroidX.
      */
     private static final String EXTRA_FOCUS_INTENT =
-            "androidx.browser.customtabs.extra.FOCUS_INTENT";
+            "android.support.customtabs.extra.FOCUS_INTENT";
 
     private static final int MAX_CUSTOM_MENU_ITEMS = 5;
 

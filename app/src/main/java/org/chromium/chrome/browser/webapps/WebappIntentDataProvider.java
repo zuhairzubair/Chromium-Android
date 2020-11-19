@@ -8,7 +8,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.chrome.R;

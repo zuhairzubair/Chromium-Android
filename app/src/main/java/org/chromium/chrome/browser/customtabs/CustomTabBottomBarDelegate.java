@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.Log;
 import org.chromium.base.metrics.CachedMetrics;

@@ -16,8 +16,8 @@ import android.view.ViewGroup;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.customtabs.PostMessageBackend;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.PostMessageBackend;
 
 import org.chromium.base.Callback;
 import org.chromium.base.TraceEvent;

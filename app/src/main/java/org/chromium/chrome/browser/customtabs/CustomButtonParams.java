@@ -23,7 +23,7 @@ import android.widget.ImageButton;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.Log;
 import org.chromium.chrome.R;

@@ -12,7 +12,7 @@ import android.util.SparseArray;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.Callback;
 import org.chromium.chrome.browser.customtabs.CustomTabsConnection;

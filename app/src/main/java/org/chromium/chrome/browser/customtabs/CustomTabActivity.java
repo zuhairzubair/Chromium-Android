@@ -4,8 +4,8 @@
 
 package org.chromium.chrome.browser.customtabs;
 
-import static androidx.browser.customtabs.CustomTabsIntent.COLOR_SCHEME_DARK;
-import static androidx.browser.customtabs.CustomTabsIntent.COLOR_SCHEME_LIGHT;
+import static android.support.customtabs.CustomTabsIntent.COLOR_SCHEME_DARK;
+import static android.support.customtabs.CustomTabsIntent.COLOR_SCHEME_LIGHT;
 
 import static org.chromium.chrome.browser.customtabs.content.CustomTabActivityNavigationController.FinishReason.USER_NAVIGATION;
 
@@ -22,8 +22,8 @@ import android.view.ViewGroup;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.base.metrics.RecordHistogram;

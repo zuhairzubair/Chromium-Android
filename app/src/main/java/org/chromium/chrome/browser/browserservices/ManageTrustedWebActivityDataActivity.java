@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.Log;
 import org.chromium.chrome.browser.ChromeApplication;

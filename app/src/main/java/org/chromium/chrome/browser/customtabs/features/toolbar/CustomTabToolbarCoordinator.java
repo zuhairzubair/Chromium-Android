@@ -14,7 +14,7 @@ import android.view.View;
 
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.Log;
 import org.chromium.chrome.browser.ChromeActivity;

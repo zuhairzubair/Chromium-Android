@@ -12,7 +12,7 @@ import android.text.TextUtils;
 
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.TraceEvent;

@@ -4,8 +4,8 @@
 
 package org.chromium.chrome.browser.customtabs;
 
-import androidx.browser.customtabs.CustomTabsCallback;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsCallback;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.chrome.browser.browserservices.BrowserServicesIntentDataProvider;
 import org.chromium.chrome.browser.dependency_injection.ActivityScope;

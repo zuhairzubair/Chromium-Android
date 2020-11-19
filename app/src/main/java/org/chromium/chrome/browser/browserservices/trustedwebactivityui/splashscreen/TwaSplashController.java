@@ -19,7 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import androidx.browser.customtabs.TrustedWebUtils;
+import android.support.customtabs.TrustedWebUtils;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.splashscreens.SplashScreenParamKey;
 

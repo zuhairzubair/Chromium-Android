@@ -15,7 +15,7 @@ import android.support.v7.preference.PreferenceFragmentCompat;
 
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.BuildInfo;
 import org.chromium.base.metrics.RecordHistogram;

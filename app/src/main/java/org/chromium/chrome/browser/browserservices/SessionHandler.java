@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.widget.RemoteViews;
 
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsSessionToken;
 
 /**
  * Interface to handle browser services calls whenever the session id matched.

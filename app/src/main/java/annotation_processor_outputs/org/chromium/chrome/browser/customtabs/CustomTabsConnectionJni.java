@@ -1,7 +1,7 @@
 package org.chromium.chrome.browser.customtabs;
 
 import J.N;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsSessionToken;
 import java.lang.Override;
 import java.lang.String;
 import javax.annotation.Generated;

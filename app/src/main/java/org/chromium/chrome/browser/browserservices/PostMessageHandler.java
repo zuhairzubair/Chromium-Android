@@ -7,9 +7,9 @@ package org.chromium.chrome.browser.browserservices;
 import android.net.Uri;
 
 import android.support.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.customtabs.CustomTabsSessionToken;
-import androidx.browser.customtabs.PostMessageBackend;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.PostMessageBackend;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.task.PostTask;

@@ -10,7 +10,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import android.support.annotation.NonNull;
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.CommandLine;
 import org.chromium.base.SysUtils;

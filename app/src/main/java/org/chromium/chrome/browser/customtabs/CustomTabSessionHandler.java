@@ -13,9 +13,9 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsService;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.Log;
 import org.chromium.chrome.browser.browserservices.BrowserServicesIntentDataProvider;

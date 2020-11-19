@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.provider.Browser;
 
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.ContextUtils;

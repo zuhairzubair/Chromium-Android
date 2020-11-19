@@ -19,7 +19,7 @@ import android.os.Build;
 import android.provider.Browser;
 import android.text.TextUtils;
 
-import androidx.browser.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsIntent;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.base.ContextUtils;

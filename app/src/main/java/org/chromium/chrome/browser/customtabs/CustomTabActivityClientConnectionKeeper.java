@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.customtabs;
 
 import android.support.annotation.IntDef;
 
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsSessionToken;
 
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.chrome.browser.browserservices.BrowserServicesIntentDataProvider;

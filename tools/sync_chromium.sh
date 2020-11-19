@@ -249,6 +249,9 @@ sync_chrome() {
 		${BASE_DIR}/chrome/android/features/keyboard_accessory/factory/java/src/* \
 		${BASE_DIR}/components/browser_ui/modaldialog/android/java/src/* \
 		${BASE_DIR}/chrome/lib/lifecycle/public/android/java/src/* \
+		${BASE_DIR}/components/content_capture/android/java/src/* \
+		${BASE_DIR}/components/paint_preview/browser/android/java/src/* \
+		${BASE_DIR}/components/search_engines/android/java/src/* \
 		"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
@@ -259,12 +262,22 @@ sync_chrome() {
         ${RELEASE_DIR}/gen/components/contextual_search/content/common/mojom/mojom_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/chrome/browser/preferences/java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/chrome/android/update_proto_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/third_party/blink/public/blink_headers_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/url/mojom/url_mojom_origin_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/service_manager/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/mojo/public/java/bindings_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/sync/android/sync_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/build/android/buildhooks/build_hooks_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/url_formatter/android/url_formatter_java/generated_java/input_srcjars/* \
         "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
 	  ${RELEASE_DIR}/gen/content/public/android/content_java/generated_java/input_srcjars/org/* \
 	  ${RELEASE_DIR}/gen/ui/android/ui_full_java/generated_java/input_srcjars/org/* \
 		"$src_dir/org"
+
+	cp -r ${RELEASE_DIR}/gen/chrome/browser/util/java/generated_java/annotation_processor_outputs/org/* \
+	  "$src_dir/annotation_processor_outputs/org"
 
 	mkdir -p ${PRO_DIR}/res_base
 

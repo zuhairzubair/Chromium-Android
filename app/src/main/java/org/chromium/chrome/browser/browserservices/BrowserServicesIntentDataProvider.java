@@ -13,8 +13,8 @@ import android.widget.RemoteViews;
 
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsSessionToken;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.sharing.ShareData;
 import androidx.browser.trusted.sharing.ShareTarget;

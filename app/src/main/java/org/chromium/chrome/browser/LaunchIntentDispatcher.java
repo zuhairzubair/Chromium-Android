@@ -17,9 +17,9 @@ import android.os.Bundle;
 import android.os.StrictMode;
 
 import android.support.annotation.IntDef;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsSessionToken;
-import androidx.browser.customtabs.TrustedWebUtils;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsSessionToken;
+import android.support.customtabs.TrustedWebUtils;
 
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.CommandLine;
