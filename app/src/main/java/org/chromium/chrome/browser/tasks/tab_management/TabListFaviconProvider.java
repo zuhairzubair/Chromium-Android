@@ -12,7 +12,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.v7.content.res.AppCompatResources;
 
-import androidx.annotation.ColorInt;
+import android.support.annotation.ColorInt;
 
 import org.chromium.base.Callback;
 import org.chromium.chrome.browser.favicon.FaviconHelper;

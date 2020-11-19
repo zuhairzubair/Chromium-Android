@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.tasks.tab_management.suggestions;
 
-import androidx.annotation.StringDef;
+import android.support.annotation.StringDef;
 
 import java.util.Collections;
 import java.util.List;

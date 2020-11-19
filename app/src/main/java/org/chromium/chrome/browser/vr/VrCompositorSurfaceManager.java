@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.view.Surface;
 import android.view.View;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.chrome.browser.compositor.CompositorSurfaceManager;
 

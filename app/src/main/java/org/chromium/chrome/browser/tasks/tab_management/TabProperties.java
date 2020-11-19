@@ -11,7 +11,7 @@ import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.view.View.AccessibilityDelegate;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.components.browser_ui.widget.selectable_list.SelectionDelegate;
 import org.chromium.ui.modelutil.PropertyKey;

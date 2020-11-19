@@ -6,7 +6,7 @@ package org.chromium.chrome.browser.tasks.tab_management;
 
 import android.view.View;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.browser.compositor.layouts.EmptyOverviewModeObserver;
 import org.chromium.chrome.browser.compositor.layouts.OverviewModeBehavior;

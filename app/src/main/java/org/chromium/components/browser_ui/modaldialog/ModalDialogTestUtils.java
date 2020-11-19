@@ -7,7 +7,7 @@ package org.chromium.components.browser_ui.modaldialog;
 import android.app.Activity;
 import android.content.res.Resources;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.junit.Assert;
 

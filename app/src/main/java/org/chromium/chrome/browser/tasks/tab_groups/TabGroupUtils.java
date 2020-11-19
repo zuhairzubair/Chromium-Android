@@ -9,9 +9,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.view.View;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.ContextUtils;

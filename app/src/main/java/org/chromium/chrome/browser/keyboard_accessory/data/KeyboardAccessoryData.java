@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.keyboard_accessory.data;
 import android.graphics.drawable.Drawable;
 import android.view.ViewGroup;
 
-import androidx.annotation.LayoutRes;
-import androidx.annotation.Nullable;
+import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.Callback;
 import org.chromium.chrome.browser.keyboard_accessory.AccessoryAction;

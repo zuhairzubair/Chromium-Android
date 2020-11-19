@@ -16,8 +16,8 @@ import android.os.Parcelable;
 import android.os.TransactionTooLargeException;
 import android.support.v4.app.BundleCompat;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.base.Log;

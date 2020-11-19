@@ -8,7 +8,7 @@ import static org.chromium.chrome.browser.tasks.tab_management.MessageService.Me
 
 import android.content.Context;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.ui.modelutil.PropertyModel;
 

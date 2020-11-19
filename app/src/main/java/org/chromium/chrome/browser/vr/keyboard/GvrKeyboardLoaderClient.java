@@ -13,7 +13,7 @@ import android.content.res.Resources;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.vr.keyboard.IGvrKeyboardLoader;
 

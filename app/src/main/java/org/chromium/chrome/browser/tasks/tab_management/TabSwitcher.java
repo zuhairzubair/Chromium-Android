@@ -9,8 +9,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.SystemClock;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Callback;
 import org.chromium.chrome.browser.compositor.layouts.Layout;

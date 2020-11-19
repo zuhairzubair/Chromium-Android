@@ -27,8 +27,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.vr.ndk.base.AndroidCompat;
 import com.google.vr.ndk.base.DaydreamApi;

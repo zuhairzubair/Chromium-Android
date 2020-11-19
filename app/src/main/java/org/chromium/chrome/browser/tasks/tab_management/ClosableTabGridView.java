@@ -16,8 +16,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.IntDef;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.chrome.tab_ui.R;
 import org.chromium.ui.widget.ViewLookupCachingFrameLayout;

@@ -15,7 +15,7 @@ import static org.chromium.chrome.browser.tasks.tab_management.TabProperties.TAB
 
 import android.util.Pair;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tabmodel.TabModel;

@@ -11,8 +11,8 @@ import android.support.annotation.ColorInt;
 import android.support.v7.content.res.AppCompatResources;
 import android.view.View;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.chrome.browser.tab.Tab;

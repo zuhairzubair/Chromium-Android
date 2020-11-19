@@ -235,12 +235,35 @@ sync_chrome() {
 		${BASE_DIR}/third_party/cacheinvalidation/src/java/* \
 		${BASE_DIR}/third_party/gif_player/src/* \
 		${BASE_DIR}/third_party/protobuf/java/core/src/main/java/* \
+		${BASE_DIR}/chrome/browser/util/android/java/src/* \
+		${BASE_DIR}/chrome/browser/preferences/android/java/src/* \
+		${BASE_DIR}/chrome/browser/flags/android/java/src/* \
+		${BASE_DIR}/chrome/android/features/vr/java/src/* \
+		${BASE_DIR}/components/find_in_page/android/java/src/* \
+		${BASE_DIR}/chrome/browser/ui/android/native_page/java/src/* \
+		${BASE_DIR}/chrome/android/public/crypto/java/src/* \
+		${BASE_DIR}/chrome/android/public/profiles/java/src/* \
+		${BASE_DIR}/url/android/java/src/* \
+		${BASE_DIR}/chrome/android/features/autofill_assistant/public/java/src/* \
+		${BASE_DIR}/chrome/android/features/keyboard_accessory/public/java/src/* \
+		${BASE_DIR}/chrome/android/features/keyboard_accessory/factory/java/src/* \
+		${BASE_DIR}/components/browser_ui/modaldialog/android/java/src/* \
+		${BASE_DIR}/chrome/lib/lifecycle/public/android/java/src/* \
 		"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
-		"$src_dir"
+        ${RELEASE_DIR}/gen/chrome/android/chrome_android_java_switches/generated_java/input_srcjars* \
+        ${RELEASE_DIR}/gen/third_party/blink/public/mojom/mojom_platform_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/network/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/feature_engagement/public/public_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/contextual_search/content/common/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/chrome/browser/preferences/java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/chrome/android/update_proto_java/generated_java/input_srcjars/* \
+        "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
+	  ${RELEASE_DIR}/gen/content/public/android/content_java/generated_java/input_srcjars/org/* \
+	  ${RELEASE_DIR}/gen/ui/android/ui_full_java/generated_java/input_srcjars/org/* \
 		"$src_dir/org"
 
 	mkdir -p ${PRO_DIR}/res_base

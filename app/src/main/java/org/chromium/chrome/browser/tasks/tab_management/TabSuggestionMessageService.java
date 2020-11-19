@@ -10,7 +10,7 @@ import static org.chromium.chrome.browser.tasks.tab_management.suggestions.TabSu
 
 import android.content.Context;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Callback;
 import org.chromium.chrome.browser.tab.Tab;

@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.preferences;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.StrictModeContext;

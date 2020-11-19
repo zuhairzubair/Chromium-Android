@@ -4,7 +4,7 @@
 
 package org.chromium.chrome.browser.tasks.tab_management;
 
-import androidx.annotation.IntDef;
+import android.support.annotation.IntDef;
 
 import org.chromium.base.ObserverList;
 

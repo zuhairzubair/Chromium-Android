@@ -15,7 +15,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.metrics.RecordUserAction;
 import org.chromium.chrome.browser.feature_engagement.TrackerFactory;

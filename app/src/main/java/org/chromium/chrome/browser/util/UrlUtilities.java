@@ -7,8 +7,8 @@ package org.chromium.chrome.browser.util;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.CollectionUtil;
 import org.chromium.base.Log;
