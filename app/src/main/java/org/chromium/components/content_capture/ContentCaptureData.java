@@ -6,7 +6,7 @@ package org.chromium.components.content_capture;
 
 import android.graphics.Rect;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.annotations.CalledByNative;
 

@@ -252,6 +252,8 @@ sync_chrome() {
 		${BASE_DIR}/components/content_capture/android/java/src/* \
 		${BASE_DIR}/components/paint_preview/browser/android/java/src/* \
 		${BASE_DIR}/components/search_engines/android/java/src/* \
+		${BASE_DIR}/chrome/android/features/start_surface/public/java/src/* \
+		${BASE_DIR}/chrome/browser/android/thin_webview/java/src/* \
 		"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
@@ -269,11 +271,15 @@ sync_chrome() {
         ${RELEASE_DIR}/gen/components/sync/android/sync_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/build/android/buildhooks/build_hooks_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/components/url_formatter/android/url_formatter_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/mojo/public/mojom/base/base_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/bookmarks/common/android/bookmarks_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/signin/public/android/java/generated_java/input_srcjars/* \
         "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
 	  ${RELEASE_DIR}/gen/content/public/android/content_java/generated_java/input_srcjars/org/* \
 	  ${RELEASE_DIR}/gen/ui/android/ui_full_java/generated_java/input_srcjars/org/* \
+	  ${RELEASE_DIR}/gen/components/autofill/android/autofill_java/generated_java/input_srcjars/org/* \
 		"$src_dir/org"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/browser/util/java/generated_java/annotation_processor_outputs/org/* \

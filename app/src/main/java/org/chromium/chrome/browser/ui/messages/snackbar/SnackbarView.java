@@ -26,7 +26,7 @@ import android.widget.TextView;
 import android.support.annotation.Nullable;
 
 import org.chromium.base.ApiCompatibilityUtils;
-import org.chromium.chrome.ui.messages.R;
+import org.chromium.chrome.R;
 import org.chromium.components.browser_ui.widget.animation.Interpolators;
 import org.chromium.components.browser_ui.widget.text.TemplatePreservingTextView;
 import org.chromium.ui.base.DeviceFormFactor;
