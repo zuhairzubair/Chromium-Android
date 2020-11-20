@@ -254,6 +254,11 @@ sync_chrome() {
 		${BASE_DIR}/components/search_engines/android/java/src/* \
 		${BASE_DIR}/chrome/android/features/start_surface/public/java/src/* \
 		${BASE_DIR}/chrome/browser/android/thin_webview/java/src/* \
+		${BASE_DIR}/third_party/android_sdk/androidx_browser/src/browser/src/main/java/* \
+		${BASE_DIR}/chrome/browser/thumbnail/generator/android/java/src/* \
+		${BASE_DIR}/chrome/browser/image_fetcher/android/java/src/* \
+		${BASE_DIR}/chrome/browser/download/android/java/src/* \
+		${BASE_DIR}/components/download/internal/common/android/java/src/* \
 		"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
@@ -274,7 +279,20 @@ sync_chrome() {
         ${RELEASE_DIR}/gen/mojo/public/mojom/base/base_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/components/bookmarks/common/android/bookmarks_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/components/signin/public/android/java/generated_java/input_srcjars/* \
-        "$src_dir"
+        ${RELEASE_DIR}/gen/ui/base/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/chrome/android/webapk/libs/client/client_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/crash/android/java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/offline_items_collection/core/core_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/chrome/browser/image_fetcher/java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/third_party/cct_dynamic_module/cct_dynamic_module_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/omnibox/browser/browser_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/third_party/blink/public/mojom/android_mojo_bindings_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/feed/core/proto/proto_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/net/android/net_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/download/public/common/public_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/chrome/android/usage_stats_proto_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/download/public/task/public_java/generated_java/input_srcjars/* \
+       "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
 	  ${RELEASE_DIR}/gen/content/public/android/content_java/generated_java/input_srcjars/org/* \

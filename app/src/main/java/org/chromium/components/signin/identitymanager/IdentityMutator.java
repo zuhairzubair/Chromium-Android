@@ -4,7 +4,7 @@
 
 package org.chromium.components.signin.identitymanager;
 
-import androidx.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import org.chromium.base.annotations.CalledByNative;
 import org.chromium.base.annotations.NativeMethods;

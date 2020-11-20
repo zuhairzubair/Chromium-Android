@@ -7,9 +7,9 @@ package org.chromium.components.signin.identitymanager;
 import android.accounts.Account;
 import android.text.TextUtils;
 
-import androidx.annotation.MainThread;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.MainThread;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.Log;
 import org.chromium.base.StrictModeContext;

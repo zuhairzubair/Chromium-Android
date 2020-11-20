@@ -4,7 +4,7 @@
 
 package org.chromium.components.signin.base;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 
 import org.chromium.base.annotations.CalledByNative;
 

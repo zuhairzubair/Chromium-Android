@@ -8,7 +8,7 @@ import android.accounts.Account;
 import android.support.annotation.MainThread;
 import android.support.annotation.Nullable;
 
-import androidx.annotation.VisibleForTesting;
+import android.support.annotation.VisibleForTesting;
 
 import org.chromium.base.ObserverList;
 import org.chromium.base.annotations.CalledByNative;

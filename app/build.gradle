@@ -91,6 +91,8 @@ dependencies {
     implementation "com.google.android.gms:play-services-fido:$rootProject.ext.gmsVersion"
     implementation "com.google.vr:sdk-base:$rootProject.ext.googleVRVersion"
     implementation "com.google.ar:core:1.6.0"
+    implementation "com.google.guava:guava:29.0-android"
+    implementation "androidx.concurrent:concurrent-futures:1.1.0"
     implementation "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
