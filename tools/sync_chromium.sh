@@ -259,6 +259,12 @@ sync_chrome() {
 		${BASE_DIR}/chrome/browser/image_fetcher/android/java/src/* \
 		${BASE_DIR}/chrome/browser/download/android/java/src/* \
 		${BASE_DIR}/components/download/internal/common/android/java/src/* \
+		${BASE_DIR}/components/app_modal/android/java/src/* \
+		${BASE_DIR}/components/viz/common/java/src/* \
+		${BASE_DIR}/base/test/android/javatests/src/* \
+		${BASE_DIR}/chrome/test/android/javatests/src/* \
+		${BASE_DIR}/ui/android/javatests/src/* \
+		${BASE_DIR}/content/public/test/android/javatests/src/* \
 		"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
@@ -292,6 +298,11 @@ sync_chrome() {
         ${RELEASE_DIR}/gen/components/download/public/common/public_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/chrome/android/usage_stats_proto_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/components/download/public/task/public_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/url/mojom/url_mojom_gurl_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/payments/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/sync/protocol/protocol_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/chrome/android/partner_location_descriptor_proto_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/version_info/android/version_constants_java/generated_java/input_srcjars/* \
        "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \

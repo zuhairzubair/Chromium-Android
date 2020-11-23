@@ -114,5 +114,7 @@ dependencies {
     implementation project(':autofill_assistant')
     androidTestImplementation "com.android.support.test:runner:$rootProject.ext.runnerVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
+    implementation "com.google.truth:truth:1.1"
+    implementation "org.mockito:mockito-core:3.3.3"
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
 }
