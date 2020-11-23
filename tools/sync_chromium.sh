@@ -265,6 +265,10 @@ sync_chrome() {
 		${BASE_DIR}/chrome/test/android/javatests/src/* \
 		${BASE_DIR}/ui/android/javatests/src/* \
 		${BASE_DIR}/content/public/test/android/javatests/src/* \
+		${BASE_DIR}/chrome/browser/share/android/java/src/* \
+		${BASE_DIR}/chrome/android/features/start_surface/internal/java/src/* \
+		${BASE_DIR}/chrome/browser/notifications/chime/android/java/src/* \
+		${BASE_DIR}/chrome/android/webapk/shell_apk/src/* \
 		"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
@@ -303,12 +307,18 @@ sync_chrome() {
         ${RELEASE_DIR}/gen/components/sync/protocol/protocol_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/chrome/android/partner_location_descriptor_proto_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/components/version_info/android/version_constants_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/media_session/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/network/public/mojom/data_pipe_interfaces_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/chrome/android/webapk/libs/common/common_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/chrome/browser/thumbnail/generator/proto_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/out/Debug/gen/chrome/android/modules/chime/public/java/generated_java/annotation_processor_outputs/* \
        "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
 	  ${RELEASE_DIR}/gen/content/public/android/content_java/generated_java/input_srcjars/org/* \
 	  ${RELEASE_DIR}/gen/ui/android/ui_full_java/generated_java/input_srcjars/org/* \
 	  ${RELEASE_DIR}/gen/components/autofill/android/autofill_java/generated_java/input_srcjars/org/* \
+	  ${RELEASE_DIR}/gen/components/gcm_driver/instance_id/android/instance_id_driver_java/generated_java/input_srcjars/org/* \
 		"$src_dir/org"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/browser/util/java/generated_java/annotation_processor_outputs/org/* \
