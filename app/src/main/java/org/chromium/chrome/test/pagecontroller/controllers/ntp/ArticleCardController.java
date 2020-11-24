@@ -127,8 +127,8 @@ public class ArticleCardController extends ElementController {
         private static final IUi2Locator LOCATOR_CARDS = Ui2Locators.withPath(
                 Ui2Locators.withAnyResEntry(R.id.content),
                 Ui2Locators.withAnyResEntry(
-                        org.chromium.chrome.feed.R.id.feed_stream_recycler_view),
-                Ui2Locators.withAnyResEntry(org.chromium.chrome.feed.R.id.feed_content_card));
+                        org.chromium.chrome.R.id.feed_stream_recycler_view),
+                Ui2Locators.withAnyResEntry(org.chromium.chrome.R.id.feed_content_card));
         private static final IUi2Locator LOCATOR_HEADLINE =
                 Ui2Locators.withPath(Ui2Locators.withChildIndex(0, 6), LOCATOR_NON_EMPTY_STRING);
         private static final IUi2Locator LOCATOR_PUBLISHER =

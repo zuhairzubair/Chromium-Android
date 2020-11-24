@@ -14,7 +14,7 @@ import android.widget.ListAdapter;
 
 import android.support.annotation.Nullable;
 
-import org.chromium.chrome.feed.R;
+import org.chromium.chrome.R;
 
 import java.util.ArrayList;
 import java.util.List;
