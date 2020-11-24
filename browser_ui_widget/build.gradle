@@ -21,16 +21,6 @@ android {
         }
     }
 
-    sourceSets {
-        main {
-            res {
-                srcDirs += [
-                        "style_res",
-                ]
-            }
-        }
-    }
-
 }
 
 dependencies {
