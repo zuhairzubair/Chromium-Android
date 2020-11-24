@@ -1,4 +1,4 @@
 include ':app', ':ui', ':data_chart', ':media', ':content', ':components:autofill', ':customtabs', ':download',
-        ':splash', ':autofill_assistant', ':feed', ':components:embedder_support', ':components:components_base'
+        ':splash', ':autofill_assistant', ':feed_basicstream', ':components:embedder_support', ':components:components_base'
 include ':components:browser_ui'
 include ':browser_ui_widget'
