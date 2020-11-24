@@ -269,7 +269,14 @@ sync_chrome() {
 		${BASE_DIR}/chrome/android/features/start_surface/internal/java/src/* \
 		${BASE_DIR}/chrome/browser/notifications/chime/android/java/src/* \
 		${BASE_DIR}/chrome/android/webapk/shell_apk/src/* \
-		"$src_dir"
+		${BASE_DIR}/net/test/android/javatests/src/* \
+		${BASE_DIR}/chrome/browser/image_editor/public/android/java/src/* \
+		${BASE_DIR}/android/modules/image_editor/provider/java/src/* \
+		${BASE_DIR}/android/modules/image_editor/public/java/src/* \
+		${BASE_DIR}/base/test/android/junit/src/* \
+		${BASE_DIR}/chrome/browser/ui/android/appmenu/test/java/src/* \
+		${BASE_DIR}/components/signin/core/browser/android/javatests/src/* \
+	"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/chrome/android/chrome_android_java_switches/generated_java/input_srcjars* \
@@ -312,6 +319,8 @@ sync_chrome() {
         ${RELEASE_DIR}/gen/chrome/android/webapk/libs/common/common_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/chrome/browser/thumbnail/generator/proto_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/out/Debug/gen/chrome/android/modules/chime/public/java/generated_java/annotation_processor_outputs/* \
+        ${RELEASE_DIR}/gen/third_party/blink/public/mojom/mojom_core_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/ui/gfx/geometry/mojom/mojom_java/generated_java/input_srcjars/* \
        "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \

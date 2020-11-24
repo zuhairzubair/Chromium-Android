@@ -41,9 +41,9 @@ ext {
     gmsVersion = "15.0.1"
     daggerVersion = "2.17"
     // third_party/gvr-android-sdk/README.chromium
-    googleVRVersion = "1.140.0"
+    googleVRVersion = "1.190.0"
 
-    espressoVersion = "2.2.2"
+    espressoVersion = "3.0.2"
     runnerVersion = "1.0.1"
     junitVersion = "4.12"
 }
