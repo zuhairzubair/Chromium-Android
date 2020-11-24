@@ -44,11 +44,11 @@ class QrCodeScanView {
         mView.setLayoutParams(
                 new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         mPermissionsView = (View) LayoutInflater.from(context).inflate(
-                org.chromium.chrome.browser.share.qrcode.R.layout.qrcode_permission_layout, null,
+                org.chromium.chrome.R.layout.qrcode_permission_layout, null,
                 false);
 
         ButtonCompat cameraPermissionPrompt = mPermissionsView.findViewById(
-                org.chromium.chrome.browser.share.qrcode.R.id.ask_for_permission);
+                org.chromium.chrome.R.id.ask_for_permission);
         cameraPermissionPrompt.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

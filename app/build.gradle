@@ -43,7 +43,8 @@ android {
                         "$rootDir/base_res",
                         "settings_res",
                         "strings_res",
-                        "ui_res"
+                        "ui_res",
+                        "qr_share_res"
                 ]
                 excludes = [
                         "**/download_*.xml",

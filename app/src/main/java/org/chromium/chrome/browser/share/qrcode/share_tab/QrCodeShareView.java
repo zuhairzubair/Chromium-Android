@@ -19,7 +19,7 @@ class QrCodeShareView {
         mContext = context;
 
         mView = (View) LayoutInflater.from(context).inflate(
-                org.chromium.chrome.browser.share.qrcode.R.layout.qrcode_share_layout, null, false);
+                org.chromium.chrome.R.layout.qrcode_share_layout, null, false);
     }
 
     public View getView() {
