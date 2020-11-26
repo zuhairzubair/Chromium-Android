@@ -324,6 +324,18 @@ sync_chrome() {
         ${RELEASE_DIR}/gen/services/device/public/mojom/mojom_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/media/mojo/mojom/mojom_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/skia/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/network/public/mojom/mojom_network_isolation_key_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/network/public/mojom/mutable_network_traffic_annotation_interface_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/ui/gfx/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/media/learning/mojo/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/gpu/ipc/common/interfaces_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/viz/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/network/public/mojom/websocket_mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/services/filesystem/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/media/capture/mojom/video_capture_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/proxy_resolver/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/network/public/mojom/mojom_ip_address_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/invalidation/impl/proto_java/generated_java/input_srcjars/* \
        "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
