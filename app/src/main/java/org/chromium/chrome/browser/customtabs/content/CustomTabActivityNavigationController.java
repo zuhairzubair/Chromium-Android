@@ -56,8 +56,8 @@ import dagger.Lazy;
 @ActivityScope
 public class CustomTabActivityNavigationController implements StartStopWithNativeObserver {
 
-    @IntDef({USER_NAVIGATION, REPARENTING, OTHER})
-    @Retention(RetentionPolicy.SOURCE)
+    @android.support.annotation.IntDef({USER_NAVIGATION, REPARENTING, OTHER})
+    @java.lang.annotation.Retention(RetentionPolicy.SOURCE)
     public @interface FinishReason {
         int USER_NAVIGATION = 0;
         int REPARENTING = 1;

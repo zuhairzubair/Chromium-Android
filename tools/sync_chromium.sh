@@ -321,6 +321,9 @@ sync_chrome() {
         ${RELEASE_DIR}/out/Debug/gen/chrome/android/modules/chime/public/java/generated_java/annotation_processor_outputs/* \
         ${RELEASE_DIR}/gen/third_party/blink/public/mojom/mojom_core_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/ui/gfx/geometry/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/device/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/media/mojo/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/skia/public/mojom/mojom_java/generated_java/input_srcjars/* \
        "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \

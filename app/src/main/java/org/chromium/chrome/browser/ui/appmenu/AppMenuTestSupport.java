@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import org.chromium.base.Callback;
-import org.chromium.chrome.browser.ui.appmenu.internal.R;
+import org.chromium.chrome.R;
 
 /**
  * Utility methods for performing operations on the app menu needed for testing.
