@@ -38,7 +38,7 @@ public final class DistilledPagePrefs {
 
         public DistilledPagePrefsObserverWrapper(Observer observer) {
             mNativeDistilledPagePrefsObserverAndroidPtr =
-                    DistilledPagePrefsJni.get().initObserverAndroid(this);
+                    org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().initObserverAndroid(this);
             mDistilledPagePrefsObserver = observer;
         }
 
@@ -58,7 +58,7 @@ public final class DistilledPagePrefs {
         }
 
         public void destroy() {
-            DistilledPagePrefsJni.get().destroyObserverAndroid(
+            org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().destroyObserverAndroid(
                     mNativeDistilledPagePrefsObserverAndroidPtr);
         }
 
@@ -69,7 +69,7 @@ public final class DistilledPagePrefs {
 
     DistilledPagePrefs(long distilledPagePrefsPtr) {
         mDistilledPagePrefsAndroid =
-                DistilledPagePrefsJni.get().init(DistilledPagePrefs.this, distilledPagePrefsPtr);
+                org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().init(DistilledPagePrefs.this, distilledPagePrefsPtr);
         mObserverMap = new HashMap<Observer, DistilledPagePrefsObserverWrapper>();
     }
 
@@ -81,7 +81,7 @@ public final class DistilledPagePrefs {
         if (mObserverMap.containsKey(obs)) return false;
         DistilledPagePrefsObserverWrapper wrappedObserver =
                 new DistilledPagePrefsObserverWrapper(obs);
-        DistilledPagePrefsJni.get().addObserver(mDistilledPagePrefsAndroid, DistilledPagePrefs.this,
+        org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().addObserver(mDistilledPagePrefsAndroid, DistilledPagePrefs.this,
                 wrappedObserver.getNativePtr());
         mObserverMap.put(obs, wrappedObserver);
         return true;
@@ -94,39 +94,39 @@ public final class DistilledPagePrefs {
     public boolean removeObserver(Observer obs) {
         DistilledPagePrefsObserverWrapper wrappedObserver = mObserverMap.remove(obs);
         if (wrappedObserver == null) return false;
-        DistilledPagePrefsJni.get().removeObserver(mDistilledPagePrefsAndroid,
+        org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().removeObserver(mDistilledPagePrefsAndroid,
                 DistilledPagePrefs.this, wrappedObserver.getNativePtr());
         wrappedObserver.destroy();
         return true;
     }
 
     public void setFontFamily(@FontFamily int fontFamily) {
-        DistilledPagePrefsJni.get().setFontFamily(
+        org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().setFontFamily(
                 mDistilledPagePrefsAndroid, DistilledPagePrefs.this, fontFamily);
     }
 
     public @FontFamily int getFontFamily() {
-        return DistilledPagePrefsJni.get().getFontFamily(
+        return org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().getFontFamily(
                 mDistilledPagePrefsAndroid, DistilledPagePrefs.this);
     }
 
     public void setTheme(@Theme int theme) {
-        DistilledPagePrefsJni.get().setTheme(
+        org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().setTheme(
                 mDistilledPagePrefsAndroid, DistilledPagePrefs.this, theme);
     }
 
     public @Theme int getTheme() {
-        return DistilledPagePrefsJni.get().getTheme(
+        return org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().getTheme(
                 mDistilledPagePrefsAndroid, DistilledPagePrefs.this);
     }
 
     public void setFontScaling(float scaling) {
-        DistilledPagePrefsJni.get().setFontScaling(
+        org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().setFontScaling(
                 mDistilledPagePrefsAndroid, DistilledPagePrefs.this, scaling);
     }
 
     public float getFontScaling() {
-        return DistilledPagePrefsJni.get().getFontScaling(
+        return org.chromium.components.dom_distiller.core.DistilledPagePrefsJni.get().getFontScaling(
                 mDistilledPagePrefsAndroid, DistilledPagePrefs.this);
     }
 

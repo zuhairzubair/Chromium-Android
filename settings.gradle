@@ -2,3 +2,4 @@ include ':app', ':ui', ':data_chart', ':media', ':content', ':components:autofil
         ':splash', ':autofill_assistant', ':feed_basicstream', ':components:embedder_support', ':components:components_base'
 include ':components:browser_ui'
 include ':browser_ui_widget'
+include ':browser_ui_widget:widget_test'

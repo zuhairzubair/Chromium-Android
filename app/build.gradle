@@ -115,6 +115,7 @@ dependencies {
     implementation project(':feed_basicstream')
     implementation project(':autofill_assistant')
     implementation project(':browser_ui_widget')
+    implementation project(':browser_ui_widget:widget_test')
     implementation "com.android.support.test:runner:$rootProject.ext.runnerVersion"
     implementation "org.hamcrest:hamcrest-library:1.3"
     implementation "com.android.support.test.espresso:espresso-core:$rootProject.ext.espressoVersion"

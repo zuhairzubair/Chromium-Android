@@ -235,6 +235,8 @@ sync_chrome() {
 		${BASE_DIR}/third_party/cacheinvalidation/src/java/* \
 		${BASE_DIR}/third_party/gif_player/src/* \
 		${BASE_DIR}/third_party/protobuf/java/core/src/main/java/* \
+		${BASE_DIR}/third_party/android_sdk/public/extras/chromium/support/src/* \
+		${BASE_DIR}/third_party/robolectric/custom_asynctask/java/src/* \
 		${BASE_DIR}/chrome/browser/util/android/java/src/* \
 		${BASE_DIR}/chrome/browser/preferences/android/java/src/* \
 		${BASE_DIR}/chrome/browser/flags/android/java/src/* \
@@ -276,6 +278,8 @@ sync_chrome() {
 		${BASE_DIR}/base/test/android/junit/src/* \
 		${BASE_DIR}/chrome/browser/ui/android/appmenu/test/java/src/* \
 		${BASE_DIR}/components/signin/core/browser/android/javatests/src/* \
+		${BASE_DIR}/components/signin/core/browser/android/javatests/src/* \
+		${BASE_DIR}/testing/android/junit/java/src/* \
 	"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
@@ -336,6 +340,13 @@ sync_chrome() {
         ${RELEASE_DIR}/gen/services/proxy_resolver/public/mojom/mojom_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/services/network/public/mojom/mojom_ip_address_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/components/invalidation/impl/proto_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/shape_detection/public/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/content_settings/core/common/mojo_bindings_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/dom_distiller/core/android/dom_distiller_core_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/ui/latency/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/ui/display/mojom/mojom_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/media/capture/video/android/capture_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/location/android/location_java/generated_java/input_srcjars/* \
        "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
@@ -343,6 +354,7 @@ sync_chrome() {
 	  ${RELEASE_DIR}/gen/ui/android/ui_full_java/generated_java/input_srcjars/org/* \
 	  ${RELEASE_DIR}/gen/components/autofill/android/autofill_java/generated_java/input_srcjars/org/* \
 	  ${RELEASE_DIR}/gen/components/gcm_driver/instance_id/android/instance_id_driver_java/generated_java/input_srcjars/org/* \
+	  ${RELEASE_DIR}/gen/media/base/android/media_java/generated_java/input_srcjars/org/* \
 		"$src_dir/org"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/browser/util/java/generated_java/annotation_processor_outputs/org/* \
