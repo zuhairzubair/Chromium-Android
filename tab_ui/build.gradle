@@ -12,6 +12,7 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
@@ -25,7 +26,10 @@ android {
         main {
             res {
                 srcDirs += [
-                        "style_res",
+                        "$rootDir/base_res",
+                ]
+                excludes = [
+                        "**/download_*.xml",
                 ]
             }
         }
@@ -40,4 +44,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation project(':ui')
 }

@@ -55,7 +55,7 @@ public class FontSizePrefs {
     }
 
     private FontSizePrefs() {
-        mFontSizePrefsAndroidPtr = FontSizePrefsJni.get().init(FontSizePrefs.this);
+        mFontSizePrefsAndroidPtr = org.chromium.chrome.browser.accessibility.FontSizePrefsJni.get().init(FontSizePrefs.this);
         mObserverList = new ObserverList<FontSizePrefsObserver>();
     }
 
@@ -137,7 +137,7 @@ public class FontSizePrefs {
      * font scale, and is the amount by which webpage text will be scaled during font boosting.
      */
     public float getFontScaleFactor() {
-        return FontSizePrefsJni.get().getFontScaleFactor(
+        return org.chromium.chrome.browser.accessibility.FontSizePrefsJni.get().getFontScaleFactor(
                 mFontSizePrefsAndroidPtr, FontSizePrefs.this);
     }
 
@@ -153,7 +153,7 @@ public class FontSizePrefs {
      * Returns whether forceEnableZoom is enabled.
      */
     public boolean getForceEnableZoom() {
-        return FontSizePrefsJni.get().getForceEnableZoom(
+        return org.chromium.chrome.browser.accessibility.FontSizePrefsJni.get().getForceEnableZoom(
                 mFontSizePrefsAndroidPtr, FontSizePrefs.this);
     }
 
@@ -173,7 +173,7 @@ public class FontSizePrefs {
     private void setForceEnableZoom(boolean enabled, boolean fromUser) {
         SharedPreferencesManager.getInstance().writeBoolean(
                 ChromePreferenceKeys.FONT_USER_SET_FORCE_ENABLE_ZOOM, fromUser);
-        FontSizePrefsJni.get().setForceEnableZoom(
+        org.chromium.chrome.browser.accessibility.FontSizePrefsJni.get().setForceEnableZoom(
                 mFontSizePrefsAndroidPtr, FontSizePrefs.this, enabled);
     }
 
@@ -184,7 +184,7 @@ public class FontSizePrefs {
 
     private void setFontScaleFactor(float fontScaleFactor) {
         float previousFontScaleFactor = getFontScaleFactor();
-        FontSizePrefsJni.get().setFontScaleFactor(
+        org.chromium.chrome.browser.accessibility.FontSizePrefsJni.get().setFontScaleFactor(
                 mFontSizePrefsAndroidPtr, FontSizePrefs.this, fontScaleFactor);
 
         if (previousFontScaleFactor < FORCE_ENABLE_ZOOM_THRESHOLD_MULTIPLIER

@@ -3,3 +3,4 @@ include ':app', ':ui', ':data_chart', ':media', ':content', ':components:autofil
 include ':components:browser_ui'
 include ':browser_ui_widget'
 include ':browser_ui_widget:widget_test'
+include ':tab_ui'
