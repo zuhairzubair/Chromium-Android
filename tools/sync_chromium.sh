@@ -280,6 +280,9 @@ sync_chrome() {
 		${BASE_DIR}/components/signin/core/browser/android/javatests/src/* \
 		${BASE_DIR}/components/signin/core/browser/android/javatests/src/* \
 		${BASE_DIR}/testing/android/junit/java/src/* \
+		${BASE_DIR}/chrome/browser/android/thin_webview/internal/java/src/* \
+		${BASE_DIR}/chrome/android/modules/chime/public/java/src/* \
+		${BASE_DIR}/components/policy/android/javatests/src/* \
 	"$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/third_party/cacheinvalidation/cacheinvalidation_proto_java/generated_java/input_srcjars/* \
@@ -347,6 +350,9 @@ sync_chrome() {
         ${RELEASE_DIR}/gen/ui/display/mojom/mojom_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/media/capture/video/android/capture_java/generated_java/input_srcjars/* \
         ${RELEASE_DIR}/gen/components/location/android/location_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/gpu/ipc/common/vulkan_interface_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/services/device/public/mojom/generic_sensor_java/generated_java/input_srcjars/* \
+        ${RELEASE_DIR}/gen/components/background_task_scheduler/scheduled_task_java/generated_java/input_srcjars/* \
        "$src_dir"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/android/templates/org/* \
@@ -355,9 +361,14 @@ sync_chrome() {
 	  ${RELEASE_DIR}/gen/components/autofill/android/autofill_java/generated_java/input_srcjars/org/* \
 	  ${RELEASE_DIR}/gen/components/gcm_driver/instance_id/android/instance_id_driver_java/generated_java/input_srcjars/org/* \
 	  ${RELEASE_DIR}/gen/media/base/android/media_java/generated_java/input_srcjars/org/* \
+	  ${RELEASE_DIR}/gen/components/signin/public/android/java/generated_java/annotation_processor_outputs/org/* \
 		"$src_dir/org"
 
 	cp -r ${RELEASE_DIR}/gen/chrome/browser/util/java/generated_java/annotation_processor_outputs/org/* \
+	  ${RELEASE_DIR}/gen/ui/android/ui_full_java/generated_java/annotation_processor_outputs/org/* \
+	  ${RELEASE_DIR}/gen/content/public/android/content_java/generated_java/annotation_processor_outputs/org/* \
+	  ${RELEASE_DIR}/gen/components/search_engines/android/java/generated_java/annotation_processor_outputs/org/* \
+	  ${RELEASE_DIR}/gen/net/android/net_java/generated_java/annotation_processor_outputs/org/* \
 	  "$src_dir/annotation_processor_outputs/org"
 
 	mkdir -p ${PRO_DIR}/res_base

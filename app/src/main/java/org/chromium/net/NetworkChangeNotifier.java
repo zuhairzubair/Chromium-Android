@@ -311,7 +311,7 @@ public class NetworkChangeNotifier {
 
     private void notifyObserversOfConnectionTypeChange(int newConnectionType, long defaultNetId) {
         for (Long nativeChangeNotifier : mNativeChangeNotifiers) {
-            NetworkChangeNotifierJni.get().notifyConnectionTypeChanged(nativeChangeNotifier,
+            org.chromium.net.NetworkChangeNotifierJni.get().notifyConnectionTypeChanged(nativeChangeNotifier,
                     NetworkChangeNotifier.this, newConnectionType, defaultNetId);
         }
         for (ConnectionTypeObserver observer : mConnectionTypeObservers) {
@@ -324,7 +324,7 @@ public class NetworkChangeNotifier {
      */
     void notifyObserversOfConnectionSubtypeChange(int connectionSubtype) {
         for (Long nativeChangeNotifier : mNativeChangeNotifiers) {
-            NetworkChangeNotifierJni.get().notifyMaxBandwidthChanged(
+            org.chromium.net.NetworkChangeNotifierJni.get().notifyMaxBandwidthChanged(
                     nativeChangeNotifier, NetworkChangeNotifier.this, connectionSubtype);
         }
     }
@@ -334,7 +334,7 @@ public class NetworkChangeNotifier {
      */
     void notifyObserversOfNetworkConnect(long netId, int connectionType) {
         for (Long nativeChangeNotifier : mNativeChangeNotifiers) {
-            NetworkChangeNotifierJni.get().notifyOfNetworkConnect(
+            org.chromium.net.NetworkChangeNotifierJni.get().notifyOfNetworkConnect(
                     nativeChangeNotifier, NetworkChangeNotifier.this, netId, connectionType);
         }
     }
@@ -344,7 +344,7 @@ public class NetworkChangeNotifier {
      */
     void notifyObserversOfNetworkSoonToDisconnect(long netId) {
         for (Long nativeChangeNotifier : mNativeChangeNotifiers) {
-            NetworkChangeNotifierJni.get().notifyOfNetworkSoonToDisconnect(
+            org.chromium.net.NetworkChangeNotifierJni.get().notifyOfNetworkSoonToDisconnect(
                     nativeChangeNotifier, NetworkChangeNotifier.this, netId);
         }
     }
@@ -354,7 +354,7 @@ public class NetworkChangeNotifier {
      */
     void notifyObserversOfNetworkDisconnect(long netId) {
         for (Long nativeChangeNotifier : mNativeChangeNotifiers) {
-            NetworkChangeNotifierJni.get().notifyOfNetworkDisconnect(
+            org.chromium.net.NetworkChangeNotifierJni.get().notifyOfNetworkDisconnect(
                     nativeChangeNotifier, NetworkChangeNotifier.this, netId);
         }
     }
@@ -367,7 +367,7 @@ public class NetworkChangeNotifier {
      */
     void notifyObserversToPurgeActiveNetworkList(long[] activeNetIds) {
         for (Long nativeChangeNotifier : mNativeChangeNotifiers) {
-            NetworkChangeNotifierJni.get().notifyPurgeActiveNetworkList(
+            org.chromium.net.NetworkChangeNotifierJni.get().notifyPurgeActiveNetworkList(
                     nativeChangeNotifier, NetworkChangeNotifier.this, activeNetIds);
         }
     }

@@ -19,6 +19,8 @@ import android.support.v7.content.res.AppCompatResources;
 
 import org.chromium.base.annotations.RemovableInRelease;
 
+import org.chromium.chrome.R;
+
 /**
  * Implementation of BitmapDrawable that allows to tint the color of the drawable for all
  * bitmap drawable states.

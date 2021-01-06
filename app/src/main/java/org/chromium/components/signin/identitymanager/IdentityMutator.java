@@ -45,7 +45,7 @@ public class IdentityMutator {
      *   - there is not already a primary account set.
      */
     public boolean setPrimaryAccount(CoreAccountId accountId) {
-        return IdentityMutatorJni.get().setPrimaryAccount(mNativeIdentityMutator, accountId);
+        return org.chromium.components.signin.identitymanager.IdentityMutatorJni.get().setPrimaryAccount(mNativeIdentityMutator, accountId);
     }
 
     /**
@@ -54,7 +54,7 @@ public class IdentityMutator {
      */
     public boolean clearPrimaryAccount(@ClearAccountsAction int action,
             @SignoutReason int sourceMetric, @SignoutDelete int deleteMetric) {
-        return IdentityMutatorJni.get().clearPrimaryAccount(
+        return org.chromium.components.signin.identitymanager.IdentityMutatorJni.get().clearPrimaryAccount(
                 mNativeIdentityMutator, action, sourceMetric, deleteMetric);
     }
 
@@ -63,7 +63,7 @@ public class IdentityMutator {
      * ProfileOAuth2TokenServiceDelegate::ReloadAllAccountsFromSystemWithPrimaryAccount.
      */
     public void reloadAllAccountsFromSystemWithPrimaryAccount(@Nullable CoreAccountId accountId) {
-        IdentityMutatorJni.get().reloadAllAccountsFromSystemWithPrimaryAccount(
+        org.chromium.components.signin.identitymanager.IdentityMutatorJni.get().reloadAllAccountsFromSystemWithPrimaryAccount(
                 mNativeIdentityMutator, accountId);
     }
 

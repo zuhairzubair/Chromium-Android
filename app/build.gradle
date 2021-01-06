@@ -58,6 +58,7 @@ android {
         ignoreWarnings true
         disable 'MissingTranslation'
     }
+    useLibrary 'android.test.mock'
 }
 
 idea {
@@ -105,6 +106,7 @@ dependencies {
     implementation project(':components:autofill')
     implementation project(':components:embedder_support')
     implementation project(':components:browser_ui')
+    implementation project(':components:find_in_page')
     implementation project(':content')
     implementation project(':data_chart')
     implementation project(':download')
